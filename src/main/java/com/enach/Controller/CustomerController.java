@@ -27,6 +27,7 @@ import static com.enach.Utill.SHA256.getSHA;
 import static com.enach.Utill.SHA256.toHexString;
 
 @RestController
+@RequestMapping("/eNach")
 @CrossOrigin
 public class CustomerController {
 
