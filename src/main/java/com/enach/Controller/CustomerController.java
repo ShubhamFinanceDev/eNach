@@ -34,6 +34,15 @@ public class CustomerController {
 @Autowired
 private CoustomerService coustomerService;
 
+
+    @GetMapping("/")
+     public String demo(){
+
+        return "Hello programmer";
+    }
+
+
+
     @PostMapping("/sendOtp")
     public HashMap sendOtpOnRegisteredMobile(@RequestBody Map<String, String> inputParam) {
         String loanNo = inputParam.get("loanNo");
