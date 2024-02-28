@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/customer")
+@RequestMapping("/eNach")
 @CrossOrigin
 public class CustomerController {
 
