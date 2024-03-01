@@ -14,7 +14,7 @@ public class OtpVerifyResponse extends CommonResponse {
     private String email;
     private LocalDate startDate;
     private LocalDate expiryDate;
-    private Double custDebitAmount;
+    private Double amount;
 
 
 
@@ -25,6 +25,6 @@ public class OtpVerifyResponse extends CommonResponse {
         this.email = "";
         this.startDate = null;
         this.expiryDate = null;
-        this.custDebitAmount = null;
+        this.amount = null;
     }
 }
