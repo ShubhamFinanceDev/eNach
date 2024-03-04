@@ -101,10 +101,4 @@ private CoustomerService coustomerService;
         }
     }
 
-    @RequestMapping("/response")
-    public String getData()
-    {
-        return "response";
-    }
-
 }
