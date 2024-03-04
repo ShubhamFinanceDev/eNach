@@ -3,13 +3,12 @@ package com.enach.Controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
 @Controller
 @RequestMapping("/eNach")
 
 public class ResponseController {
 
-    @RequestMapping(value = "/", method = RequestMethod.GET)
+    @GetMapping(value = "/")
     public String demo(){
 
         return "Hello programmer";
