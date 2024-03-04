@@ -8,11 +8,11 @@ import org.springframework.web.bind.annotation.*;
 
 public class ResponseController {
 
-//    @RequestMapping(value = "/", method = RequestMethod.GET)
-//    public String demo(){
-//
-//        return "Hello programmer";
-//    }
+    @RequestMapping(value = "/", method = RequestMethod.GET)
+    public String demo(){
+
+        return "Hello programmer";
+    }
     @RequestMapping("/response")
     public String getData()
     {
