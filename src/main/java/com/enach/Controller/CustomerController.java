@@ -9,12 +9,13 @@ import com.enach.Service.CoustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
-
+@Controller
 @RestController
 @RequestMapping("/eNach")
 @CrossOrigin
@@ -23,6 +24,11 @@ public class CustomerController {
 @Autowired
 private CoustomerService coustomerService;
 
+    @RequestMapping(value = "/", method = RequestMethod.GET)
+    public String demo(){
+
+        return "Hello programmer";
+    }
     @PostMapping("/sendOtp")
     public HashMap sendOtpOnCustomerRegisteredMobile(@RequestBody Map<String, String> inputParam) {
 
@@ -94,7 +100,5 @@ private CoustomerService coustomerService;
 
         }
     }
-
-
 
 }
