@@ -6,7 +6,6 @@ import lombok.Data;
 @Data
 public class EnachPaymentStatusRequest {
 
-    private  String transactionNo;
     private String transactionStatus;
 
 }

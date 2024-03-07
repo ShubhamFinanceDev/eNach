@@ -7,8 +7,11 @@ import com.enach.Models.EnachPaymentStatusRequest;
 import com.enach.Repository.EnachPaymentRepository;
 import com.enach.Repository.ReqStrDetailsRepository;
 import com.enach.Service.ReqstrService;
+import org.apache.poi.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -54,7 +57,7 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
 
     @Override
-    public EnachPayment saveEnachPayment(String transactionNo, String loanNo, Timestamp transactionStartDate) {
+    public EnachPayment saveEnachPayment(String transactionNo, String loanNo, Timestamp transactionStartDate) throws Exception {
 
         EnachPayment enachPayment = new EnachPayment();
         String transactionStatus ="inprocess";
@@ -64,13 +67,15 @@ public class ReqstrServiceIMPL implements ReqstrService {
             enachPayment.setTransactionNo(transactionNo);
             enachPayment.setLoanNo(loanNo);
             enachPayment.setTransactionStartDate(transactionStartDate);
-            enachPayment.setTransactionCompleteDate(null);
+            //enachPayment.setTransactionCompleteDate(null);
             enachPayment.setTransactionStatus(transactionStatus);
 
             enachPaymentRepository.save(enachPayment);
+        } catch (DataIntegrityViolationException ex) {
+            throw new DataIntegrityViolationException(ex.getMessage());
 
         } catch (Exception e) {
-            System.out.println(e);
+            throw new Exception(e);
         }
 
         return enachPayment;
@@ -81,12 +86,12 @@ public class ReqstrServiceIMPL implements ReqstrService {
     @Override
     public EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus) {
 
-        EnachPayment enachPayment = new EnachPayment();
+        EnachPayment enachPayment = null;
 
         try {
             enachPayment = enachPaymentRepository.findByTansactionNo(transactionNo);
 
-            if (enachPayment != null) {
+            if (enachPayment != null && !StringUtils.isEmpty(enachPayment)) {
 
                 Timestamp transactionCompleteDate = new Timestamp(System.currentTimeMillis());
                 enachPaymentRepository.updatePaymentStatus(transactionNo, transactionStatus,transactionCompleteDate);

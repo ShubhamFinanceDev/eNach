@@ -7,8 +7,10 @@ import com.enach.Models.*;
 import com.enach.Service.ReqstrService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
@@ -74,11 +76,15 @@ public class ReqstrController {
 
         try {
 
-            EnachPayment enachPayment = reqstrService.saveEnachPayment(request.getTransactionNo(),request.getLoanNo(),request.getTransactionStartDate());
+            EnachPayment enachPayment = reqstrService.saveEnachPayment(request.getTransactionNo(), request.getLoanNo(), request.getTransactionStartDate());
 
             commonResponse.setMsg("Response Save.");
             commonResponse.setCode("0000");
 
+        } catch (DataIntegrityViolationException ex) {
+
+            commonResponse.setMsg("Dublicate request.");
+            commonResponse.setCode("1111");
 
         } catch (Exception e) {
             commonResponse.setMsg("something went worng.");
@@ -89,21 +95,21 @@ public class ReqstrController {
 
 
 
-    @PutMapping("/enachPaymentStatus")
-    public ResponseEntity<String> enachPaymentStatus(@RequestBody EnachPaymentStatusRequest request ) {
+    @PutMapping("/enachPaymentStatus/{transactionNo}")
+    public ResponseEntity<String> enachPaymentStatus(@RequestBody EnachPaymentStatusRequest request , @PathVariable("transactionNo") String transactionNo) {
 
         CommonResponse commonResponse = new CommonResponse();
 
         try {
 
-            EnachPayment enachPayment = reqstrService.updateEnachPaymentStatus(request.getTransactionNo(),request.getTransactionStatus());
+            EnachPayment enachPayment = reqstrService.updateEnachPaymentStatus(transactionNo,request.getTransactionStatus());
 
-            if (enachPayment != null){
+            if (enachPayment != null && !StringUtils.isEmpty(enachPayment)){
                 commonResponse.setMsg("update paymentstatus sucussfully.");
                 commonResponse.setCode("0000");
             }else{
                 commonResponse.setMsg("transactionno does not exist.");
-                commonResponse.setCode("0000");
+                commonResponse.setCode("1111");
             }
 
         } catch (Exception e) {
