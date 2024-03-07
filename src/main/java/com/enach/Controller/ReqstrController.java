@@ -1,10 +1,11 @@
 package com.enach.Controller;
 
 
-import com.enach.Entity.MandateRespDoc;
-import com.enach.Models.CommonResponse;
-import com.enach.Models.MandateRespDocResponse;
+import com.enach.Entity.EnachPayment;
+import com.enach.Entity.ResponseStructure;
+import com.enach.Models.*;
 import com.enach.Service.ReqstrService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,14 +45,15 @@ public class ReqstrController {
 
 
     @PostMapping("/mandateRespDoc")
-    public ResponseEntity<String> mandateRespDoc(@RequestBody MandateRespDocResponse request) {
+    public ResponseEntity<String> mandateRespDoc(@RequestBody ResponseStructureRequest request) {
 
         CommonResponse commonResponse = new CommonResponse();
 
-
             try {
 
-                MandateRespDoc mandateRespDoc = reqstrService.saveMandateRespDoc(request.getStatus(),request.getMsgId(),request.getRefId(),request.getErrors(),request.getErrorCode(),request.getErrorMessage(),request.getFiller1(),request.getFiller2(),request.getFiller3(),request.getFiller4(),request.getFiller5(),request.getFiller6(),request.getFiller7(),request.getFiller8(),request.getFiller9(),request.getFiller10());
+                MandateRespDoc mandateRespDoc = request.getMandateRespDoc();
+
+                ResponseStructure responseStructure = reqstrService.saveMandateRespDoc(request.getCheckSumVal(),mandateRespDoc.getStatus(),mandateRespDoc.getMsgId(),mandateRespDoc.getRefId(),mandateRespDoc.getErrorCode(),mandateRespDoc.getErrorMessage(),mandateRespDoc.getFiller1(),mandateRespDoc.getFiller2(),mandateRespDoc.getFiller3(),mandateRespDoc.getFiller4(),mandateRespDoc.getFiller5(),mandateRespDoc.getFiller6(),mandateRespDoc.getFiller7(),mandateRespDoc.getFiller8(),mandateRespDoc.getFiller9(),mandateRespDoc.getFiller10());
                 commonResponse.setMsg("Response Save.");
                 commonResponse.setCode("0000");
 
@@ -65,7 +67,50 @@ public class ReqstrController {
 
 
 
+    @PostMapping("/enachPayment")
+    public ResponseEntity<String> enachPayment(@RequestBody EnachPaymentRequest request ) {
+
+        CommonResponse commonResponse = new CommonResponse();
+
+        try {
+
+            EnachPayment enachPayment = reqstrService.saveEnachPayment(request.getTransactionNo(),request.getLoanNo(),request.getTransactionStartDate());
+
+            commonResponse.setMsg("Response Save.");
+            commonResponse.setCode("0000");
+
+
+        } catch (Exception e) {
+            commonResponse.setMsg("something went worng.");
+            commonResponse.setCode("1111");
+        }
+        return new ResponseEntity(commonResponse, HttpStatus.OK);
+    }
 
 
 
-}
+    @PutMapping("/enachPaymentStatus")
+    public ResponseEntity<String> enachPaymentStatus(@RequestBody EnachPaymentStatusRequest request ) {
+
+        CommonResponse commonResponse = new CommonResponse();
+
+        try {
+
+            EnachPayment enachPayment = reqstrService.updateEnachPaymentStatus(request.getTransactionNo(),request.getTransactionStatus());
+
+            if (enachPayment != null){
+                commonResponse.setMsg("update paymentstatus sucussfully.");
+                commonResponse.setCode("0000");
+            }else{
+                commonResponse.setMsg("transactionno does not exist.");
+                commonResponse.setCode("0000");
+            }
+
+        } catch (Exception e) {
+            commonResponse.setMsg("something went worng.");
+            commonResponse.setCode("1111");
+        }
+        return new ResponseEntity(commonResponse, HttpStatus.OK);
+    }
+
+    }

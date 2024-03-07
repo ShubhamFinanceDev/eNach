@@ -1,16 +1,13 @@
 package com.enach.Models;
 
-import lombok.Builder;
 import lombok.Data;
 
 @Data
-@Builder
-public class MandateRespDocResponse {
+public class MandateRespDoc {
 
     private String status;
     private String msgId;
     private String refId;
-    private String errors;
     private String errorCode;
     private String errorMessage;
     private String filler1;
@@ -23,6 +20,4 @@ public class MandateRespDocResponse {
     private String filler8;
     private String filler9;
     private String filler10;
-
-
 }

@@ -6,30 +6,30 @@ import lombok.Data;
 @Entity
 @Table(name = "mandate_resp_doc")
 @Data
-public class MandateRespDoc {
+public class ResponseStructure {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "respid")
     private Long respId;
 
-    @Column(name = "status")
-    private String status;
+    @Column(name = "checksum")
+    private  String checkSumVal;
 
     @Column(name = "msgId")
     private String msgId;
 
-    @Column(name = "refid")
-    private String refId;
-
-    @Column(name = "errors")
-    private String errors;
+    @Column(name = "status")
+    private String status;
 
     @Column(name = "error_code")
     private String errorCode;
 
     @Column(name = "error_message")
     private String errorMessage;
+
+    @Column(name = "refid")
+    private String refId;
 
     @Column(name = "filler1")
     private String filler1;

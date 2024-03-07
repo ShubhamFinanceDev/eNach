@@ -1,7 +1,7 @@
 package com.enach.Repository;
 
-import com.enach.Entity.MandateRespDoc;
+import com.enach.Entity.ResponseStructure;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ReqStrDetailsRepository extends JpaRepository<MandateRespDoc,Long> {
+public interface ReqStrDetailsRepository extends JpaRepository<ResponseStructure,Long> {
 }

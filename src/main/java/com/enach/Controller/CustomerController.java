@@ -76,7 +76,7 @@ private CoustomerService coustomerService;
                     if(expiryDate.isAfter(today1)){
                         otpVerifyResponse.setExpiryDate(expiryDate);
                     }
-                    otpVerifyResponse.setCustDebitAmount(customerDetails.getCustDebitAmount());
+                    otpVerifyResponse.setAmount(customerDetails.getAmount());
                     return new ResponseEntity(otpVerifyResponse, HttpStatus.OK);
 
                 } else {
