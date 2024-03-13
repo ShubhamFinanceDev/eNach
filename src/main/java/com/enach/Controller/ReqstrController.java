@@ -98,6 +98,7 @@ public class ReqstrController {
     @PutMapping("/enachPaymentStatus/{transactionNo}")
     public ResponseEntity<String> enachPaymentStatus(@RequestBody EnachPaymentStatusRequest request , @PathVariable("transactionNo") String transactionNo) {
 
+        StatusResponse statusResponse = new StatusResponse();
         CommonResponse commonResponse = new CommonResponse();
 
         try {
@@ -105,8 +106,12 @@ public class ReqstrController {
             EnachPayment enachPayment = reqstrService.updateEnachPaymentStatus(transactionNo,request.getTransactionStatus());
 
             if (enachPayment != null && !StringUtils.isEmpty(enachPayment)){
-                commonResponse.setMsg("update paymentstatus sucussfully.");
-                commonResponse.setCode("0000");
+
+
+                statusResponse.setLoanNo(enachPayment.getLoanNo());
+                statusResponse.setMsg("update paymentstatus.");
+                statusResponse.setCode("0000");
+                return new ResponseEntity(statusResponse, HttpStatus.OK);
             }else{
                 commonResponse.setMsg("transactionno does not exist.");
                 commonResponse.setCode("1111");
