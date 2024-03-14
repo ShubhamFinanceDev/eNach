@@ -3,7 +3,7 @@ package com.enach.Service;
 
 
 import com.enach.Models.CustomerDetails;
-import org.springframework.web.multipart.MultipartFile;
+import com.enach.Models.MandateTypeAmountResponse;
 
 import java.util.HashMap;
 
@@ -13,4 +13,9 @@ public interface CoustomerService {
 
     CustomerDetails getCustomerDetail(String mobileNo, String otpCode);
 
+   // EMandateAmountResponse getEMandateAmount(String loanNo);
+
+   // SecurityMandateAmountResponse getSecutityMandateAmount(String loanNo);
+
+    MandateTypeAmountResponse getMandateTypeAmount(String loanNo);
 }

@@ -1,10 +1,7 @@
 package com.enach.Controller;
 
 
-import com.enach.Models.CommonResponse;
-import com.enach.Models.CustomerDetails;
-import com.enach.Models.OtpRequest;
-import com.enach.Models.OtpVerifyResponse;
+import com.enach.Models.*;
 import com.enach.Service.CoustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -100,5 +97,50 @@ private CoustomerService coustomerService;
 
         }
     }
+
+
+    @GetMapping("/mandateType")
+    public ResponseEntity<String> mandateType(@RequestBody MandateTypeRequest mandateTypeRequest) {
+
+        CommonResponse commonResponse = new CommonResponse();
+        MandateTypeAmountResponse mandateTypeAmountResponse = new MandateTypeAmountResponse();
+
+        try{
+
+
+            MandateTypeAmountResponse mandateTypeAmount = coustomerService.getMandateTypeAmount(mandateTypeRequest.getLoanNo());
+
+            if(mandateTypeRequest.getMandateType().equals("MNTH")){
+
+                mandateTypeAmountResponse.setAmount(mandateTypeAmount.getAmount());
+                mandateTypeAmountResponse.setCode("0000");
+                mandateTypeAmountResponse.setMsg("succuss emandate amount");
+
+                return new ResponseEntity(mandateTypeAmountResponse, HttpStatus.OK);
+
+            }else if (mandateTypeRequest.getMandateType().equals("ADHO") ){
+
+                Double emiAmount = mandateTypeAmount.getAmount();
+                mandateTypeAmountResponse.setAmount(emiAmount/2);
+                mandateTypeAmountResponse.setCode("0000");
+                mandateTypeAmountResponse.setMsg("succuss emandate amount");
+
+                return new ResponseEntity(mandateTypeAmountResponse, HttpStatus.OK);
+
+            }else {
+
+                commonResponse.setMsg("mandateType is not correct.");
+                commonResponse.setCode("1111");
+            }
+
+        }
+        catch (Exception ex) {
+            commonResponse.setMsg("Please try again.");
+            commonResponse.setCode("1111");
+        }
+        return new ResponseEntity(commonResponse, HttpStatus.OK);
+    }
+
+
 
 }
