@@ -99,17 +99,16 @@ private CoustomerService coustomerService;
 
 
     @GetMapping("/mandateType")
-    public ResponseEntity<String> mandateType(@RequestBody MandateTypeRequest mandateTypeRequest) {
+    public ResponseEntity<String> mandateType(@RequestParam("loanNo") String loanNo, @RequestParam("mandateType") String  mandateType) {
 
         CommonResponse commonResponse = new CommonResponse();
         MandateTypeAmountResponse mandateTypeAmountResponse = new MandateTypeAmountResponse();
 
         try{
 
+            MandateTypeAmountResponse mandateTypeAmount = coustomerService.getMandateTypeAmount(loanNo);
 
-            MandateTypeAmountResponse mandateTypeAmount = coustomerService.getMandateTypeAmount(mandateTypeRequest.getLoanNo());
-
-            if(mandateTypeRequest.getMandateType().equals("MNTH")){
+            if("MNTH".equalsIgnoreCase(mandateType)){
 
                 mandateTypeAmountResponse.setAmount(mandateTypeAmount.getAmount());
                 mandateTypeAmountResponse.setCode("0000");
@@ -117,7 +116,7 @@ private CoustomerService coustomerService;
 
                 return new ResponseEntity(mandateTypeAmountResponse, HttpStatus.OK);
 
-            }else if (mandateTypeRequest.getMandateType().equals("ADHO") ){
+            }else if ("ADHO".equalsIgnoreCase(mandateType)){
 
                 Double emiAmount = mandateTypeAmount.getAmount();
                 mandateTypeAmountResponse.setAmount(emiAmount/2);
