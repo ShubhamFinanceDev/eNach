@@ -14,7 +14,7 @@ public class CustomerDetails {
     private String email;
     private LocalDate startDate;
     private LocalDate expiryDate;
-    private Double amount;
+
 
 
 }
