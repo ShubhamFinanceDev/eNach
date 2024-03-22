@@ -15,7 +15,8 @@ public interface ReqstrService {
 
     EnachPayment saveEnachPayment(String transactionNo, String loanNo, Timestamp transactionStartDate) throws Exception;
 
-    EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus);
+    EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus,String errorMessage);
 
+    void sendEmailOnBank(String emailId,String loanNo ,String transactionStatus,String errorMessage);
 }
 

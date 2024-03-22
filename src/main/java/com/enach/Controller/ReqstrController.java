@@ -103,10 +103,13 @@ public class ReqstrController {
 
         try {
 
-            EnachPayment enachPayment = reqstrService.updateEnachPaymentStatus(transactionNo,request.getTransactionStatus());
+            EnachPayment enachPayment = reqstrService.updateEnachPaymentStatus(transactionNo,request.getTransactionStatus(),request.getErrorMessage());
 
             if (enachPayment != null && !StringUtils.isEmpty(enachPayment)){
 
+                String loanNo = "LN001";
+                String emailId ="abhialok5499@gmail.com";
+                reqstrService.sendEmailOnBank(emailId,loanNo,request.getTransactionStatus(),request.getErrorMessage());
 
                 statusResponse.setLoanNo(enachPayment.getLoanNo());
                 statusResponse.setMsg("update paymentstatus.");

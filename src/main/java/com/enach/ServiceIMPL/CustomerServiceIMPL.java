@@ -3,6 +3,7 @@ package com.enach.ServiceIMPL;
 
 import com.enach.Entity.OtpDetails;
 import com.enach.Models.CustomerDetails;
+import com.enach.Models.MandateTypeAmountResponse;
 import com.enach.Repository.OtpDetailsRepository;
 import com.enach.Service.CoustomerService;
 import com.enach.Utill.OtpUtility;
@@ -43,7 +44,7 @@ public class CustomerServiceIMPL implements CoustomerService {
 
         HashMap<String, String> otpResponse = new HashMap<>();
 
-        String sql = "SELECT * FROM customer_details WHERE loan_no='"+loanNo+"';";
+        String sql = "SELECT * FROM customer_details WHERE loan_no='"+loanNo+"'";
         try {
             List<CustomerDetails>  listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(CustomerDetails.class));
 
@@ -104,7 +105,7 @@ public class CustomerServiceIMPL implements CoustomerService {
             OtpDetails otpDetails = otpDetailsRepository.IsotpExpired(mobileNo, otpCode);
             if (otpDetails != null) {
 
-                String sql = "SELECT * FROM customer_details WHERE mobile_no='"+mobileNo+"';";
+                String sql = "SELECT * FROM customer_details WHERE mobile_no='"+mobileNo+"'";
                 List<CustomerDetails> listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(CustomerDetails.class));
 
                 if(!listData.isEmpty() && listData.size()>0) {
@@ -125,6 +126,28 @@ public class CustomerServiceIMPL implements CoustomerService {
         return customerDetails;
     }
 
+    @Override
+    public MandateTypeAmountResponse getMandateTypeAmount(String loanNo) {
 
+        MandateTypeAmountResponse mandateTypeAmountResponse = new MandateTypeAmountResponse();
+
+        try {
+
+            String sql = "SELECT amount FROM customer_details WHERE loan_no='"+loanNo+"'";
+            List<MandateTypeAmountResponse> listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(MandateTypeAmountResponse.class));
+
+            if(!listData.isEmpty() && listData.size()>0) {
+                mandateTypeAmountResponse = listData.get(0);
+            }else{
+                mandateTypeAmountResponse = null;
+
+            }
+
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return mandateTypeAmountResponse;
+    }
 
 }

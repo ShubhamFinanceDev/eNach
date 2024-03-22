@@ -3,10 +3,12 @@ package com.enach.ServiceIMPL;
 import com.enach.Entity.EnachPayment;
 import com.enach.Entity.ResponseStructure;
 import com.enach.Models.CommonResponse;
+import com.enach.Models.EmailDetails;
 import com.enach.Models.EnachPaymentStatusRequest;
 import com.enach.Repository.EnachPaymentRepository;
 import com.enach.Repository.ReqStrDetailsRepository;
 import com.enach.Service.ReqstrService;
+import com.enach.Utill.OtpUtility;
 import org.apache.poi.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -25,7 +27,8 @@ public class ReqstrServiceIMPL implements ReqstrService {
     private ReqStrDetailsRepository reqStrDetailsRepository;
     @Autowired
     private EnachPaymentRepository enachPaymentRepository;
-
+    @Autowired
+    private OtpUtility otpUtility;
 
     @Override
     public ResponseStructure saveMandateRespDoc(String checkSum, String status, String msgId,  String refId, String errorCode, String errorMessage, String filler1, String filler2, String filler3, String filler4, String filler5, String filler6, String filler7, String filler8, String filler9, String filler10) {
@@ -84,7 +87,7 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
 
     @Override
-    public EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus) {
+    public EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus, String errorMessage) {
 
         EnachPayment enachPayment = null;
 
@@ -94,7 +97,7 @@ public class ReqstrServiceIMPL implements ReqstrService {
             if (enachPayment != null && !StringUtils.isEmpty(enachPayment)) {
 
                 Timestamp transactionCompleteDate = new Timestamp(System.currentTimeMillis());
-                enachPaymentRepository.updatePaymentStatus(transactionNo, transactionStatus,transactionCompleteDate);
+                enachPaymentRepository.updatePaymentStatus(transactionNo, transactionStatus,errorMessage,transactionCompleteDate);
             }
         } catch (Exception e) {
             System.out.println(e);
@@ -102,5 +105,34 @@ public class ReqstrServiceIMPL implements ReqstrService {
         return enachPayment;
     }
 
+
+    @Override
+    public void sendEmailOnBank(String emailId, String loanNo,String transactionStatus,String errorMessage) {
+
+
+        EmailDetails emailDetails = new EmailDetails();
+        try {
+            if("Sucuss".equalsIgnoreCase(transactionStatus)) {
+                emailDetails.setRecipient(emailId);
+                emailDetails.setSubject("TESTING EMAIL TEST");
+                emailDetails.setMsgBody("LoanNo:- "+loanNo+" has been sucussfully E-Nach.\n" +
+                                        "Regards\n" +
+                                        "Shubham Housing Development Finance Company");
+
+                otpUtility.sendSimpleMail(emailDetails);
+
+            }else if ("Failed".equalsIgnoreCase(transactionStatus)){
+                emailDetails.setRecipient(emailId);
+                emailDetails.setSubject("TESTING EMAIL TEST");
+                emailDetails.setMsgBody("LoanNo:- "+loanNo+" has been not sucussfully E-Nach Due to "+errorMessage+". \n" +
+                        "Regards\n" +
+                        "Shubham Housing Development Finance Company");
+
+                otpUtility.sendSimpleMail(emailDetails);
+            }
+        }catch (Exception e){
+            System.out.println(e);
+        }
+    }
 
 }

@@ -34,5 +34,8 @@ public class EnachPayment {
     @Column(name = "transactionStatus")
     private String transactionStatus;
 
+    @Column(name = "errorMessage")
+    private String errorMessage;
+
 
 }
