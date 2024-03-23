@@ -13,9 +13,4 @@ public interface CoustomerService {
 
     CustomerDetails getCustomerDetail(String mobileNo, String otpCode);
 
-   // EMandateAmountResponse getEMandateAmount(String loanNo);
-
-   // SecurityMandateAmountResponse getSecutityMandateAmount(String loanNo);
-
-    MandateTypeAmountResponse getMandateTypeAmount(String loanNo);
 }

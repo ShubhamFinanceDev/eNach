@@ -17,25 +17,46 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @RestController
-@RequestMapping("/eNach")
+@RequestMapping("/customer")
 @CrossOrigin
 public class ReqstrController {
 
     @Autowired
     private ReqstrService reqstrService;
 
+    @GetMapping("/mandateType")
+    public ResponseEntity<String> mandateType(@RequestParam("loanNo") String loanNo, @RequestParam("mandateType") String  mandateType) {
 
-    @GetMapping("/msgId")
-    public ResponseEntity<String> msgId() {
         CommonResponse commonResponse = new CommonResponse();
-        String finalMsgId = "";
-        String msg1 = "SUBH";
+        MandateTypeAmountResponse mandateTypeAmountResponse = new MandateTypeAmountResponse();
+
         try{
-            SimpleDateFormat sdf=new SimpleDateFormat("yyyyMMddHHmmssSSS");
-            String dateString=sdf.format(new Date());
-            finalMsgId = msg1+dateString;
-            commonResponse.setMsg(finalMsgId);
-            commonResponse.setCode("0000");
+
+            MandateTypeAmountResponse mandateTypeAmount = reqstrService.getMandateTypeAmount(loanNo);
+
+            if("MNTH".equalsIgnoreCase(mandateType)){
+
+                mandateTypeAmountResponse.setAmount(mandateTypeAmount.getAmount());
+                mandateTypeAmountResponse.setCode("0000");
+                mandateTypeAmountResponse.setMsg("succuss emandate amount");
+
+                return new ResponseEntity(mandateTypeAmountResponse, HttpStatus.OK);
+
+            }else if ("ADHO".equalsIgnoreCase(mandateType)){
+
+                Double emiAmount = mandateTypeAmount.getAmount();
+                mandateTypeAmountResponse.setAmount(emiAmount/2);
+                mandateTypeAmountResponse.setCode("0000");
+                mandateTypeAmountResponse.setMsg("succuss emandate amount");
+
+                return new ResponseEntity(mandateTypeAmountResponse, HttpStatus.OK);
+
+            }else {
+
+                commonResponse.setMsg("mandateType is not correct.");
+                commonResponse.setCode("1111");
+            }
+
         }
         catch (Exception ex) {
             commonResponse.setMsg("Please try again.");
@@ -43,30 +64,6 @@ public class ReqstrController {
         }
         return new ResponseEntity(commonResponse, HttpStatus.OK);
     }
-
-
-
-    @PostMapping("/mandateRespDoc")
-    public ResponseEntity<String> mandateRespDoc(@RequestBody ResponseStructureRequest request) {
-
-        CommonResponse commonResponse = new CommonResponse();
-
-            try {
-
-                MandateRespDoc mandateRespDoc = request.getMandateRespDoc();
-
-                ResponseStructure responseStructure = reqstrService.saveMandateRespDoc(request.getCheckSumVal(),mandateRespDoc.getStatus(),mandateRespDoc.getMsgId(),mandateRespDoc.getRefId(),mandateRespDoc.getErrorCode(),mandateRespDoc.getErrorMessage(),mandateRespDoc.getFiller1(),mandateRespDoc.getFiller2(),mandateRespDoc.getFiller3(),mandateRespDoc.getFiller4(),mandateRespDoc.getFiller5(),mandateRespDoc.getFiller6(),mandateRespDoc.getFiller7(),mandateRespDoc.getFiller8(),mandateRespDoc.getFiller9(),mandateRespDoc.getFiller10());
-                commonResponse.setMsg("Response Save.");
-                commonResponse.setCode("0000");
-
-            } catch (Exception e) {
-                commonResponse.setMsg("something went worng.");
-                commonResponse.setCode("1111");
-            }
-
-        return new ResponseEntity(commonResponse, HttpStatus.OK);
-    }
-
 
 
     @PostMapping("/enachPayment")

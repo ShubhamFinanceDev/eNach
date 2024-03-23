@@ -3,9 +3,15 @@ package com.enach.Controller;
 
 import com.enach.Models.*;
 import com.enach.Service.CoustomerService;
+import com.enach.sercurity.JwtHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,14 +24,23 @@ import java.util.Map;
 @CrossOrigin
 public class CustomerController {
 
-@Autowired
-private CoustomerService coustomerService;
+    @Autowired
+    private UserDetailsService userDetailsService;
+    @Autowired
+    private AuthenticationManager manager;
+    @Autowired
+    private JwtHelper helper;
+
+    @Autowired
+    private CoustomerService coustomerService;
 
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String demo(){
 
         return "Hello programmer";
     }
+
+
     @PostMapping("/sendOtp")
     public HashMap sendOtpOnCustomerRegisteredMobile(@RequestBody Map<String, String> inputParam) {
 
@@ -56,11 +71,14 @@ private CoustomerService coustomerService;
         } else {
 
             try {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(request.getLoanNo());
+                String token = this.helper.generateToken(userDetails);
 
                 CustomerDetails customerDetails = coustomerService.getCustomerDetail(request.getMobileNo(), request.getOtpCode());
 
                 if (customerDetails != null) {
 
+                    otpVerifyResponse.setJwtToken(token);
                     otpVerifyResponse.setCustName(customerDetails.getCustName());
                     otpVerifyResponse.setLoanNo(customerDetails.getLoanNo());
                     otpVerifyResponse.setMobileNo(customerDetails.getMobileNo());
@@ -91,54 +109,12 @@ private CoustomerService coustomerService;
                 CommonResponse commonResponse = new CommonResponse();
                 commonResponse.setMsg("phone number does not exist.");
                 commonResponse.setCode("1111");
+                System.out.println(e);
                 return new ResponseEntity(commonResponse, HttpStatus.OK);
             }
 
         }
     }
-
-
-    @GetMapping("/mandateType")
-    public ResponseEntity<String> mandateType(@RequestParam("loanNo") String loanNo, @RequestParam("mandateType") String  mandateType) {
-
-        CommonResponse commonResponse = new CommonResponse();
-        MandateTypeAmountResponse mandateTypeAmountResponse = new MandateTypeAmountResponse();
-
-        try{
-
-            MandateTypeAmountResponse mandateTypeAmount = coustomerService.getMandateTypeAmount(loanNo);
-
-            if("MNTH".equalsIgnoreCase(mandateType)){
-
-                mandateTypeAmountResponse.setAmount(mandateTypeAmount.getAmount());
-                mandateTypeAmountResponse.setCode("0000");
-                mandateTypeAmountResponse.setMsg("succuss emandate amount");
-
-                return new ResponseEntity(mandateTypeAmountResponse, HttpStatus.OK);
-
-            }else if ("ADHO".equalsIgnoreCase(mandateType)){
-
-                Double emiAmount = mandateTypeAmount.getAmount();
-                mandateTypeAmountResponse.setAmount(emiAmount/2);
-                mandateTypeAmountResponse.setCode("0000");
-                mandateTypeAmountResponse.setMsg("succuss emandate amount");
-
-                return new ResponseEntity(mandateTypeAmountResponse, HttpStatus.OK);
-
-            }else {
-
-                commonResponse.setMsg("mandateType is not correct.");
-                commonResponse.setCode("1111");
-            }
-
-        }
-        catch (Exception ex) {
-            commonResponse.setMsg("Please try again.");
-            commonResponse.setCode("1111");
-        }
-        return new ResponseEntity(commonResponse, HttpStatus.OK);
-    }
-
 
 
 }
