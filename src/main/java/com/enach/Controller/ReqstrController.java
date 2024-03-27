@@ -103,13 +103,17 @@ public class ReqstrController {
 
         try {
 
-            EnachPayment enachPayment = reqstrService.updateEnachPaymentStatus(transactionNo,request.getTransactionStatus(),request.getErrorMessage());
+            String mandateType = ("MNTH".equalsIgnoreCase(request.getMandateType())) ? "e-Mandate" : "security-mandate";
+
+            EnachPayment enachPayment = reqstrService.updateEnachPaymentStatus(transactionNo,request.getTransactionStatus(),mandateType,request.getErrorMessage());
 
             if (enachPayment != null && !StringUtils.isEmpty(enachPayment)){
 
-                String loanNo = "LN001";
-                String emailId ="abhialok5499@gmail.com";
-                reqstrService.sendEmailOnBank(emailId,loanNo,request.getTransactionStatus(),request.getErrorMessage());
+                String loanNo = request.getLoanNo();
+                String emailId = "nainish.singh@dbalounge.com";
+                //String emailId = "abhialok5499@gmail.com";
+
+                reqstrService.sendEmailOnBank(emailId, loanNo, mandateType, transactionNo,request.getTransactionStatus(),request.getErrorMessage());
 
                 statusResponse.setLoanNo(enachPayment.getLoanNo());
                 statusResponse.setMsg("update paymentstatus.");

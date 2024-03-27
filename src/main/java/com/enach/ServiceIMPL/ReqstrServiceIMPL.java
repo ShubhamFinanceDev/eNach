@@ -87,7 +87,7 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
 
     @Override
-    public EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus, String errorMessage) {
+    public EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus, String mandateType,String errorMessage) {
 
         EnachPayment enachPayment = null;
 
@@ -96,8 +96,9 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
             if (enachPayment != null && !StringUtils.isEmpty(enachPayment)) {
 
+
                 Timestamp transactionCompleteDate = new Timestamp(System.currentTimeMillis());
-                enachPaymentRepository.updatePaymentStatus(transactionNo, transactionStatus,errorMessage,transactionCompleteDate);
+                enachPaymentRepository.updatePaymentStatus(transactionNo, transactionStatus,mandateType,errorMessage,transactionCompleteDate);
             }
         } catch (Exception e) {
             System.out.println(e);
@@ -107,15 +108,16 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
 
     @Override
-    public void sendEmailOnBank(String emailId, String loanNo,String transactionStatus,String errorMessage) {
+    public void sendEmailOnBank(String emailId, String loanNo,String mandateType, String transactionNo, String transactionStatus,String errorMessage) {
 
 
         EmailDetails emailDetails = new EmailDetails();
         try {
             if("Sucuss".equalsIgnoreCase(transactionStatus)) {
                 emailDetails.setRecipient(emailId);
-                emailDetails.setSubject("TESTING EMAIL TEST");
-                emailDetails.setMsgBody("LoanNo:- "+loanNo+" has been sucussfully E-Nach.\n" +
+                emailDetails.setSubject("E-NACH SHUBHAM");
+                emailDetails.setMsgBody(""+mandateType+" has been sucussfully E-Nach.\n" +
+                                        "for LoanNo "+loanNo+" and transactionNo "+transactionNo+"\n"+
                                         "Regards\n" +
                                         "Shubham Housing Development Finance Company");
 
@@ -123,8 +125,9 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
             }else if ("Failed".equalsIgnoreCase(transactionStatus)){
                 emailDetails.setRecipient(emailId);
-                emailDetails.setSubject("TESTING EMAIL TEST");
-                emailDetails.setMsgBody("LoanNo:- "+loanNo+" has been not sucussfully E-Nach Due to "+errorMessage+". \n" +
+                emailDetails.setSubject("E-NACH SHUBHAM");
+                emailDetails.setMsgBody(""+mandateType+" has been failed E-Nach.\n" +
+                        "for LoanNo"+loanNo+" and transactionNo"+transactionNo+" Due to "+errorMessage+".\n"+
                         "Regards\n" +
                         "Shubham Housing Development Finance Company");
 
