@@ -51,8 +51,8 @@ public class JpaConfig {
         JpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
         bean.setJpaVendorAdapter(adapter);
         HashMap<String, String> props = new HashMap<>();
-        props.put("hibernate.dialect","org.hibernate.dialect.MySQL8Dialect");
-        props.put("hibernate.show_sql","true");
+       /* props.put("hibernate.dialect","org.hibernate.dialect.MySQL8Dialect");
+        props.put("hibernate.show_sql","true");*/
 
         bean.setJpaPropertyMap(props);
         bean.setPackagesToScan("com.enach.Entity");

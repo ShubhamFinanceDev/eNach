@@ -1,14 +1,11 @@
 package com.enach.ServiceIMPL;
 
 import com.enach.Entity.EnachPayment;
-import com.enach.Entity.ResponseStructure;
-import com.enach.Models.CommonResponse;
-import com.enach.Models.EnachPaymentStatusRequest;
+import com.enach.Models.EmailDetails;
 import com.enach.Models.MandateTypeAmountResponse;
 import com.enach.Repository.EnachPaymentRepository;
-import com.enach.Repository.ReqStrDetailsRepository;
 import com.enach.Service.ReqstrService;
-import org.apache.poi.util.StringUtil;
+import com.enach.Utill.OtpUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -18,8 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 
@@ -29,11 +24,10 @@ public class ReqstrServiceIMPL implements ReqstrService {
     @Autowired
     @Qualifier("jdbcJdbcTemplate")
     private JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    private ReqStrDetailsRepository reqStrDetailsRepository;
     @Autowired
     private EnachPaymentRepository enachPaymentRepository;
+    @Autowired
+    private OtpUtility otpUtility;
 
 
     @Override
@@ -89,7 +83,7 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
 
     @Override
-    public EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus) {
+    public EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus, String mandateType,String errorMessage) {
 
         EnachPayment enachPayment = null;
 
@@ -99,7 +93,7 @@ public class ReqstrServiceIMPL implements ReqstrService {
             if (enachPayment != null && !StringUtils.isEmpty(enachPayment)) {
 
                 Timestamp transactionCompleteDate = new Timestamp(System.currentTimeMillis());
-                enachPaymentRepository.updatePaymentStatus(transactionNo, transactionStatus,transactionCompleteDate);
+                enachPaymentRepository.updatePaymentStatus(transactionNo, transactionStatus,mandateType,errorMessage,transactionCompleteDate);
             }
         } catch (Exception e) {
             System.out.println(e);
@@ -107,5 +101,36 @@ public class ReqstrServiceIMPL implements ReqstrService {
         return enachPayment;
     }
 
+
+    @Override
+    public void sendEmailOnBank(String emailId, String loanNo,String mandateType, String transactionNo, String transactionStatus,String errorMessage) {
+
+
+        EmailDetails emailDetails = new EmailDetails();
+        try {
+            if("Sucuss".equalsIgnoreCase(transactionStatus)) {
+                emailDetails.setRecipient(emailId);
+                emailDetails.setSubject("E-NACH SHUBHAM");
+                emailDetails.setMsgBody(""+mandateType+" has been sucussfully E-Nach.\n" +
+                        "for LoanNo "+loanNo+" and transactionNo "+transactionNo+"\n"+
+                        "Regards\n" +
+                        "Shubham Housing Development Finance Company");
+
+                otpUtility.sendSimpleMail(emailDetails);
+
+            }else if ("Failed".equalsIgnoreCase(transactionStatus)){
+                emailDetails.setRecipient(emailId);
+                emailDetails.setSubject("E-NACH SHUBHAM");
+                emailDetails.setMsgBody(""+mandateType+" has been failed E-Nach.\n" +
+                        "for LoanNo"+loanNo+" and transactionNo"+transactionNo+" Due to "+errorMessage+".\n"+
+                        "Regards\n" +
+                        "Shubham Housing Development Finance Company");
+
+                otpUtility.sendSimpleMail(emailDetails);
+            }
+        }catch (Exception e){
+            System.out.println(e);
+        }
+    }
 
 }

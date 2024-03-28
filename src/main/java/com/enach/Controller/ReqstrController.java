@@ -2,19 +2,14 @@ package com.enach.Controller;
 
 
 import com.enach.Entity.EnachPayment;
-import com.enach.Entity.ResponseStructure;
 import com.enach.Models.*;
 import com.enach.Service.ReqstrService;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 @RestController
 @RequestMapping("/customer")
@@ -100,10 +95,18 @@ public class ReqstrController {
 
         try {
 
-            EnachPayment enachPayment = reqstrService.updateEnachPaymentStatus(transactionNo,request.getTransactionStatus());
+            String mandateType = ("MNTH".equalsIgnoreCase(request.getMandateType())) ? "e-Mandate" : "security-mandate";
+
+            EnachPayment enachPayment = reqstrService.updateEnachPaymentStatus(transactionNo,request.getTransactionStatus(),mandateType,request.getErrorMessage());
 
             if (enachPayment != null && !StringUtils.isEmpty(enachPayment)){
 
+
+                String loanNo = request.getLoanNo();
+                String emailId = "nainish.singh@dbalounge.com";
+                //String emailId = "abhialok5499@gmail.com";
+
+                reqstrService.sendEmailOnBank(emailId, loanNo, mandateType, transactionNo,request.getTransactionStatus(),request.getErrorMessage());
 
                 statusResponse.setLoanNo(enachPayment.getLoanNo());
                 statusResponse.setMsg("update paymentstatus.");

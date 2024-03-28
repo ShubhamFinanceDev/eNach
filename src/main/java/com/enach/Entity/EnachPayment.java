@@ -34,5 +34,11 @@ public class EnachPayment {
     @Column(name = "transactionStatus")
     private String transactionStatus;
 
+    @Column(name = "mandateType")
+    private String mandateType;
+
+    @Column(name = "errorMessage")
+    private String errorMessage;
+
 
 }
