@@ -16,5 +16,6 @@ public interface ReqstrService {
     EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus, String mandateType,String errorMessage);
 
     void sendEmailOnBank(String emailId, String loanNo, String mandateType, String transactionNo, String transactionStatus, String errorMessage);
+
 }
 

@@ -112,6 +112,7 @@ public class ReqstrController {
                 statusResponse.setMsg("update paymentstatus.");
                 statusResponse.setCode("0000");
                 return new ResponseEntity(statusResponse, HttpStatus.OK);
+
             }else{
                 commonResponse.setMsg("transactionno does not exist.");
                 commonResponse.setCode("1111");
