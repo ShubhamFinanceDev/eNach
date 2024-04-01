@@ -67,8 +67,9 @@ public class ReqstrController {
         CommonResponse commonResponse = new CommonResponse();
 
         try {
+            String mandateType = ("MNTH".equalsIgnoreCase(request.getMandateType())) ? "e-Mandate" : "security-mandate";
 
-            EnachPayment enachPayment = reqstrService.saveEnachPayment(request.getTransactionNo(), request.getLoanNo(), request.getTransactionStartDate());
+            EnachPayment enachPayment = reqstrService.saveEnachPayment(request.getTransactionNo(), request.getLoanNo(), mandateType,request.getTransactionStartDate());
 
             commonResponse.setMsg("Response Save.");
             commonResponse.setCode("0000");
@@ -95,18 +96,16 @@ public class ReqstrController {
 
         try {
 
-            String mandateType = ("MNTH".equalsIgnoreCase(request.getMandateType())) ? "e-Mandate" : "security-mandate";
-
-            EnachPayment enachPayment = reqstrService.updateEnachPaymentStatus(transactionNo,request.getTransactionStatus(),mandateType,request.getErrorMessage());
+            EnachPayment enachPayment = reqstrService.updateEnachPaymentStatus(transactionNo,request.getTransactionStatus(),request.getErrorMessage());
 
             if (enachPayment != null && !StringUtils.isEmpty(enachPayment)){
 
 
                 String loanNo = request.getLoanNo();
-                String emailId = "nainish.singh@dbalounge.com";
-                //String emailId = "abhialok5499@gmail.com";
+               // String emailId = "nainish.singh@dbalounge.com";
+                String emailId = "abhialok5499@gmail.com";
 
-                reqstrService.sendEmailOnBank(emailId, loanNo, mandateType, transactionNo,request.getTransactionStatus(),request.getErrorMessage());
+                reqstrService.sendEmailOnBank(emailId, loanNo, transactionNo,request.getTransactionStatus(),request.getErrorMessage());
 
                 statusResponse.setLoanNo(enachPayment.getLoanNo());
                 statusResponse.setMsg("update paymentstatus.");

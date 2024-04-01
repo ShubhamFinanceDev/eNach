@@ -11,11 +11,11 @@ public interface ReqstrService {
 
     MandateTypeAmountResponse getMandateTypeAmount(String loanNo);
 
-    EnachPayment saveEnachPayment(String transactionNo, String loanNo, Timestamp transactionStartDate) throws Exception;
+    EnachPayment saveEnachPayment(String transactionNo, String loanNo, String mandateType, Timestamp transactionStartDate) throws Exception;
 
-    EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus, String mandateType,String errorMessage);
+    EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus,String errorMessage);
 
-    void sendEmailOnBank(String emailId, String loanNo, String mandateType, String transactionNo, String transactionStatus, String errorMessage);
+    void sendEmailOnBank(String emailId, String loanNo, String transactionNo, String transactionStatus, String errorMessage);
 
 }
 

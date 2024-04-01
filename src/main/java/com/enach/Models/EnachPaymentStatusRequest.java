@@ -9,6 +9,5 @@ public class EnachPaymentStatusRequest {
     private String transactionStatus;
     private String errorMessage;
     private String loanNo;
-    private String mandateType;
 
 }

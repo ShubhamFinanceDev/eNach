@@ -56,7 +56,7 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
 
     @Override
-    public EnachPayment saveEnachPayment(String transactionNo, String loanNo, Timestamp transactionStartDate) throws Exception {
+    public EnachPayment saveEnachPayment(String transactionNo, String loanNo, String mandateType, Timestamp transactionStartDate) throws Exception {
 
         EnachPayment enachPayment = new EnachPayment();
         String transactionStatus ="inprocess";
@@ -65,6 +65,7 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
             enachPayment.setTransactionNo(transactionNo);
             enachPayment.setLoanNo(loanNo);
+            enachPayment.setMandateType(mandateType);
             enachPayment.setTransactionStartDate(transactionStartDate);
             //enachPayment.setTransactionCompleteDate(null);
             enachPayment.setTransactionStatus(transactionStatus);
@@ -83,7 +84,7 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
 
     @Override
-    public EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus, String mandateType,String errorMessage) {
+    public EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus,String errorMessage) {
 
         EnachPayment enachPayment = null;
 
@@ -93,7 +94,7 @@ public class ReqstrServiceIMPL implements ReqstrService {
             if (enachPayment != null && !StringUtils.isEmpty(enachPayment)) {
 
                 Timestamp transactionCompleteDate = new Timestamp(System.currentTimeMillis());
-                enachPaymentRepository.updatePaymentStatus(transactionNo, transactionStatus,mandateType,errorMessage,transactionCompleteDate);
+                enachPaymentRepository.updatePaymentStatus(transactionNo, transactionStatus,errorMessage,transactionCompleteDate);
             }
         } catch (Exception e) {
             System.out.println(e);
@@ -103,9 +104,10 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
 
     @Override
-    public void sendEmailOnBank(String emailId, String loanNo,String mandateType, String transactionNo, String transactionStatus,String errorMessage) {
+    public void sendEmailOnBank(String emailId, String loanNo, String transactionNo, String transactionStatus,String errorMessage) {
 
-
+        String mandateType = enachPaymentRepository.findMandateType(loanNo);
+        System.out.println(mandateType);
         EmailDetails emailDetails = new EmailDetails();
         try {
             if("Sucuss".equalsIgnoreCase(transactionStatus)) {
