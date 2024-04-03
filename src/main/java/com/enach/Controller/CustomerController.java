@@ -60,7 +60,7 @@ public class CustomerController {
     public ResponseEntity<OtpVerifyResponse> login(@RequestBody OtpRequest request) {
 
         OtpVerifyResponse otpVerifyResponse = new OtpVerifyResponse();
-        if (request.getMobileNo().isBlank() || request.getOtpCode().isBlank()) {
+        if (request.getMobileNo().isBlank() || request.getOtpCode().isBlank() || request.getLoanNo().isBlank()) {
             CommonResponse commonResponse = new CommonResponse();
             commonResponse.setMsg("Required field is empty.");
             commonResponse.setCode("1111");

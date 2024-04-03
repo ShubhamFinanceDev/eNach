@@ -26,6 +26,11 @@ public class ReqstrController {
         MandateTypeAmountResponse mandateTypeAmountResponse = new MandateTypeAmountResponse();
 
         try{
+            if (StringUtils.isEmpty(loanNo) || StringUtils.isEmpty(mandateType)) {
+                commonResponse.setMsg("Required field is empty.");
+                commonResponse.setCode("1111");
+                return new ResponseEntity(commonResponse, HttpStatus.OK);
+            }
 
             MandateTypeAmountResponse mandateTypeAmount = reqstrService.getMandateTypeAmount(loanNo);
 
@@ -66,23 +71,29 @@ public class ReqstrController {
 
         CommonResponse commonResponse = new CommonResponse();
 
-        try {
-            String mandateType = ("MNTH".equalsIgnoreCase(request.getMandateType())) ? "e-Mandate" : "security-mandate";
+            try {
+                if (StringUtils.isEmpty(request.getTransactionNo()) || StringUtils.isEmpty(request.getMandateType()) || StringUtils.isEmpty(request.getLoanNo()) || StringUtils.isEmpty(request.getTransactionStartDate())) {
+                    commonResponse.setMsg("Required field is empty.");
+                    commonResponse.setCode("1111");
+                    return new ResponseEntity(commonResponse, HttpStatus.OK);
+                }
 
-            EnachPayment enachPayment = reqstrService.saveEnachPayment(request.getTransactionNo(), request.getLoanNo(), mandateType,request.getTransactionStartDate());
+                String mandateType = ("MNTH".equalsIgnoreCase(request.getMandateType())) ? "e-Mandate" : "security-mandate";
 
-            commonResponse.setMsg("Response Save.");
-            commonResponse.setCode("0000");
+                EnachPayment enachPayment = reqstrService.saveEnachPayment(request.getTransactionNo(), request.getLoanNo(), mandateType, request.getTransactionStartDate());
 
-        } catch (DataIntegrityViolationException ex) {
+                commonResponse.setMsg("Response Save.");
+                commonResponse.setCode("0000");
 
-            commonResponse.setMsg("Dublicate request.");
-            commonResponse.setCode("1111");
+            } catch (DataIntegrityViolationException ex) {
 
-        } catch (Exception e) {
-            commonResponse.setMsg("something went worng.");
-            commonResponse.setCode("1111");
-        }
+                commonResponse.setMsg("Dublicate request.");
+                commonResponse.setCode("1111");
+
+            } catch (Exception e) {
+                commonResponse.setMsg("something went worng.");
+                commonResponse.setCode("1111");
+            }
         return new ResponseEntity(commonResponse, HttpStatus.OK);
     }
 
@@ -95,17 +106,20 @@ public class ReqstrController {
         CommonResponse commonResponse = new CommonResponse();
 
         try {
+            if (StringUtils.isEmpty(transactionNo) || StringUtils.isEmpty(request.getTransactionStatus())) {
+                commonResponse.setMsg("Required field is empty.");
+                commonResponse.setCode("1111");
+                return new ResponseEntity(commonResponse, HttpStatus.OK);
+            }
 
             EnachPayment enachPayment = reqstrService.updateEnachPaymentStatus(transactionNo,request.getTransactionStatus(),request.getErrorMessage());
 
             if (enachPayment != null && !StringUtils.isEmpty(enachPayment)){
 
-
-                String loanNo = request.getLoanNo();
                // String emailId = "nainish.singh@dbalounge.com";
                 String emailId = "abhialok5499@gmail.com";
 
-                reqstrService.sendEmailOnBank(emailId, loanNo, transactionNo,request.getTransactionStatus(),request.getErrorMessage());
+                reqstrService.sendEmailOnBank(emailId, transactionNo,request.getTransactionStatus(),request.getErrorMessage());
 
                 statusResponse.setLoanNo(enachPayment.getLoanNo());
                 statusResponse.setMsg("update paymentstatus.");

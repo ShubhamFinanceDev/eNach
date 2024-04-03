@@ -104,10 +104,21 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
 
     @Override
-    public void sendEmailOnBank(String emailId, String loanNo, String transactionNo, String transactionStatus,String errorMessage) {
+    public void sendEmailOnBank(String emailId, String transactionNo, String transactionStatus,String errorMessage) {
 
-        String mandateType = enachPaymentRepository.findMandateType(loanNo);
+        String mandateType = "";
+        String loanNo = "";
+
+        List<?> dataList = enachPaymentRepository.findLoanNoAndMandateType(transactionNo);
+
+        if(!dataList.isEmpty()) {
+            Object[] obj = (Object[]) dataList.get(0);
+            mandateType = ""+obj[0];
+            loanNo = ""+obj[1];
+        }
+
         System.out.println(mandateType);
+        System.out.println(loanNo);
         EmailDetails emailDetails = new EmailDetails();
         try {
             if("Sucuss".equalsIgnoreCase(transactionStatus)) {
