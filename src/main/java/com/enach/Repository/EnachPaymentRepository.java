@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 
 @Repository
@@ -20,6 +21,11 @@ public interface EnachPaymentRepository  extends JpaRepository<EnachPayment, Lon
 
     @Transactional
     @Modifying
-    @Query("update EnachPayment cd set cd.transactionStatus=:transactionStatus, cd.transactionCompleteDate=:transactionCompleteDate where cd.transactionNo=:transactionNo")
-    void updatePaymentStatus(@Param("transactionNo") String transactionNo, @Param("transactionStatus") String transactionStatus, @Param("transactionCompleteDate")Timestamp transactionCompleteDate);
+    @Query("update EnachPayment cd set cd.transactionStatus=:transactionStatus, cd.transactionCompleteDate=:transactionCompleteDate, cd.errorMessage=:errorMessage where cd.transactionNo=:transactionNo")
+    void updatePaymentStatus(@Param("transactionNo") String transactionNo, @Param("transactionStatus") String transactionStatus, @Param("errorMessage") String errorMessage, @Param("transactionCompleteDate")Timestamp transactionCompleteDate);
+
+    @Query("select cd.mandateType,cd.loanNo from EnachPayment cd where cd.transactionNo=:transactionNo")
+    List<?> findLoanNoAndMandateType(@Param("transactionNo") String transactionNo);
+
+
 }

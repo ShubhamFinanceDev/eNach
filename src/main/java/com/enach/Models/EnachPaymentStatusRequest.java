@@ -7,5 +7,6 @@ import lombok.Data;
 public class EnachPaymentStatusRequest {
 
     private String transactionStatus;
+    private String errorMessage;
 
 }

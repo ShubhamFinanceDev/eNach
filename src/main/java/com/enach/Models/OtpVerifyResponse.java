@@ -8,6 +8,7 @@ import java.util.Date;
 @Data
 public class OtpVerifyResponse extends CommonResponse {
 
+    private String jwtToken;
     private String custName;
     private String loanNo;
     private String mobileNo;
@@ -18,6 +19,7 @@ public class OtpVerifyResponse extends CommonResponse {
 
 
     public OtpVerifyResponse() {
+        this.jwtToken = "";
         this.custName = "";
         this.loanNo = "";
         this.mobileNo = "";

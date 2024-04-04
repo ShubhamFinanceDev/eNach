@@ -2,6 +2,7 @@ package com.enach.Service;
 
 
 
+import com.enach.Entity.EnachPayment;
 import com.enach.Models.CustomerDetails;
 import com.enach.Models.MandateTypeAmountResponse;
 
@@ -13,9 +14,9 @@ public interface CoustomerService {
 
     CustomerDetails getCustomerDetail(String mobileNo, String otpCode);
 
-   // EMandateAmountResponse getEMandateAmount(String loanNo);
+    EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus, String errorMessage);
 
-   // SecurityMandateAmountResponse getSecutityMandateAmount(String loanNo);
+    void sendEmailOnBank(String emailId, String transactionNo, String transactionStatus, String errorMessage);
 
-    MandateTypeAmountResponse getMandateTypeAmount(String loanNo);
+
 }

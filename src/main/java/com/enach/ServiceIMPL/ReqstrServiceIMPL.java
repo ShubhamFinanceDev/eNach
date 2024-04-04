@@ -1,63 +1,60 @@
 package com.enach.ServiceIMPL;
 
 import com.enach.Entity.EnachPayment;
-import com.enach.Entity.ResponseStructure;
-import com.enach.Models.CommonResponse;
-import com.enach.Models.EnachPaymentStatusRequest;
+import com.enach.Models.EmailDetails;
+import com.enach.Models.MandateTypeAmountResponse;
 import com.enach.Repository.EnachPaymentRepository;
-import com.enach.Repository.ReqStrDetailsRepository;
 import com.enach.Service.ReqstrService;
-import org.apache.poi.util.StringUtil;
+import com.enach.Utill.OtpUtility;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 
 @Service
 public class ReqstrServiceIMPL implements ReqstrService {
 
     @Autowired
-    private ReqStrDetailsRepository reqStrDetailsRepository;
+    @Qualifier("jdbcJdbcTemplate")
+    private JdbcTemplate jdbcTemplate;
     @Autowired
     private EnachPaymentRepository enachPaymentRepository;
 
 
     @Override
-    public ResponseStructure saveMandateRespDoc(String checkSum, String status, String msgId,  String refId, String errorCode, String errorMessage, String filler1, String filler2, String filler3, String filler4, String filler5, String filler6, String filler7, String filler8, String filler9, String filler10) {
+    public MandateTypeAmountResponse getMandateTypeAmount(String loanNo) {
 
-        ResponseStructure responseStructure = new ResponseStructure();
+        MandateTypeAmountResponse mandateTypeAmountResponse = new MandateTypeAmountResponse();
 
-        responseStructure.setCheckSumVal(checkSum);
-        responseStructure.setStatus(status);
-        responseStructure.setMsgId(msgId);
-        responseStructure.setRefId(refId);
-        responseStructure.setErrorCode(errorCode);
-        responseStructure.setErrorMessage(errorMessage);
-        responseStructure.setFiller1(filler1);
-        responseStructure.setFiller2(filler2);
-        responseStructure.setFiller3(filler3);
-        responseStructure.setFiller4(filler4);
-        responseStructure.setFiller5(filler5);
-        responseStructure.setFiller6(filler6);
-        responseStructure.setFiller7(filler7);
-        responseStructure.setFiller8(filler8);
-        responseStructure.setFiller9(filler9);
-        responseStructure.setFiller10(filler10);
+        try {
 
-        reqStrDetailsRepository.save(responseStructure);
+            String sql = "SELECT amount FROM customer_details WHERE loan_no='"+loanNo+"';";
+            List<MandateTypeAmountResponse> listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(MandateTypeAmountResponse.class));
 
-        return responseStructure;
+            if(!listData.isEmpty() && listData.size()>0) {
+                mandateTypeAmountResponse = listData.get(0);
+            }else{
+                mandateTypeAmountResponse = null;
+
+            }
+
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return mandateTypeAmountResponse;
     }
 
 
-
     @Override
-    public EnachPayment saveEnachPayment(String transactionNo, String loanNo, Timestamp transactionStartDate) throws Exception {
+    public EnachPayment saveEnachPayment(String transactionNo, String loanNo, String mandateType, Timestamp transactionStartDate) throws Exception {
 
         EnachPayment enachPayment = new EnachPayment();
         String transactionStatus ="inprocess";
@@ -66,6 +63,7 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
             enachPayment.setTransactionNo(transactionNo);
             enachPayment.setLoanNo(loanNo);
+            enachPayment.setMandateType(mandateType);
             enachPayment.setTransactionStartDate(transactionStartDate);
             //enachPayment.setTransactionCompleteDate(null);
             enachPayment.setTransactionStatus(transactionStatus);
@@ -80,27 +78,5 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
         return enachPayment;
     }
-
-
-
-    @Override
-    public EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus) {
-
-        EnachPayment enachPayment = null;
-
-        try {
-            enachPayment = enachPaymentRepository.findByTansactionNo(transactionNo);
-
-            if (enachPayment != null && !StringUtils.isEmpty(enachPayment)) {
-
-                Timestamp transactionCompleteDate = new Timestamp(System.currentTimeMillis());
-                enachPaymentRepository.updatePaymentStatus(transactionNo, transactionStatus,transactionCompleteDate);
-            }
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-        return enachPayment;
-    }
-
 
 }
