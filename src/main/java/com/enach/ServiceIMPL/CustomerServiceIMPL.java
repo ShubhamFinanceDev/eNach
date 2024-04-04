@@ -168,8 +168,7 @@ public class CustomerServiceIMPL implements CoustomerService {
             loanNo = ""+obj[1];
         }
 
-        System.out.println(mandateType);
-        System.out.println(loanNo);
+
         EmailDetails emailDetails = new EmailDetails();
         try {
             if("Sucuss".equalsIgnoreCase(transactionStatus)) {
