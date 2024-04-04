@@ -1,9 +1,12 @@
 package com.enach.ServiceIMPL;
 
 
+import com.enach.Entity.EnachPayment;
 import com.enach.Entity.OtpDetails;
 import com.enach.Models.CustomerDetails;
+import com.enach.Models.EmailDetails;
 import com.enach.Models.MandateTypeAmountResponse;
+import com.enach.Repository.EnachPaymentRepository;
 import com.enach.Repository.OtpDetailsRepository;
 import com.enach.Service.CoustomerService;
 import com.enach.Utill.OtpUtility;
@@ -14,8 +17,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -30,12 +35,13 @@ public class CustomerServiceIMPL implements CoustomerService {
     @Autowired
     @Qualifier("jdbcJdbcTemplate")
     private JdbcTemplate jdbcTemplate;
-
-
     @Autowired
     private OtpUtility otpUtility;
     @Autowired
     private OtpDetailsRepository otpDetailsRepository;
+    @Autowired
+    private EnachPaymentRepository enachPaymentRepository;
+
 
     Logger logger = LoggerFactory.getLogger(OncePerRequestFilter.class);
 
@@ -127,6 +133,69 @@ public class CustomerServiceIMPL implements CoustomerService {
         return customerDetails;
     }
 
+
+    @Override
+    public EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus, String errorMessage) {
+
+        EnachPayment enachPayment = null;
+
+        try {
+            enachPayment = enachPaymentRepository.findByTansactionNo(transactionNo);
+
+            if (enachPayment != null && !StringUtils.isEmpty(enachPayment)) {
+
+                Timestamp transactionCompleteDate = new Timestamp(System.currentTimeMillis());
+                enachPaymentRepository.updatePaymentStatus(transactionNo, transactionStatus,errorMessage,transactionCompleteDate);
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return enachPayment;
+    }
+
+
+    @Override
+    public void sendEmailOnBank(String emailId, String transactionNo, String transactionStatus,String errorMessage) {
+
+        String mandateType = "";
+        String loanNo = "";
+
+        List<?> dataList = enachPaymentRepository.findLoanNoAndMandateType(transactionNo);
+
+        if(!dataList.isEmpty()) {
+            Object[] obj = (Object[]) dataList.get(0);
+            mandateType = ""+obj[0];
+            loanNo = ""+obj[1];
+        }
+
+        System.out.println(mandateType);
+        System.out.println(loanNo);
+        EmailDetails emailDetails = new EmailDetails();
+        try {
+            if("Sucuss".equalsIgnoreCase(transactionStatus)) {
+                emailDetails.setRecipient(emailId);
+                emailDetails.setSubject("E-NACH SHUBHAM");
+                emailDetails.setMsgBody(""+mandateType+" has been sucussfully E-Nach.\n" +
+                        "for LoanNo "+loanNo+" and transactionNo "+transactionNo+"\n"+
+                        "Regards\n" +
+                        "Shubham Housing Development Finance Company");
+
+                otpUtility.sendSimpleMail(emailDetails);
+
+            }else if ("Failed".equalsIgnoreCase(transactionStatus)){
+                emailDetails.setRecipient(emailId);
+                emailDetails.setSubject("E-NACH SHUBHAM");
+                emailDetails.setMsgBody(""+mandateType+" has been failed E-Nach.\n" +
+                        "for LoanNo"+loanNo+" and transactionNo"+transactionNo+" Due to "+errorMessage+".\n"+
+                        "Regards\n" +
+                        "Shubham Housing Development Finance Company");
+
+                otpUtility.sendSimpleMail(emailDetails);
+            }
+        }catch (Exception e){
+            System.out.println(e);
+        }
+    }
 
 
 }

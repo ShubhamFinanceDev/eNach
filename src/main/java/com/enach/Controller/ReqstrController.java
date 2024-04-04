@@ -97,45 +97,4 @@ public class ReqstrController {
         return new ResponseEntity(commonResponse, HttpStatus.OK);
     }
 
-
-
-    @PutMapping("/enachPaymentStatus/{transactionNo}")
-    public ResponseEntity<String> enachPaymentStatus(@RequestBody EnachPaymentStatusRequest request , @PathVariable("transactionNo") String transactionNo) {
-
-        StatusResponse statusResponse = new StatusResponse();
-        CommonResponse commonResponse = new CommonResponse();
-
-        try {
-            if (StringUtils.isEmpty(transactionNo) || StringUtils.isEmpty(request.getTransactionStatus())) {
-                commonResponse.setMsg("Required field is empty.");
-                commonResponse.setCode("1111");
-                return new ResponseEntity(commonResponse, HttpStatus.OK);
-            }
-
-            EnachPayment enachPayment = reqstrService.updateEnachPaymentStatus(transactionNo,request.getTransactionStatus(),request.getErrorMessage());
-
-            if (enachPayment != null && !StringUtils.isEmpty(enachPayment)){
-
-               // String emailId = "nainish.singh@dbalounge.com";
-                String emailId = "abhialok5499@gmail.com";
-
-                reqstrService.sendEmailOnBank(emailId, transactionNo,request.getTransactionStatus(),request.getErrorMessage());
-
-                statusResponse.setLoanNo(enachPayment.getLoanNo());
-                statusResponse.setMsg("update paymentstatus.");
-                statusResponse.setCode("0000");
-                return new ResponseEntity(statusResponse, HttpStatus.OK);
-
-            }else{
-                commonResponse.setMsg("transactionno does not exist.");
-                commonResponse.setCode("1111");
-            }
-
-        } catch (Exception e) {
-            commonResponse.setMsg("something went worng.");
-            commonResponse.setCode("1111");
-        }
-        return new ResponseEntity(commonResponse, HttpStatus.OK);
-    }
-
     }

@@ -26,8 +26,6 @@ public class ReqstrServiceIMPL implements ReqstrService {
     private JdbcTemplate jdbcTemplate;
     @Autowired
     private EnachPaymentRepository enachPaymentRepository;
-    @Autowired
-    private OtpUtility otpUtility;
 
 
     @Override
@@ -80,71 +78,5 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
         return enachPayment;
     }
-
-
-
-    @Override
-    public EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus,String errorMessage) {
-
-        EnachPayment enachPayment = null;
-
-        try {
-            enachPayment = enachPaymentRepository.findByTansactionNo(transactionNo);
-
-            if (enachPayment != null && !StringUtils.isEmpty(enachPayment)) {
-
-                Timestamp transactionCompleteDate = new Timestamp(System.currentTimeMillis());
-                enachPaymentRepository.updatePaymentStatus(transactionNo, transactionStatus,errorMessage,transactionCompleteDate);
-            }
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-        return enachPayment;
-    }
-
-
-    @Override
-    public void sendEmailOnBank(String emailId, String transactionNo, String transactionStatus,String errorMessage) {
-
-        String mandateType = "";
-        String loanNo = "";
-
-        List<?> dataList = enachPaymentRepository.findLoanNoAndMandateType(transactionNo);
-
-        if(!dataList.isEmpty()) {
-            Object[] obj = (Object[]) dataList.get(0);
-            mandateType = ""+obj[0];
-            loanNo = ""+obj[1];
-        }
-
-        System.out.println(mandateType);
-        System.out.println(loanNo);
-        EmailDetails emailDetails = new EmailDetails();
-        try {
-            if("Sucuss".equalsIgnoreCase(transactionStatus)) {
-                emailDetails.setRecipient(emailId);
-                emailDetails.setSubject("E-NACH SHUBHAM");
-                emailDetails.setMsgBody(""+mandateType+" has been sucussfully E-Nach.\n" +
-                        "for LoanNo "+loanNo+" and transactionNo "+transactionNo+"\n"+
-                        "Regards\n" +
-                        "Shubham Housing Development Finance Company");
-
-                otpUtility.sendSimpleMail(emailDetails);
-
-            }else if ("Failed".equalsIgnoreCase(transactionStatus)){
-                emailDetails.setRecipient(emailId);
-                emailDetails.setSubject("E-NACH SHUBHAM");
-                emailDetails.setMsgBody(""+mandateType+" has been failed E-Nach.\n" +
-                        "for LoanNo"+loanNo+" and transactionNo"+transactionNo+" Due to "+errorMessage+".\n"+
-                        "Regards\n" +
-                        "Shubham Housing Development Finance Company");
-
-                otpUtility.sendSimpleMail(emailDetails);
-            }
-        }catch (Exception e){
-            System.out.println(e);
-        }
-    }
-
 
 }

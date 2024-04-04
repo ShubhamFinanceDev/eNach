@@ -18,7 +18,5 @@ public interface OtpDetailsRepository extends JpaRepository<OtpDetails,Long> {
     void deletePrevOtp(String mobileNo);
     @Query("select otp from OtpDetails otp where otp.mobileNo=:mobileNo AND otp.otpCode=:otpCode")
     OtpDetails IsotpExpired(String mobileNo, String otpCode);
-  /*  @Query("select otp from OtpDetails otp where otp.mobileNo=:mobileNo AND otp.otpCode=:otpCode AND TIMESTAMPDIFF(SECOND, '2024-02-26 13:31:37', NOW())<60")
-    OtpDetails IsotpExpired(String mobileNo, String otpCode);*/
 
 }

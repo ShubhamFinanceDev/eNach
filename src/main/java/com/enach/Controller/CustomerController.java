@@ -1,6 +1,7 @@
 package com.enach.Controller;
 
 
+import com.enach.Entity.EnachPayment;
 import com.enach.Models.*;
 import com.enach.Service.CoustomerService;
 import com.enach.sercurity.JwtHelper;
@@ -11,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -24,8 +26,6 @@ public class CustomerController {
 
     @Autowired
     private UserDetailsService userDetailsService;
-    @Autowired
-    private AuthenticationManager manager;
     @Autowired
     private JwtHelper helper;
 
@@ -114,5 +114,45 @@ public class CustomerController {
         }
     }
 
+
+
+    @PutMapping("/enachPaymentStatus/{transactionNo}")
+    public ResponseEntity<String> enachPaymentStatus(@RequestBody EnachPaymentStatusRequest request , @PathVariable("transactionNo") String transactionNo) {
+
+        StatusResponse statusResponse = new StatusResponse();
+        CommonResponse commonResponse = new CommonResponse();
+
+        try {
+            if (StringUtils.isEmpty(transactionNo) || StringUtils.isEmpty(request.getTransactionStatus())) {
+                commonResponse.setMsg("Required field is empty.");
+                commonResponse.setCode("1111");
+                return new ResponseEntity(commonResponse, HttpStatus.OK);
+            }
+
+            EnachPayment enachPayment = coustomerService.updateEnachPaymentStatus(transactionNo,request.getTransactionStatus(),request.getErrorMessage());
+
+            if (enachPayment != null && !StringUtils.isEmpty(enachPayment)){
+
+                // String emailId = "nainish.singh@dbalounge.com";
+                String emailId = "abhialok5499@gmail.com";
+
+                coustomerService.sendEmailOnBank(emailId, transactionNo,request.getTransactionStatus(),request.getErrorMessage());
+
+                statusResponse.setLoanNo(enachPayment.getLoanNo());
+                statusResponse.setMsg("update paymentstatus.");
+                statusResponse.setCode("0000");
+                return new ResponseEntity(statusResponse, HttpStatus.OK);
+
+            }else{
+                commonResponse.setMsg("transactionno does not exist.");
+                commonResponse.setCode("1111");
+            }
+
+        } catch (Exception e) {
+            commonResponse.setMsg("something went worng.");
+            commonResponse.setCode("1111");
+        }
+        return new ResponseEntity(commonResponse, HttpStatus.OK);
+    }
 
 }
