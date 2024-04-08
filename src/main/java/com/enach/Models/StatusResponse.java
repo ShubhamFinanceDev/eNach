@@ -5,12 +5,12 @@ import lombok.Data;
 @Data
 public class StatusResponse extends  CommonResponse{
 
-    private String loanNo;
+    private String applicationNo;
 
 
     public StatusResponse(){
 
-        this.loanNo = "";
+        this.applicationNo = "";
     }
 
 

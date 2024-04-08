@@ -138,7 +138,7 @@ public class CustomerController {
 
                 coustomerService.sendEmailOnBank(emailId, transactionNo,request.getTransactionStatus(),request.getErrorMessage());
 
-                statusResponse.setLoanNo(enachPayment.getApplicationNo());
+                statusResponse.setApplicationNo(enachPayment.getApplicationNo());
                 statusResponse.setMsg("update paymentstatus.");
                 statusResponse.setCode("0000");
                 return new ResponseEntity(statusResponse, HttpStatus.OK);
