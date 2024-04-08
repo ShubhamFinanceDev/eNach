@@ -5,7 +5,6 @@ import com.enach.Entity.EnachPayment;
 import com.enach.Entity.OtpDetails;
 import com.enach.Models.CustomerDetails;
 import com.enach.Models.EmailDetails;
-import com.enach.Models.MandateTypeAmountResponse;
 import com.enach.Repository.EnachPaymentRepository;
 import com.enach.Repository.OtpDetailsRepository;
 import com.enach.Service.CoustomerService;
@@ -25,7 +24,6 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 
 
 @Service

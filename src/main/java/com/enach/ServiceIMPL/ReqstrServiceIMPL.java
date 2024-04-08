@@ -1,19 +1,15 @@
 package com.enach.ServiceIMPL;
 
 import com.enach.Entity.EnachPayment;
-import com.enach.Models.EmailDetails;
-import com.enach.Models.MandateTypeAmountResponse;
-import com.enach.Models.SecurityMandateTypeAmountResponse;
+import com.enach.Models.MandateTypeAmountData;
 import com.enach.Repository.EnachPaymentRepository;
 import com.enach.Service.ReqstrService;
-import com.enach.Utill.OtpUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -30,20 +26,18 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
 
     @Override
-    public MandateTypeAmountResponse getMandateTypeAmount(String applicationNo) {
+    public MandateTypeAmountData getMandateTypeAmount(String applicationNo) {
 
-        MandateTypeAmountResponse mandateTypeAmountResponse = new MandateTypeAmountResponse();
+        MandateTypeAmountData mandateTypeAmountResponse = new MandateTypeAmountData();
 
         try {
 
-            String sql = "SELECT Installment_Amount FROM enach WHERE Application_Number='"+applicationNo+"';";
-            List<MandateTypeAmountResponse> listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(MandateTypeAmountResponse.class));
+            String sql = "SELECT Installment_Amount,Sanction_Amount FROM enach WHERE Application_Number='"+applicationNo+"';";
+
+            List<MandateTypeAmountData> listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(MandateTypeAmountData.class));
 
             if(!listData.isEmpty() && listData.size()>0) {
                 mandateTypeAmountResponse = listData.get(0);
-            }else{
-                mandateTypeAmountResponse = null;
-
             }
 
         } catch (Exception e) {
@@ -52,31 +46,6 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
         return mandateTypeAmountResponse;
     }
-
-    @Override
-    public SecurityMandateTypeAmountResponse getsecurityMandateTypeAmount(String applicationNo) {
-
-        SecurityMandateTypeAmountResponse securityMandateTypeAmountResponse = new SecurityMandateTypeAmountResponse();
-
-        try {
-
-            String sql = "SELECT Sanction_Amount FROM enach WHERE Application_Number='"+applicationNo+"';";
-            List<SecurityMandateTypeAmountResponse> listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(SecurityMandateTypeAmountResponse.class));
-
-            if(!listData.isEmpty() && listData.size()>0) {
-                securityMandateTypeAmountResponse = listData.get(0);
-            }else{
-                securityMandateTypeAmountResponse = null;
-
-            }
-
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-
-        return securityMandateTypeAmountResponse;
-    }
-
 
     @Override
     public EnachPayment saveEnachPayment(String transactionNo, String applicationNo, String mandateType, Timestamp transactionStartDate) throws Exception {

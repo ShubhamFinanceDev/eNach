@@ -17,15 +17,6 @@ import java.util.Date;
 @Data
 public class CustomerDetails implements UserDetails {
 
-   /* private String custId;
-    private String custName;
-    private String loanNo;
-    private String mobileNo;
-    private String email;
-    private LocalDate startDate;
-    private LocalDate expiryDate;
-    private String amount;*/
-
     private String applicationNumber;
     private String customerNumber;
     private String loanAccountNo;

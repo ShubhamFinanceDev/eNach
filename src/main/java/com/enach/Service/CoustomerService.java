@@ -4,7 +4,6 @@ package com.enach.Service;
 
 import com.enach.Entity.EnachPayment;
 import com.enach.Models.CustomerDetails;
-import com.enach.Models.MandateTypeAmountResponse;
 
 import java.util.HashMap;
 

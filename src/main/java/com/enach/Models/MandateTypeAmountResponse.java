@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class MandateTypeAmountResponse extends CommonResponse{
 
-    private double installmentAmount;
+    private double amount;
 }

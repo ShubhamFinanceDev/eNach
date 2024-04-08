@@ -79,13 +79,9 @@ public class CustomerController {
                 if (customerDetails != null) {
 
                     otpVerifyResponse.setJwtToken(token);
-                    otpVerifyResponse.setApplicationNumber(customerDetails.getApplicationNumber());
-                    otpVerifyResponse.setCustomerName(customerDetails.getCustomerName());
-                    otpVerifyResponse.setCustomerNumber(customerDetails.getCustomerNumber());
-                    otpVerifyResponse.setLoanAccountNo(customerDetails.getLoanAccountNo());
+                    otpVerifyResponse.setApplicationNo(customerDetails.getApplicationNumber());
+                    otpVerifyResponse.setCustName(customerDetails.getCustomerName());
                     otpVerifyResponse.setMobileNo(customerDetails.getMobileNo());
-                    otpVerifyResponse.setCurrentStatus(customerDetails.getCurrentStatus());
-
                     LocalDateTime startDate = customerDetails.getFirstInstalmentDate();
                     LocalDateTime today = LocalDateTime.now();
                     if(startDate.isBefore(today)){

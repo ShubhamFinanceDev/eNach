@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+
 @RestController
 @RequestMapping("/customer")
 @CrossOrigin
@@ -23,7 +25,7 @@ public class ReqstrController {
     public ResponseEntity<String> mandateType(@RequestParam("applicationNo") String applicationNo, @RequestParam("mandateType") String  mandateType) {
 
         CommonResponse commonResponse = new CommonResponse();
-        MandateTypeAmountResponse mandateTypeAmountResponse = new MandateTypeAmountResponse();
+
 
         try{
             if (StringUtils.isEmpty(applicationNo) || StringUtils.isEmpty(mandateType)) {
@@ -32,30 +34,24 @@ public class ReqstrController {
                 return new ResponseEntity(commonResponse, HttpStatus.OK);
             }
 
-          //  MandateTypeAmountResponse mandateTypeAmount = reqstrService.getMandateTypeAmount(applicationNo);
+
+            MandateTypeAmountResponse mandateTypeAmountResponse = new MandateTypeAmountResponse();
+
+            MandateTypeAmountData mandateTypeAmountData = reqstrService.getMandateTypeAmount(applicationNo);
 
             if("MNTH".equalsIgnoreCase(mandateType)){
-
-                MandateTypeAmountResponse mandateTypeAmount = reqstrService.getMandateTypeAmount(applicationNo);
-
-                mandateTypeAmountResponse.setInstallmentAmount(mandateTypeAmount.getInstallmentAmount()*2);
+                mandateTypeAmountResponse.setAmount(mandateTypeAmountData.getInstallment_Amount()*2);
                 mandateTypeAmountResponse.setCode("0000");
                 mandateTypeAmountResponse.setMsg("succuss emandate amount");
 
                 return new ResponseEntity(mandateTypeAmountResponse, HttpStatus.OK);
+            } else if ("ADHO".equalsIgnoreCase(mandateType)) {
+                mandateTypeAmountResponse.setAmount(mandateTypeAmountData.getSanction_Amount());
+                mandateTypeAmountResponse.setCode("0000");
+                mandateTypeAmountResponse.setMsg("succuss emandate amount");
 
-            }else if ("ADHO".equalsIgnoreCase(mandateType)){
-
-                SecurityMandateTypeAmountResponse securityMandateTypeAmount = reqstrService.getsecurityMandateTypeAmount(applicationNo);
-
-                securityMandateTypeAmount.setSanctionAmount(securityMandateTypeAmount.getSanctionAmount());
-                securityMandateTypeAmount.setCode("0000");
-                securityMandateTypeAmount.setMsg("succuss securityMandate amount");
-
-                return new ResponseEntity(securityMandateTypeAmount, HttpStatus.OK);
-
-            }else {
-
+                return new ResponseEntity(mandateTypeAmountResponse, HttpStatus.OK);
+            } else {
                 commonResponse.setMsg("mandateType is not correct.");
                 commonResponse.setCode("1111");
             }
