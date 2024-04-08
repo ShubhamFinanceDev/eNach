@@ -3,6 +3,7 @@ package com.enach.ServiceIMPL;
 import com.enach.Entity.EnachPayment;
 import com.enach.Models.EmailDetails;
 import com.enach.Models.MandateTypeAmountResponse;
+import com.enach.Models.SecurityMandateTypeAmountResponse;
 import com.enach.Repository.EnachPaymentRepository;
 import com.enach.Service.ReqstrService;
 import com.enach.Utill.OtpUtility;
@@ -29,13 +30,13 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
 
     @Override
-    public MandateTypeAmountResponse getMandateTypeAmount(String loanNo) {
+    public MandateTypeAmountResponse getMandateTypeAmount(String applicationNo) {
 
         MandateTypeAmountResponse mandateTypeAmountResponse = new MandateTypeAmountResponse();
 
         try {
 
-            String sql = "SELECT amount FROM customer_details WHERE loan_no='"+loanNo+"';";
+            String sql = "SELECT Installment_Amount FROM enach WHERE Application_Number='"+applicationNo+"';";
             List<MandateTypeAmountResponse> listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(MandateTypeAmountResponse.class));
 
             if(!listData.isEmpty() && listData.size()>0) {
@@ -52,9 +53,33 @@ public class ReqstrServiceIMPL implements ReqstrService {
         return mandateTypeAmountResponse;
     }
 
+    @Override
+    public SecurityMandateTypeAmountResponse getsecurityMandateTypeAmount(String applicationNo) {
+
+        SecurityMandateTypeAmountResponse securityMandateTypeAmountResponse = new SecurityMandateTypeAmountResponse();
+
+        try {
+
+            String sql = "SELECT Sanction_Amount FROM enach WHERE Application_Number='"+applicationNo+"';";
+            List<SecurityMandateTypeAmountResponse> listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(SecurityMandateTypeAmountResponse.class));
+
+            if(!listData.isEmpty() && listData.size()>0) {
+                securityMandateTypeAmountResponse = listData.get(0);
+            }else{
+                securityMandateTypeAmountResponse = null;
+
+            }
+
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return securityMandateTypeAmountResponse;
+    }
+
 
     @Override
-    public EnachPayment saveEnachPayment(String transactionNo, String loanNo, String mandateType, Timestamp transactionStartDate) throws Exception {
+    public EnachPayment saveEnachPayment(String transactionNo, String applicationNo, String mandateType, Timestamp transactionStartDate) throws Exception {
 
         EnachPayment enachPayment = new EnachPayment();
         String transactionStatus ="inprocess";
@@ -62,7 +87,7 @@ public class ReqstrServiceIMPL implements ReqstrService {
         try {
 
             enachPayment.setTransactionNo(transactionNo);
-            enachPayment.setLoanNo(loanNo);
+            enachPayment.setApplicationNo(applicationNo);
             enachPayment.setMandateType(mandateType);
             enachPayment.setTransactionStartDate(transactionStartDate);
             //enachPayment.setTransactionCompleteDate(null);
@@ -78,5 +103,9 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
         return enachPayment;
     }
+
+
+
+
 
 }

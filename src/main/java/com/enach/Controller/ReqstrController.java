@@ -20,23 +20,25 @@ public class ReqstrController {
     private ReqstrService reqstrService;
 
     @GetMapping("/mandateType")
-    public ResponseEntity<String> mandateType(@RequestParam("loanNo") String loanNo, @RequestParam("mandateType") String  mandateType) {
+    public ResponseEntity<String> mandateType(@RequestParam("applicationNo") String applicationNo, @RequestParam("mandateType") String  mandateType) {
 
         CommonResponse commonResponse = new CommonResponse();
         MandateTypeAmountResponse mandateTypeAmountResponse = new MandateTypeAmountResponse();
 
         try{
-            if (StringUtils.isEmpty(loanNo) || StringUtils.isEmpty(mandateType)) {
+            if (StringUtils.isEmpty(applicationNo) || StringUtils.isEmpty(mandateType)) {
                 commonResponse.setMsg("Required field is empty.");
                 commonResponse.setCode("1111");
                 return new ResponseEntity(commonResponse, HttpStatus.OK);
             }
 
-            MandateTypeAmountResponse mandateTypeAmount = reqstrService.getMandateTypeAmount(loanNo);
+          //  MandateTypeAmountResponse mandateTypeAmount = reqstrService.getMandateTypeAmount(applicationNo);
 
             if("MNTH".equalsIgnoreCase(mandateType)){
 
-                mandateTypeAmountResponse.setAmount(mandateTypeAmount.getAmount());
+                MandateTypeAmountResponse mandateTypeAmount = reqstrService.getMandateTypeAmount(applicationNo);
+
+                mandateTypeAmountResponse.setInstallmentAmount(mandateTypeAmount.getInstallmentAmount()*2);
                 mandateTypeAmountResponse.setCode("0000");
                 mandateTypeAmountResponse.setMsg("succuss emandate amount");
 
@@ -44,12 +46,13 @@ public class ReqstrController {
 
             }else if ("ADHO".equalsIgnoreCase(mandateType)){
 
-                Double emiAmount = mandateTypeAmount.getAmount();
-                mandateTypeAmountResponse.setAmount(emiAmount/2);
-                mandateTypeAmountResponse.setCode("0000");
-                mandateTypeAmountResponse.setMsg("succuss emandate amount");
+                SecurityMandateTypeAmountResponse securityMandateTypeAmount = reqstrService.getsecurityMandateTypeAmount(applicationNo);
 
-                return new ResponseEntity(mandateTypeAmountResponse, HttpStatus.OK);
+                securityMandateTypeAmount.setSanctionAmount(securityMandateTypeAmount.getSanctionAmount());
+                securityMandateTypeAmount.setCode("0000");
+                securityMandateTypeAmount.setMsg("succuss securityMandate amount");
+
+                return new ResponseEntity(securityMandateTypeAmount, HttpStatus.OK);
 
             }else {
 
@@ -72,7 +75,7 @@ public class ReqstrController {
         CommonResponse commonResponse = new CommonResponse();
 
             try {
-                if (StringUtils.isEmpty(request.getTransactionNo()) || StringUtils.isEmpty(request.getMandateType()) || StringUtils.isEmpty(request.getLoanNo()) || StringUtils.isEmpty(request.getTransactionStartDate())) {
+                if (StringUtils.isEmpty(request.getTransactionNo()) || StringUtils.isEmpty(request.getMandateType()) || StringUtils.isEmpty(request.getApplicationNo()) || StringUtils.isEmpty(request.getTransactionStartDate())) {
                     commonResponse.setMsg("Required field is empty.");
                     commonResponse.setCode("1111");
                     return new ResponseEntity(commonResponse, HttpStatus.OK);
@@ -80,7 +83,7 @@ public class ReqstrController {
 
                 String mandateType = ("MNTH".equalsIgnoreCase(request.getMandateType())) ? "e-Mandate" : "security-mandate";
 
-                EnachPayment enachPayment = reqstrService.saveEnachPayment(request.getTransactionNo(), request.getLoanNo(), mandateType, request.getTransactionStartDate());
+                EnachPayment enachPayment = reqstrService.saveEnachPayment(request.getTransactionNo(), request.getApplicationNo(), mandateType, request.getTransactionStartDate());
 
                 commonResponse.setMsg("Response Save.");
                 commonResponse.setCode("0000");

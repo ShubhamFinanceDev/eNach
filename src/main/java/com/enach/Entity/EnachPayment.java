@@ -22,8 +22,8 @@ public class EnachPayment {
     @Column(name = "transactionNo")
     private  String transactionNo;
 
-    @Column(name = "loanNo")
-    private String loanNo;
+    @Column(name = "applicationNo")
+    private String applicationNo;
 
     @Column(name = "transactionStartDate")
     private Timestamp transactionStartDate;

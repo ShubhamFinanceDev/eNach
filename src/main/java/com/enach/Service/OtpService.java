@@ -20,12 +20,12 @@ public class OtpService implements UserDetailsService {
     private JdbcTemplate jdbcTemplate;
 
     @Override
-    public UserDetails loadUserByUsername(String loanNo) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String applicationNo) throws UsernameNotFoundException {
 
         CustomerDetails customerDetails = new CustomerDetails();
         try {
 
-            String sql = "SELECT * FROM customer_details WHERE loan_no='" + loanNo + "';";
+            String sql = "SELECT * FROM enach WHERE Application_Number='" + applicationNo + "';";
             List<CustomerDetails> listData = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(CustomerDetails.class));
 
             if (!listData.isEmpty() && listData.size() > 0) {

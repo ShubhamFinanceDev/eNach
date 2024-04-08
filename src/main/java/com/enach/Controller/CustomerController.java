@@ -16,6 +16,8 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.HashMap;
 import java.util.Map;
 @Controller
@@ -42,14 +44,14 @@ public class CustomerController {
     @PostMapping("/sendOtp")
     public HashMap sendOtpOnCustomerRegisteredMobile(@RequestBody Map<String, String> inputParam) {
 
-        String loanNo = inputParam.get("loanNo");
+        String applicationNo = inputParam.get("applicationNo");
         HashMap<String, String> otpResponse = new HashMap<>();
 
-        if (loanNo.isEmpty()) {
-            otpResponse.put("msg", "Loan number field is empty");
+        if (applicationNo.isEmpty()) {
+            otpResponse.put("msg", "Application number field is empty");
             otpResponse.put("code", "1111");
         } else {
-            otpResponse = coustomerService.validateCustAndSendOtp(loanNo);
+            otpResponse = coustomerService.validateCustAndSendOtp(applicationNo);
         }
 
         return otpResponse;
@@ -60,7 +62,7 @@ public class CustomerController {
     public ResponseEntity<OtpVerifyResponse> login(@RequestBody OtpRequest request) {
 
         OtpVerifyResponse otpVerifyResponse = new OtpVerifyResponse();
-        if (request.getMobileNo().isBlank() || request.getOtpCode().isBlank() || request.getLoanNo().isBlank()) {
+        if (request.getMobileNo().isBlank() || request.getOtpCode().isBlank() || request.getApplicationNo().isBlank()) {
             CommonResponse commonResponse = new CommonResponse();
             commonResponse.setMsg("Required field is empty.");
             commonResponse.setCode("1111");
@@ -69,7 +71,7 @@ public class CustomerController {
         } else {
 
             try {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(request.getLoanNo());
+                UserDetails userDetails = userDetailsService.loadUserByUsername(request.getApplicationNo());
                 String token = this.helper.generateToken(userDetails);
 
                 CustomerDetails customerDetails = coustomerService.getCustomerDetail(request.getMobileNo(), request.getOtpCode());
@@ -77,24 +79,26 @@ public class CustomerController {
                 if (customerDetails != null) {
 
                     otpVerifyResponse.setJwtToken(token);
-                    otpVerifyResponse.setCustName(customerDetails.getCustName());
-                    otpVerifyResponse.setLoanNo(customerDetails.getLoanNo());
+                    otpVerifyResponse.setApplicationNumber(customerDetails.getApplicationNumber());
+                    otpVerifyResponse.setCustomerName(customerDetails.getCustomerName());
+                    otpVerifyResponse.setCustomerNumber(customerDetails.getCustomerNumber());
+                    otpVerifyResponse.setLoanAccountNo(customerDetails.getLoanAccountNo());
                     otpVerifyResponse.setMobileNo(customerDetails.getMobileNo());
-                    otpVerifyResponse.setEmail(customerDetails.getEmail());
+                    otpVerifyResponse.setCurrentStatus(customerDetails.getCurrentStatus());
 
-                    LocalDate startDate = customerDetails.getStartDate();
-                    LocalDate today = LocalDate.now();
+                    LocalDateTime startDate = customerDetails.getFirstInstalmentDate();
+                    LocalDateTime today = LocalDateTime.now();
                     if(startDate.isBefore(today)){
                         otpVerifyResponse.setStartDate(today);
+                        LocalDateTime futureDate = today.plus(Period.ofYears(40));
+                        otpVerifyResponse.setExpiryDate(futureDate);
                     }else{
                         otpVerifyResponse.setStartDate(startDate);
+                        LocalDateTime futureDate = startDate.plus(Period.ofYears(40));
+                        otpVerifyResponse.setExpiryDate(futureDate);
                     }
 
-                    LocalDate expiryDate = customerDetails.getExpiryDate();
-                    LocalDate today1 = LocalDate.now();
-                    if(expiryDate.isAfter(today1)){
-                        otpVerifyResponse.setExpiryDate(expiryDate);
-                    }
+
                     return new ResponseEntity(otpVerifyResponse, HttpStatus.OK);
 
                 } else {
@@ -138,7 +142,7 @@ public class CustomerController {
 
                 coustomerService.sendEmailOnBank(emailId, transactionNo,request.getTransactionStatus(),request.getErrorMessage());
 
-                statusResponse.setLoanNo(enachPayment.getLoanNo());
+                statusResponse.setLoanNo(enachPayment.getApplicationNo());
                 statusResponse.setMsg("update paymentstatus.");
                 statusResponse.setCode("0000");
                 return new ResponseEntity(statusResponse, HttpStatus.OK);

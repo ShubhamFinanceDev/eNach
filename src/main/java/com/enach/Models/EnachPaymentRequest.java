@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 public class EnachPaymentRequest {
 
     private String transactionNo;
-    private String loanNo;
+    private String applicationNo;
     private String mandateType;
     private Timestamp transactionStartDate;
 }

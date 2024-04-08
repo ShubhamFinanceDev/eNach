@@ -47,11 +47,11 @@ public class CustomerServiceIMPL implements CoustomerService {
 
 
     @Override
-    public HashMap<String, String> validateCustAndSendOtp(String loanNo) {
+    public HashMap<String, String> validateCustAndSendOtp(String applicationNo) {
 
         HashMap<String, String> otpResponse = new HashMap<>();
 
-        String sql = "SELECT * FROM customer_details WHERE loan_no='"+loanNo+"';";
+        String sql = "SELECT * FROM enach WHERE Application_Number='"+applicationNo+"';";
         try {
             List<CustomerDetails>  listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(CustomerDetails.class));
 
@@ -112,7 +112,7 @@ public class CustomerServiceIMPL implements CoustomerService {
             OtpDetails otpDetails = otpDetailsRepository.IsotpExpired(mobileNo, otpCode);
             if (otpDetails != null) {
 
-                String sql = "SELECT * FROM customer_details WHERE mobile_no='"+mobileNo+"';";
+                String sql = "SELECT * FROM enach WHERE mobile_no='"+mobileNo+"';";
                 List<CustomerDetails> listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(CustomerDetails.class));
 
                 if(!listData.isEmpty() && listData.size()>0) {
@@ -158,14 +158,14 @@ public class CustomerServiceIMPL implements CoustomerService {
     public void sendEmailOnBank(String emailId, String transactionNo, String transactionStatus,String errorMessage) {
 
         String mandateType = "";
-        String loanNo = "";
+        String applicationNo = "";
 
         List<?> dataList = enachPaymentRepository.findLoanNoAndMandateType(transactionNo);
 
         if(!dataList.isEmpty()) {
             Object[] obj = (Object[]) dataList.get(0);
             mandateType = ""+obj[0];
-            loanNo = ""+obj[1];
+            applicationNo = ""+obj[1];
         }
 
 
@@ -175,7 +175,7 @@ public class CustomerServiceIMPL implements CoustomerService {
                 emailDetails.setRecipient(emailId);
                 emailDetails.setSubject("E-NACH SHUBHAM");
                 emailDetails.setMsgBody(""+mandateType+" has been sucussfully E-Nach.\n" +
-                        "for LoanNo "+loanNo+" and transactionNo "+transactionNo+"\n"+
+                        "for ApplicationNo "+applicationNo+" and transactionNo "+transactionNo+"\n"+
                         "Regards\n" +
                         "Shubham Housing Development Finance Company");
 
@@ -185,7 +185,7 @@ public class CustomerServiceIMPL implements CoustomerService {
                 emailDetails.setRecipient(emailId);
                 emailDetails.setSubject("E-NACH SHUBHAM");
                 emailDetails.setMsgBody(""+mandateType+" has been failed E-Nach.\n" +
-                        "for LoanNo"+loanNo+" and transactionNo"+transactionNo+" Due to "+errorMessage+".\n"+
+                        "for ApplicationNo"+applicationNo+" and transactionNo"+transactionNo+" Due to "+errorMessage+".\n"+
                         "Regards\n" +
                         "Shubham Housing Development Finance Company");
 
