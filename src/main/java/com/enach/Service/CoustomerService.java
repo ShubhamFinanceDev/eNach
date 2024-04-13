@@ -11,7 +11,7 @@ public interface CoustomerService {
 
     HashMap<String, String> validateCustAndSendOtp(String applicationNo);
 
-    CustomerDetails getCustomerDetail(String mobileNo, String otpCode);
+    CustomerDetails getCustomerDetail(String mobileNo, String otpCode, String applicationNo);
 
     EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus, String errorMessage);
 

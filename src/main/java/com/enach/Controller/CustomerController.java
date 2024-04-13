@@ -76,7 +76,7 @@ public class CustomerController {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(request.getApplicationNo());
                 String token = this.helper.generateToken(userDetails);
 
-                CustomerDetails customerDetails = coustomerService.getCustomerDetail(request.getMobileNo(), request.getOtpCode());
+                CustomerDetails customerDetails = coustomerService.getCustomerDetail(request.getMobileNo(), request.getOtpCode(),request.getApplicationNo());
 
                 if (customerDetails != null) {
 

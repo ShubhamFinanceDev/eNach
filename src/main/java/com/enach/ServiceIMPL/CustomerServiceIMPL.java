@@ -105,14 +105,14 @@ public class CustomerServiceIMPL implements CoustomerService {
 
 
     @Override
-    public CustomerDetails getCustomerDetail(String mobileNo, String otpCode) {
+    public CustomerDetails getCustomerDetail(String mobileNo, String otpCode, String applicationNo) {
 
         CustomerDetails customerDetails = new CustomerDetails();
         try {
             OtpDetails otpDetails = otpDetailsRepository.IsotpExpired(mobileNo, otpCode);
             if (otpDetails != null) {
 
-                String sql = "SELECT * FROM enach WHERE mobile_no='"+mobileNo+"';";
+                String sql = "SELECT * FROM enach WHERE Application_No='"+applicationNo+"';";
                 List<CustomerDetails> listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(CustomerDetails.class));
 
                 if(!listData.isEmpty() && listData.size()>0) {
