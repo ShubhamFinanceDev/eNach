@@ -13,8 +13,8 @@ public class OtpVerifyResponse extends CommonResponse {
     private String custName;
     private String applicationNo;
     private String mobileNo;
-    private LocalDateTime startDate;
-    private LocalDateTime expiryDate;
+    private String startDate;
+    private String expiryDate;
 
 
 }

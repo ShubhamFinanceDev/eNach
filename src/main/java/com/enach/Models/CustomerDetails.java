@@ -20,13 +20,14 @@ public class CustomerDetails implements UserDetails {
     private String applicationNumber;
     private String customerNumber;
     private String loanAccountNo;
-    private LocalDateTime firstDisbursalDate;
-    private LocalDateTime firstInstalmentDate;
+    private LocalDate firstDisbursalDate;
+    private LocalDate firstInstalmentDate;
     private Double installmentAmount;
     private Double sanctionAmount;
     private String currentStatus;
     private String mobileNo;
     private String customerName;
+    private LocalDate nextDueDate;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

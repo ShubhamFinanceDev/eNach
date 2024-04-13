@@ -4,22 +4,24 @@ package com.enach.Controller;
 import com.enach.Entity.EnachPayment;
 import com.enach.Models.*;
 import com.enach.Service.CoustomerService;
+import com.enach.Utill.NextDueDate;
 import com.enach.sercurity.JwtHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.Period;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
 @Controller
 @RestController
 @RequestMapping("/eNach")
@@ -82,21 +84,34 @@ public class CustomerController {
                     otpVerifyResponse.setApplicationNo(customerDetails.getApplicationNumber());
                     otpVerifyResponse.setCustName(customerDetails.getCustomerName());
                     otpVerifyResponse.setMobileNo(customerDetails.getMobileNo());
-                    LocalDateTime startDate = customerDetails.getFirstInstalmentDate();
-                    LocalDateTime today = LocalDateTime.now();
-                    if(startDate.isBefore(today)){
-                        otpVerifyResponse.setStartDate(today);
-                        LocalDateTime futureDate = today.plus(Period.ofYears(40));
-                        otpVerifyResponse.setExpiryDate(futureDate);
-                    }else{
-                        otpVerifyResponse.setStartDate(startDate);
-                        LocalDateTime futureDate = startDate.plus(Period.ofYears(40));
-                        otpVerifyResponse.setExpiryDate(futureDate);
-                    }
 
+                    LocalDate firstInstallmentDate = customerDetails.getFirstInstalmentDate();
+                    LocalDate nextDueDate = customerDetails.getNextDueDate();
+
+                    if(StringUtils.isEmpty(firstInstallmentDate) || StringUtils.isEmpty(nextDueDate)){
+
+                           CommonResponse commonResponse = new CommonResponse();
+                           commonResponse.setMsg("FirstInstallmentDate/ NextDueDate is empty.");
+                           commonResponse.setCode("1111");
+                           return new ResponseEntity(commonResponse, HttpStatus.OK);
+                    }
+                    LocalDate currentDate = LocalDate.now();
+
+                    if(!nextDueDate.isBefore(currentDate)) {
+
+                          String startDate = NextDueDate.findNextDueDate(nextDueDate.toString());
+                          otpVerifyResponse.setStartDate(startDate);
+                    }else {
+
+                          CommonResponse commonResponse = new CommonResponse();
+                          commonResponse.setMsg("Next due date before current date.");
+                          commonResponse.setCode("1111");
+                          return new ResponseEntity(commonResponse, HttpStatus.OK);
+                    }
+                    LocalDate futureDate = firstInstallmentDate.plus(Period.ofYears(40));
+                    otpVerifyResponse.setExpiryDate(futureDate.toString());
 
                     return new ResponseEntity(otpVerifyResponse, HttpStatus.OK);
-
                 } else {
                     CommonResponse commonResponse = new CommonResponse();
                     commonResponse.setMsg("Otp is invalid or expired, please try again.");
@@ -113,7 +128,6 @@ public class CustomerController {
 
         }
     }
-
 
 
     @PutMapping("/enachPaymentStatus/{transactionNo}")
@@ -133,10 +147,8 @@ public class CustomerController {
 
             if (enachPayment != null && !StringUtils.isEmpty(enachPayment)){
 
-                // String emailId = "nainish.singh@dbalounge.com";
-                String emailId = "abhialok5499@gmail.com";
 
-                coustomerService.sendEmailOnBank(emailId, transactionNo,request.getTransactionStatus(),request.getErrorMessage());
+                coustomerService.sendEmailOnBank(transactionNo,request.getTransactionStatus(),request.getErrorMessage());
 
                 statusResponse.setApplicationNo(enachPayment.getApplicationNo());
                 statusResponse.setMsg("update paymentstatus.");
