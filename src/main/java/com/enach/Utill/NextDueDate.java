@@ -21,16 +21,24 @@ public class NextDueDate {
         calendar.set(year,month,day);
         int currentDay = calendar.get(Calendar.DAY_OF_MONTH);
 
-        if (!(currentDay >= 1 && currentDay <= 4)) {
+        if (currentDay >= 1 && currentDay <= 4) {
 
+            calendar.set(Calendar.DAY_OF_MONTH, 4);
+        }
+        else
+        if(currentDay >= 5 && currentDay <= 10)
+        {
+            calendar.set(Calendar.DAY_OF_MONTH, 10);
+
+        }
+
+        else {
             calendar.set(Calendar.DAY_OF_MONTH, 4);
             calendar.set(Calendar.MONTH, month+1);
 
-            System.out.println("month");
-        } else {
-            calendar.set(Calendar.DAY_OF_MONTH, 4);
-        }
+            // System.out.println("month");
 
+        }
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         String next4thDate = formatter.format(calendar.getTime());
 
