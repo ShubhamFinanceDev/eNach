@@ -25,7 +25,7 @@ public class NextDueDate {
             System.out.println(currentDay);
 
             calendar.set(Calendar.DAY_OF_MONTH, 4);
-            if (currentDay < 1 || currentDay > 4) {
+            if (currentDay > 4) {
                 calendar.set(Calendar.MONTH, month + 1);
             }
         }
@@ -35,7 +35,7 @@ public class NextDueDate {
             System.out.println(currentDay);
 
             calendar.set(Calendar.DAY_OF_MONTH, 10);
-            if (currentDay < 1 || currentDay > 10) {
+            if (currentDay > 10) {
                 calendar.set(Calendar.MONTH, month + 1);
             }
         }
