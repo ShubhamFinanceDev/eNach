@@ -183,6 +183,16 @@ public class CustomerServiceIMPL implements CoustomerService {
 
                 otpUtility.sendSimpleMail(emailDetails);
 
+            }else if("Failed".equalsIgnoreCase(transactionStatus)){
+                emailDetails.setRecipient(emailId);
+                emailDetails.setSubject("E-NACH SHUBHAM");
+                emailDetails.setMsgBody("Enach registration has been not successfully completed \n"+
+                        "for "+mandateType+" to ApplicationNo "+applicationNo+".\n"+
+                        "Regards\n" +
+                        "Shubham Housing Development Finance Company");
+
+                otpUtility.sendSimpleMail(emailDetails);
+
             }
         }catch (Exception e){
             System.out.println(e);
