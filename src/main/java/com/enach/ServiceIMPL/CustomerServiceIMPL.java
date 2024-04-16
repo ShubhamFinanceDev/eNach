@@ -51,7 +51,7 @@ public class CustomerServiceIMPL implements CoustomerService {
 
         HashMap<String, String> otpResponse = new HashMap<>();
 
-        String sql = "SELECT * FROM enach WHERE Application_Number='"+applicationNo+"';";
+        String sql = "SELECT * FROM enach WHERE Application_Number='"+applicationNo+"' || Old_Application_Number='"+applicationNo+"';";
         try {
             List<CustomerDetails>  listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(CustomerDetails.class));
 
@@ -112,7 +112,7 @@ public class CustomerServiceIMPL implements CoustomerService {
             OtpDetails otpDetails = otpDetailsRepository.IsotpExpired(mobileNo, otpCode);
             if (otpDetails != null) {
 
-                String sql = "SELECT * FROM enach WHERE Application_Number='"+applicationNo+"';";
+                String sql = "SELECT * FROM enach WHERE Application_Number='"+applicationNo+"' || Old_Application_Number='"+applicationNo+"'; ";
                 List<CustomerDetails> listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(CustomerDetails.class));
 
                 if(!listData.isEmpty() && listData.size()>0) {

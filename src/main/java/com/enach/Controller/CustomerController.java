@@ -32,7 +32,6 @@ public class CustomerController {
     private UserDetailsService userDetailsService;
     @Autowired
     private JwtHelper helper;
-
     @Autowired
     private CoustomerService coustomerService;
 
@@ -81,7 +80,11 @@ public class CustomerController {
                 if (customerDetails != null) {
 
                     otpVerifyResponse.setJwtToken(token);
-                    otpVerifyResponse.setApplicationNo(customerDetails.getApplicationNumber());
+                    if(request.getApplicationNo().equals(customerDetails.getApplicationNumber())){
+                        otpVerifyResponse.setApplicationNo(customerDetails.getApplicationNumber());
+                     }else {
+                        otpVerifyResponse.setApplicationNo(customerDetails.getOldApplicationNumber());
+                     }
                     otpVerifyResponse.setCustName(customerDetails.getCustomerName());
                     otpVerifyResponse.setMobileNo(customerDetails.getMobileNo());
 
