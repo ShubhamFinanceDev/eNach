@@ -29,6 +29,7 @@ public class CustomerDetails implements UserDetails {
     private String mobileNo;
     private String customerName;
     private LocalDate nextDueDate;
+    private String branchName;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
