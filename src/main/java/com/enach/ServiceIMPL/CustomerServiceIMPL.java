@@ -169,7 +169,7 @@ public class CustomerServiceIMPL implements CoustomerService {
         }
 
         //String emailId = "abhialok5499@gmail.com";
-        String emailId = "ravi@shubham.co";
+        String emailId = "ravi.soni@shubham.co";
 
         EmailDetails emailDetails = new EmailDetails();
         try {
