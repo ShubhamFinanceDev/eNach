@@ -168,16 +168,16 @@ public class CustomerServiceIMPL implements CoustomerService {
             applicationNo = ""+obj[1];
         }
 
-        //String emailId = "abhialok5499@gmail.com";
+       // String emailId = "abhialok5499@gmail.com";
         String emailId = "ravi.soni@shubham.co";
 
         EmailDetails emailDetails = new EmailDetails();
         try {
-            if("Sucuss".equalsIgnoreCase(transactionStatus)) {
+            if("Success".equalsIgnoreCase(transactionStatus)) {
                 emailDetails.setRecipient(emailId);
                 emailDetails.setSubject("E-NACH SHUBHAM");
                 emailDetails.setMsgBody("Enach registration has been successfully completed \n"+
-                                        "for "+mandateType+" to ApplicationNo "+applicationNo+".\n"+
+                                        "for "+mandateType+" to ApplicationNo "+applicationNo+" and TransactionNo "+transactionNo+".\n"+
                                         "Regards\n" +
                                         "Shubham Housing Development Finance Company");
 
@@ -186,8 +186,8 @@ public class CustomerServiceIMPL implements CoustomerService {
             }else if("Failed".equalsIgnoreCase(transactionStatus)){
                 emailDetails.setRecipient(emailId);
                 emailDetails.setSubject("E-NACH SHUBHAM");
-                emailDetails.setMsgBody("Enach registration has been not successfully completed \n"+
-                        "due to "+errorMessage+" for "+mandateType+" to ApplicationNo "+applicationNo+".\n"+
+                emailDetails.setMsgBody("Enach registration has been failed \n"+
+                        "due to "+errorMessage+" for "+mandateType+" to ApplicationNo "+applicationNo+" and TransactionNo "+transactionNo+".\n"+
                         "Regards\n" +
                         "Shubham Housing Development Finance Company");
 
