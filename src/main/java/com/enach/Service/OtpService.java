@@ -25,7 +25,7 @@ public class OtpService implements UserDetailsService {
         CustomerDetails customerDetails = new CustomerDetails();
         try {
 
-            String sql = "SELECT * FROM enach WHERE Application_Number='" + applicationNo + "' || Old_Application_Number='" + applicationNo +"';";
+            String sql = "SELECT * FROM enach WHERE `Application Number`='" + applicationNo + "'";
             List<CustomerDetails> listData = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(CustomerDetails.class));
 
             if (!listData.isEmpty() && listData.size() > 0) {

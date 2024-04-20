@@ -18,7 +18,6 @@ import java.util.Date;
 public class CustomerDetails implements UserDetails {
 
     private String applicationNumber;
-    private String oldApplicationNumber;
     private String customerNumber;
     private String loanAccountNo;
     private LocalDate firstDisbursalDate;

@@ -80,11 +80,7 @@ public class CustomerController {
                 if (customerDetails != null) {
 
                     otpVerifyResponse.setJwtToken(token);
-                    if(request.getApplicationNo().equals(customerDetails.getApplicationNumber())){
-                        otpVerifyResponse.setApplicationNo(customerDetails.getApplicationNumber());
-                     }else {
-                        otpVerifyResponse.setApplicationNo(customerDetails.getOldApplicationNumber());
-                     }
+                    otpVerifyResponse.setApplicationNo(customerDetails.getApplicationNumber());
                     otpVerifyResponse.setCustName(customerDetails.getCustomerName());
                     otpVerifyResponse.setMobileNo(customerDetails.getMobileNo());
 

@@ -2,9 +2,11 @@ package com.enach.Models;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
+
 @Data
 public class MandateTypeAmountData {
 
-    private double Installment_Amount;
-    private double Sanction_Amount;
+    private BigDecimal installmentAmount;
+    private BigDecimal sanctionAmount;
 }

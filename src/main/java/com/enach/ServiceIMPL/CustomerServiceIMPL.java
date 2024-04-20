@@ -51,7 +51,7 @@ public class CustomerServiceIMPL implements CoustomerService {
 
         HashMap<String, String> otpResponse = new HashMap<>();
 
-        String sql = "SELECT * FROM enach WHERE Application_Number='"+applicationNo+"' || Old_Application_Number='"+applicationNo+"';";
+        String sql = "SELECT * FROM enach WHERE `Application Number`='"+applicationNo+"'";
         try {
             List<CustomerDetails>  listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(CustomerDetails.class));
 
@@ -92,7 +92,7 @@ public class CustomerServiceIMPL implements CoustomerService {
                 }
 
             } else {
-                otpResponse.put("msg", "Loan no not found");
+                otpResponse.put("msg", "Application no not found");
                 otpResponse.put("code", "1111");
             }
 
@@ -112,7 +112,7 @@ public class CustomerServiceIMPL implements CoustomerService {
             OtpDetails otpDetails = otpDetailsRepository.IsotpExpired(mobileNo, otpCode);
             if (otpDetails != null) {
 
-                String sql = "SELECT * FROM enach WHERE Application_Number='"+applicationNo+"' || Old_Application_Number='"+applicationNo+"'; ";
+                String sql = "SELECT * FROM enach WHERE `Application Number`='"+applicationNo+"'";
                 List<CustomerDetails> listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(CustomerDetails.class));
 
                 if(!listData.isEmpty() && listData.size()>0) {
@@ -157,56 +157,60 @@ public class CustomerServiceIMPL implements CoustomerService {
      @Override
     public void sendEmailOnBank(String transactionNo, String transactionStatus,String errorMessage) {
 
-         BranchDetails branchDetails = new BranchDetails();
+        BranchDetails branchDetails = new BranchDetails();
+        CommonResponse commonResponse = new CommonResponse();
+        try {
 
-        String mandateType = "";
-        String applicationNo = "";
+           String mandateType = "";
+           String applicationNo = "";
 
-        List<?> dataList = enachPaymentRepository.findLoanNoAndMandateType(transactionNo);
+           List<?> dataList = enachPaymentRepository.findLoanNoAndMandateType(transactionNo);
 
-        if(!dataList.isEmpty()) {
+           if(!dataList.isEmpty()) {
             Object[] obj = (Object[]) dataList.get(0);
             mandateType = ""+obj[0];
             applicationNo = ""+obj[1];
-        }
+           }
 
-        /* String sql = "SELECT enach.Branch_Name,branch_detail.Email_Id FROM enach_customer_details.enach  INNER JOIN \n"+
+         /* String sql = "SELECT enach.Branch_Name,branch_detail.Email_Id FROM enach_customer_details.enach  INNER JOIN \n"+
                       " enach_request_structure_details.branch_detail ON enach.Branch_Name = branch_detail.Branch_Name WHERE Application_Number='"+applicationNo+"' || Old_Application_Number='"+applicationNo+"' ";
 
-        List<BranchDetails> listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(BranchDetails.class));
-         if(!listData.isEmpty() && listData.size()>0) {
-             branchDetails = listData.get(0);
-         }
-         String emailId = branchDetails.getEmailId();*/
+            List<BranchDetails> listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(BranchDetails.class));
+            if(!listData.isEmpty() && listData.size()>0) {
+                branchDetails = listData.get(0);
+             }
+            String emailId = branchDetails.getEmailId();*/
+           // String emailId = "abhialok@5499";
+            String emailId = "ravi.soni@shubham.co";
 
-         // String emailId = "abhialok5499@gmail.com";
-         String emailId = "ravi.soni@shubham.co";
+            if(!StringUtils.isEmpty(emailId)) {
+                EmailDetails emailDetails = new EmailDetails();
 
-        EmailDetails emailDetails = new EmailDetails();
-        try {
-            if("Success".equalsIgnoreCase(transactionStatus)) {
-                emailDetails.setRecipient(emailId);
-                emailDetails.setSubject("E-NACH SHUBHAM");
-                emailDetails.setMsgBody("Enach registration has been successfully completed \n"+
-                                        "for "+mandateType+" to ApplicationNo "+applicationNo+" and TransactionNo "+transactionNo+".\n"+
-                                        "Regards\n" +
-                                        "Shubham Housing Development Finance Company");
+                if ("Success".equalsIgnoreCase(transactionStatus)) {
+                    emailDetails.setRecipient(emailId);
+                    emailDetails.setSubject("E-NACH SHUBHAM");
+                    emailDetails.setMsgBody("Enach registration has been successfully completed \n" +
+                            "for " + mandateType + " to ApplicationNo " + applicationNo + " and TransactionNo " + transactionNo + ".\n" +
+                            "Regards\n" +
+                            "Shubham Housing Development Finance Company");
 
-                otpUtility.sendSimpleMail(emailDetails);
+                    otpUtility.sendSimpleMail(emailDetails);
 
-            }else if("Failed".equalsIgnoreCase(transactionStatus)){
-                emailDetails.setRecipient(emailId);
-                emailDetails.setSubject("E-NACH SHUBHAM");
-                emailDetails.setMsgBody("Enach registration has been failed \n"+
-                        "due to "+errorMessage+" for "+mandateType+" to ApplicationNo "+applicationNo+" and TransactionNo "+transactionNo+".\n"+
-                        "Regards\n" +
-                        "Shubham Housing Development Finance Company");
+                } else if ("Failed".equalsIgnoreCase(transactionStatus)) {
+                    emailDetails.setRecipient(emailId);
+                    emailDetails.setSubject("E-NACH SHUBHAM");
+                    emailDetails.setMsgBody("Enach registration has been failed \n" +
+                            "due to " + errorMessage + " for " + mandateType + " to ApplicationNo " + applicationNo + " and TransactionNo " + transactionNo + ".\n" +
+                            "Regards\n" +
+                            "Shubham Housing Development Finance Company");
 
-                otpUtility.sendSimpleMail(emailDetails);
-
+                    otpUtility.sendSimpleMail(emailDetails);
+                }
+            }else{
+                System.out.println("emailId does not exist.");
             }
         }catch (Exception e){
-            System.out.println(e);
+            System.out.println(transactionNo+" error is "+e);
         }
     }
 

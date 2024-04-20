@@ -32,9 +32,7 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
         try {
 
-            String sql = "SELECT Installment_Amount,Sanction_Amount FROM enach WHERE Application_Number='"+applicationNo+"' || Old_Application_Number='"+applicationNo+"';";
-
-
+            String sql = "SELECT `Installment Amount`,`Sanction Amount` FROM enach WHERE `Application Number`='"+applicationNo+"'";
             List<MandateTypeAmountData> listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(MandateTypeAmountData.class));
 
             if(!listData.isEmpty() && listData.size()>0) {
