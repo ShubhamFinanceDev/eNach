@@ -206,7 +206,7 @@ public class CustomerServiceIMPL implements CoustomerService {
                 branchDetails = listData.get(0);
              }
             String emailId = branchDetails.getEmailId();*/
-           // String emailId = "abhialok@5499@gmail.com";
+          //  String emailId = "abhialok@5499@gmail.com";
             String emailId = "ravi.soni@shubham.co";
 
             if(!StringUtils.isEmpty(emailId)) {
