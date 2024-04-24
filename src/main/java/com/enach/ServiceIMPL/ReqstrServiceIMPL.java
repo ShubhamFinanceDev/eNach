@@ -41,12 +41,12 @@ public class ReqstrServiceIMPL implements ReqstrService {
                     + " left JOIN  loandetails l ON a.`Application Number`=l.CASAPPLNO\n"
                     + " left  JOIN communication c ON a.`Customer Number`=c.`Customer Number`\n"
                     + " UNION\n"
-                    + " SELECT e.APPLICATION_NUMBER,e.BRANCH_NAME,e.SANCTION_AMOUNT,NULL,e.CUSTOMER_NAME,DATE_FORMAT(e.FIRST_DISBURSAL_DATE,'%Y-%m-%d') AS FIRST_DISBURSAL_DATE,\n"
-                    + " DATE_FORMAT(e.FIRST_INSTALLMENT_DATE,'%Y-%m-%d') AS FIRST_INSTALLMENT_DATE, CAST(e.INSTALLMENT_AMOUNT as DECIMAL(25,2)) AS INSTALLMENT_AMOUNT,\n"
-                    + " DATE_FORMAT(e.NEXT_DUE_DATE,'%d-%m-%y') AS NEXT_DUE_DATE,e.CURRENT_STATUS,e.Mobile_No ,l.`LOAN STATUS`\n"
+                    + " SELECT e.APPLICATION_NUMBER,e.BRANCH_NAME,e.SANCTION_AMOUNT,NULL,e.CUSTOMER_NAME,	DATE_FORMAT (STR_TO_DATE (FIRST_DISBURSAL_DATE, '%d-%m-%y'), '%Y-%m-%d') AS FIRST_DISBURSAL_DATE,\n"
+                    + " DATE_FORMAT (STR_TO_DATE (FIRST_INSTALLMENT_DATE, '%d-%m-%y'), '%Y-%m-%d') AS FIRST_INSTALLMENT_DATE, CAST(e.INSTALLMENT_AMOUNT as DECIMAL(25,2)) AS INSTALLMENT_AMOUNT,\n"
+                    + " DATE_FORMAT (STR_TO_DATE (NEXT_DUE_DATE, '%d-%m-%y'), '%Y-%m-%d') AS NEXT_DUE_DATE,e.CURRENT_STATUS,e.Mobile_No ,l.`LOAN STATUS`\n"
                     + " FROM enach_old	e\n"
                     + " left JOIN  loandetails l ON l.`LOAN NO`=e.APPLICATION_NUMBER\n"
-                    + " ) a WHERE a.`LOAN STATUS`='A' AND a.`Application Number` LIKE '"+applicationNo+"' \n";
+                    + " ) a   WHERE a.`LOAN STATUS`='A' AND a.`Application Number` LIKE  '"+applicationNo+"' \n";
 
             List<MandateTypeAmountData> listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(MandateTypeAmountData.class));
 
