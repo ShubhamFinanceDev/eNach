@@ -3,10 +3,7 @@ package com.enach.ServiceIMPL;
 
 import com.enach.Entity.EnachPayment;
 import com.enach.Entity.OtpDetails;
-import com.enach.Models.BranchDetails;
-import com.enach.Models.CommonResponse;
-import com.enach.Models.CustomerDetails;
-import com.enach.Models.EmailDetails;
+import com.enach.Models.*;
 import com.enach.Repository.EnachPaymentRepository;
 import com.enach.Repository.OtpDetailsRepository;
 import com.enach.Service.CoustomerService;
@@ -15,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -50,71 +49,77 @@ public class CustomerServiceIMPL implements CoustomerService {
     public HashMap<String, String> validateCustAndSendOtp(String applicationNo) {
 
         HashMap<String, String> otpResponse = new HashMap<>();
-
         //String sql = "SELECT * FROM enach WHERE `Application Number`='"+applicationNo+"'";
+
+    try {
 
         String sql= " SELECT * FROM (SELECT a.`Application NUMBER`, a.`Branch NAME`, a.`Sanction Amount`,a.`Customer NUMBER`,\n"
                 + " l.`CUSTOMER NAME`, a.`First Disbursal DATE`, a.`First Instalment DATE`, l.`Installment Amount`,\n"
-                + " l.`NEXT DUE DATE`, a.`Current STATUS`, c.`Mobile No`\n"
-                + " FROM application a \n"
-                + " RIGHT JOIN  loandetails l ON a.`Application Number`=l.CASAPPLNO \n"
-                + " left  JOIN communication c ON a.`Customer Number`=c.`Customer Number` \n"
-                + " UNION \n"
-                + " SELECT APPLICATION_NUMBER,BRANCH_NAME,SANCTION_AMOUNT,NULL,CUSTOMER_NAME, DATE_FORMAT (STR_TO_DATE (FIRST_DISBURSAL_DATE, '%d-%m-%y'), '%Y-%m-%d') AS FIRST_DISBURSAL_DATE, \n"
-                + " DATE_FORMAT (STR_TO_DATE (FIRST_INSTALLMENT_DATE, '%d-%m-%y'), '%Y-%m-%d')  AS FIRST_INSTALLMENT_DATE,cast(INSTALLMENT_AMOUNT as DECIMAL(25,2)) AS INSTALLMENT_AMOUNT, DATE_FORMAT (STR_TO_DATE (NEXT_DUE_DATE, '%d-%m-%y'), '%Y-%m-%d') AS NEXT_DUE_DATE,CURRENT_STATUS,Mobile_No \n"
-                + " FROM enach_old	   \n"
-                + " ) a   WHERE a.`Application Number` LIKE '"+applicationNo+"'  ";
+                + " l.`NEXT DUE DATE`, a.`Current STATUS`, c.`Mobile No`,l.`LOAN STATUS`\n"
+                + " FROM application a\n"
+                + " left JOIN  loandetails l ON a.`Application Number`=l.CASAPPLNO\n"
+                + " left  JOIN communication c ON a.`Customer Number`=c.`Customer Number`\n"
+                + " UNION\n"
+                + " SELECT e.APPLICATION_NUMBER,e.BRANCH_NAME,e.SANCTION_AMOUNT,NULL,e.CUSTOMER_NAME,DATE_FORMAT(e.FIRST_DISBURSAL_DATE,'%Y-%m-%d') AS FIRST_DISBURSAL_DATE,\n"
+                + " DATE_FORMAT(e.FIRST_INSTALLMENT_DATE,'%Y-%m-%d') AS FIRST_INSTALLMENT_DATE, CAST(e.INSTALLMENT_AMOUNT as DECIMAL(25,2)) AS INSTALLMENT_AMOUNT,\n"
+                + " DATE_FORMAT(e.NEXT_DUE_DATE,'%d-%m-%y') AS NEXT_DUE_DATE,e.CURRENT_STATUS,e.Mobile_No ,l.`LOAN STATUS`\n"
+                + " FROM enach_old	e\n"
+                + " left JOIN  loandetails l ON l.`LOAN NO`=e.APPLICATION_NUMBER\n"
+                + " ) a WHERE a.`LOAN STATUS`='A' AND a.`Application Number` LIKE '"+applicationNo+"' \n";
 
-        try {
-            List<CustomerDetails>  listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(CustomerDetails.class));
+        List<CustomerDetails> listData = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(CustomerDetails.class));
 
-            if(!listData.isEmpty() && listData.size()>0) {
-                CustomerDetails customerDetails = listData.get(0);
+        if (!listData.isEmpty() && listData.size() > 0) {
+            CustomerDetails customerDetails = listData.get(0);
 
-                int otpCode = otpUtility.generateCustOtp(customerDetails);
+          if(!StringUtils.isEmpty(customerDetails.getMobileNo())) {
+            int otpCode = otpUtility.generateCustOtp(customerDetails);
 
-                if(otpCode >0){
+            if (otpCode > 0) {
 
-                    logger.info("otp generated successfully");
-                 //   if (otpUtility.sendOtp(customerDetails.getMobileNo(), otpCode)) {
-                    logger.info("otp sent on mobile");
+                logger.info("otp generated successfully");
+                //   if (otpUtility.sendOtp(customerDetails.getMobileNo(), otpCode)) {
+                logger.info("otp sent on mobile");
 
-                    OtpDetails otpDetails = new OtpDetails();
-                    otpDetails.setOtpCode(Long.valueOf(otpCode));
+                OtpDetails otpDetails = new OtpDetails();
+                otpDetails.setOtpCode(Long.valueOf(otpCode));
 
-                    System.out.println(otpCode);
+                System.out.println(otpCode);
 
-                    otpDetails.setMobileNo(customerDetails.getMobileNo());
+                otpDetails.setMobileNo(customerDetails.getMobileNo());
 
-                    otpDetailsRepository.save(otpDetails);
-                    Long otpId = otpDetails.getOtpId();
-                    otpResponse.put("otpCode", String.valueOf(otpCode));
-                    otpResponse.put("otpId", String.valueOf(otpId));
-                    otpResponse.put("mobile", otpDetails.getMobileNo());
-                    otpResponse.put("msg", "Otp send.");
-                    otpResponse.put("code", "0000");
+                otpDetailsRepository.save(otpDetails);
+                Long otpId = otpDetails.getOtpId();
+                otpResponse.put("otpCode", String.valueOf(otpCode));
+                otpResponse.put("otpId", String.valueOf(otpId));
+                otpResponse.put("mobile", otpDetails.getMobileNo());
+                otpResponse.put("msg", "Otp send.");
+                otpResponse.put("code", "0000");
 
-                  //     } else {
-                  //         otpResponse.put("msg", "Otp did not send, please try again");
-                  //         otpResponse.put("code", "1111");
-                  //     }
-
-                } else {
-                    otpResponse.put("msg", "Otp did not generated, please try again");
-                    otpResponse.put("code", "1111");
-                }
+                //     } else {
+                //         otpResponse.put("msg", "Otp did not send, please try again");
+                //         otpResponse.put("code", "1111");
+                //     }
 
             } else {
-                otpResponse.put("msg", "Application no not found");
+                otpResponse.put("msg", "Otp did not generated, please try again");
                 otpResponse.put("code", "1111");
             }
 
-        } catch (Exception e) {
-            System.out.println(e);
+          }else{
+              otpResponse.put("msg", "mobile no does not exist with this application no.");
+              otpResponse.put("code", "1111");
+          }
+        } else {
+            otpResponse.put("msg", "Application no does not exist / deactivate");
+            otpResponse.put("code", "1111");
         }
+
+    } catch (Exception e) {
+            System.out.println(e);
+    }
         return otpResponse;
     }
-
 
 
     @Override
@@ -125,19 +130,19 @@ public class CustomerServiceIMPL implements CoustomerService {
             OtpDetails otpDetails = otpDetailsRepository.IsotpExpired(mobileNo, otpCode);
             if (otpDetails != null) {
 
-               // String sql = "SELECT * FROM enach WHERE `Application Number`='"+applicationNo+"'";
-
                 String sql= " SELECT * FROM (SELECT a.`Application NUMBER`, a.`Branch NAME`, a.`Sanction Amount`,a.`Customer NUMBER`,\n"
                         + " l.`CUSTOMER NAME`, a.`First Disbursal DATE`, a.`First Instalment DATE`, l.`Installment Amount`,\n"
-                        + " l.`NEXT DUE DATE`, a.`Current STATUS`, c.`Mobile No`\n"
-                        + " FROM application a \n"
-                        + " RIGHT JOIN  loandetails l ON a.`Application Number`=l.CASAPPLNO \n"
-                        + " left  JOIN communication c ON a.`Customer Number`=c.`Customer Number` \n"
-                        + " UNION \n"
-                        + " SELECT APPLICATION_NUMBER,BRANCH_NAME,SANCTION_AMOUNT,NULL,CUSTOMER_NAME, DATE_FORMAT (STR_TO_DATE (FIRST_DISBURSAL_DATE, '%d-%m-%y'), '%Y-%m-%d') AS FIRST_DISBURSAL_DATE, \n"
-                        + " DATE_FORMAT (STR_TO_DATE (FIRST_INSTALLMENT_DATE, '%d-%m-%y'), '%Y-%m-%d')  AS FIRST_INSTALLMENT_DATE,cast(INSTALLMENT_AMOUNT as DECIMAL(25,2)) AS INSTALLMENT_AMOUNT, DATE_FORMAT (STR_TO_DATE (NEXT_DUE_DATE, '%d-%m-%y'), '%Y-%m-%d') AS NEXT_DUE_DATE,CURRENT_STATUS,Mobile_No \n"
-                        + " FROM enach_old	   \n"
-                        + " ) a   WHERE a.`Application Number` LIKE '"+applicationNo+"'  ";
+                        + " l.`NEXT DUE DATE`, a.`Current STATUS`, c.`Mobile No`,l.`LOAN STATUS`\n"
+                        + " FROM application a\n"
+                        + " left JOIN  loandetails l ON a.`Application Number`=l.CASAPPLNO\n"
+                        + " left  JOIN communication c ON a.`Customer Number`=c.`Customer Number`\n"
+                        + " UNION\n"
+                        + " SELECT e.APPLICATION_NUMBER,e.BRANCH_NAME,e.SANCTION_AMOUNT,NULL,e.CUSTOMER_NAME,DATE_FORMAT(e.FIRST_DISBURSAL_DATE,'%Y-%m-%d') AS FIRST_DISBURSAL_DATE,\n"
+                        + " DATE_FORMAT(e.FIRST_INSTALLMENT_DATE,'%Y-%m-%d') AS FIRST_INSTALLMENT_DATE, CAST(e.INSTALLMENT_AMOUNT as DECIMAL(25,2)) AS INSTALLMENT_AMOUNT,\n"
+                        + " DATE_FORMAT(e.NEXT_DUE_DATE,'%d-%m-%y') AS NEXT_DUE_DATE,e.CURRENT_STATUS,e.Mobile_No ,l.`LOAN STATUS`\n"
+                        + " FROM enach_old	e\n"
+                        + " left JOIN  loandetails l ON l.`LOAN NO`=e.APPLICATION_NUMBER\n"
+                        + " ) a WHERE a.`LOAN STATUS`='A' AND a.`Application Number` LIKE '"+applicationNo+"' \n";
 
                 List<CustomerDetails> listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(CustomerDetails.class));
 

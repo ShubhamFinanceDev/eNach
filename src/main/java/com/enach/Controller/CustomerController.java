@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -100,6 +101,10 @@ public class CustomerController {
 
                           String startDate = NextDueDate.findNextDueDate(nextDueDate.toString());
                           otpVerifyResponse.setStartDate(startDate);
+
+                        DateTimeFormatter formatter  = DateTimeFormatter.ofPattern("uuuu-MM-dd");;
+                        LocalDate futureDate = LocalDate.parse(startDate, formatter);
+                        otpVerifyResponse.setExpiryDate(futureDate.plus(Period.ofYears(40).minusMonths(1)).toString());
                     }else {
 
                           CommonResponse commonResponse = new CommonResponse();
@@ -107,8 +112,6 @@ public class CustomerController {
                           commonResponse.setCode("1111");
                           return new ResponseEntity(commonResponse, HttpStatus.OK);
                     }
-                    LocalDate futureDate = firstInstallmentDate.plus(Period.ofYears(40));
-                    otpVerifyResponse.setExpiryDate(futureDate.toString());
 
                     return new ResponseEntity(otpVerifyResponse, HttpStatus.OK);
                 } else {
