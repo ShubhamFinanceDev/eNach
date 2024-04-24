@@ -111,7 +111,7 @@ public class CustomerServiceIMPL implements CoustomerService {
               otpResponse.put("code", "1111");
           }
         } else {
-            otpResponse.put("msg", "Application no does not exist / deactivate");
+            otpResponse.put("msg", "Application no does not exist / deactivate.");
             otpResponse.put("code", "1111");
         }
 

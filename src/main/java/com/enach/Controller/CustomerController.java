@@ -85,13 +85,13 @@ public class CustomerController {
                     otpVerifyResponse.setCustName(customerDetails.getCustomerName());
                     otpVerifyResponse.setMobileNo(customerDetails.getMobileNo());
 
-                    LocalDate firstInstallmentDate = customerDetails.getFirstInstalmentDate();
+                  //  LocalDate firstInstallmentDate = customerDetails.getFirstInstalmentDate();
                     LocalDate nextDueDate = customerDetails.getNextDueDate();
 
-                    if(StringUtils.isEmpty(firstInstallmentDate) || StringUtils.isEmpty(nextDueDate)){
+                    if(StringUtils.isEmpty(nextDueDate)){
 
                            CommonResponse commonResponse = new CommonResponse();
-                           commonResponse.setMsg("FirstInstallmentDate/ NextDueDate is empty.");
+                           commonResponse.setMsg("NextDueDate is empty.");
                            commonResponse.setCode("1111");
                            return new ResponseEntity(commonResponse, HttpStatus.OK);
                     }
