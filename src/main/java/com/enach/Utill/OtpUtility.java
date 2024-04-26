@@ -51,10 +51,12 @@ public class OtpUtility {
         return randomNo;
     }
 
-    public boolean sendOtp(String mobileNo, int otpCode)
+    public boolean sendOtp(String applicationNo, String mobileNo, int otpCode)
     {
         boolean status=false;
-        String otpMsg="Your E-Nach Registration OTP is "+otpCode+" for Loan XXXXXXXXXXXXXX046174.\n" +
+
+        String subStringapplicationNo= applicationNo.substring(applicationNo.length()-5,applicationNo.length());
+        String otpMsg="Your E-Nach Registration OTP is "+otpCode+" for Loan XXXXXXXXXXXXXX"+subStringapplicationNo+"\n" +
                 "Regards\n" +
                 "Shubham Housing Development Finance Company";
 

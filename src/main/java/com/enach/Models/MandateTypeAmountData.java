@@ -7,6 +7,6 @@ import java.math.BigDecimal;
 @Data
 public class MandateTypeAmountData {
 
-    private BigDecimal installmentAmount;
+    private BigDecimal InstallmentAmount;
     private BigDecimal sanctionAmount;
 }

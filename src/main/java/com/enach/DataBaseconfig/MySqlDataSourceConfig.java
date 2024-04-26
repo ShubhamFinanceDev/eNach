@@ -20,29 +20,29 @@ import java.util.HashMap;
 @Configuration
 @EnableTransactionManagement
 @EnableJpaRepositories(
-        entityManagerFactoryRef = "jpaEntityManagerFactoryBean",
-        transactionManagerRef = "jpaTransactionManager",
+        entityManagerFactoryRef = "mysqlEntityManagerFactoryBean",
+        transactionManagerRef = "mysqlTransactionManager",
         basePackages = {"com.enach.Repository"}
 )
-public class JpaConfig {
+public class MySqlDataSourceConfig {
 
     @Autowired
     public Environment environment;
 
-    @Bean(name ="jpaDataSource")
+    @Bean(name ="mysqlDataSource")
     @Primary
     public  DataSource dataSource(){
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
 
-        dataSource.setUrl(environment.getProperty("spring.datasource.jpa.url"));
-        dataSource.setDriverClassName(environment.getProperty("spring.datasource.jpa.driver-class-name"));
-        dataSource.setUsername(environment.getProperty("spring.datasource.jpa.username"));
-        dataSource.setPassword(environment.getProperty("spring.datasource.jpa.password"));
+        dataSource.setUrl(environment.getProperty("spring.datasource.mysql.url"));
+        dataSource.setDriverClassName(environment.getProperty("spring.datasource.mysql.driver-class-name"));
+        dataSource.setUsername(environment.getProperty("spring.datasource.mysql.username"));
+        dataSource.setPassword(environment.getProperty("spring.datasource.mysql.password"));
 
         return dataSource;
     }
 
-    @Bean(name = "jpaEntityManagerFactoryBean")
+    @Bean(name = "mysqlEntityManagerFactoryBean")
     @Primary
     public LocalContainerEntityManagerFactoryBean jpaEntityManagerFactoryBean(){
 
@@ -51,8 +51,7 @@ public class JpaConfig {
         JpaVendorAdapter adapter = new HibernateJpaVendorAdapter();
         bean.setJpaVendorAdapter(adapter);
         HashMap<String, String> props = new HashMap<>();
-       /* props.put("hibernate.dialect","org.hibernate.dialect.MySQL8Dialect");
-        props.put("hibernate.show_sql","true");*/
+
 
         bean.setJpaPropertyMap(props);
         bean.setPackagesToScan("com.enach.Entity");
@@ -63,7 +62,7 @@ public class JpaConfig {
 
 
     @Primary
-    @Bean(name = "jpaTransactionManager")
+    @Bean(name = "mysqlTransactionManager")
     public PlatformTransactionManager jpaTransactionManager(){
         JpaTransactionManager manager = new JpaTransactionManager();
         manager.setEntityManagerFactory(jpaEntityManagerFactoryBean().getObject());

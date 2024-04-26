@@ -84,8 +84,6 @@ public class CustomerController {
                     otpVerifyResponse.setApplicationNo(customerDetails.getApplicationNumber());
                     otpVerifyResponse.setCustName(customerDetails.getCustomerName());
                     otpVerifyResponse.setMobileNo(customerDetails.getMobileNo());
-
-                  //  LocalDate firstInstallmentDate = customerDetails.getFirstInstalmentDate();
                     LocalDate nextDueDate = customerDetails.getNextDueDate();
 
                     if(StringUtils.isEmpty(nextDueDate)){
@@ -96,7 +94,6 @@ public class CustomerController {
                            return new ResponseEntity(commonResponse, HttpStatus.OK);
                     }
                     LocalDate currentDate = LocalDate.now();
-
                     if(!nextDueDate.isBefore(currentDate)) {
 
                           String startDate = NextDueDate.findNextDueDate(nextDueDate.toString());

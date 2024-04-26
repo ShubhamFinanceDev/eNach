@@ -1,19 +1,20 @@
 package com.enach.ServiceIMPL;
 
 
+import com.enach.Entity.EnachOldCustomerDetails;
 import com.enach.Entity.EnachPayment;
 import com.enach.Entity.OtpDetails;
 import com.enach.Models.*;
+import com.enach.Repository.EnachOldRepository;
 import com.enach.Repository.EnachPaymentRepository;
 import com.enach.Repository.OtpDetailsRepository;
 import com.enach.Service.CoustomerService;
+import com.enach.Utill.CustomerDetailsUtility;
 import com.enach.Utill.OtpUtility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -22,7 +23,10 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.sql.Timestamp;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -40,6 +44,10 @@ public class CustomerServiceIMPL implements CoustomerService {
     private OtpDetailsRepository otpDetailsRepository;
     @Autowired
     private EnachPaymentRepository enachPaymentRepository;
+    @Autowired
+    private CustomerDetailsUtility customerDetailsUtility;
+    @Autowired
+    private EnachOldRepository enachOldRepository;
 
 
     Logger logger = LoggerFactory.getLogger(OncePerRequestFilter.class);
@@ -49,71 +57,93 @@ public class CustomerServiceIMPL implements CoustomerService {
     public HashMap<String, String> validateCustAndSendOtp(String applicationNo) {
 
         HashMap<String, String> otpResponse = new HashMap<>();
-        //String sql = "SELECT * FROM enach WHERE `Application Number`='"+applicationNo+"'";
 
     try {
+        List<CustomerDetails> listData = new ArrayList<>();
+        if(!applicationNo.contains("_")){
 
-        String sql= " SELECT * FROM (SELECT a.`Application NUMBER`, a.`Branch NAME`, a.`Sanction Amount`,a.`Customer NUMBER`,\n"
-                + " l.`CUSTOMER NAME`, a.`First Disbursal DATE`, a.`First Instalment DATE`, l.`Installment Amount`,\n"
-                + " l.`NEXT DUE DATE`, a.`Current STATUS`, c.`Mobile No`,l.`LOAN STATUS`\n"
-                + " FROM application a\n"
-                + " left JOIN  loandetails l ON a.`Application Number`=l.CASAPPLNO\n"
-                + " left  JOIN communication c ON a.`Customer Number`=c.`Customer Number`\n"
-                + " UNION\n"
-                + " SELECT e.APPLICATION_NUMBER,e.BRANCH_NAME,e.SANCTION_AMOUNT,NULL,e.CUSTOMER_NAME,	DATE_FORMAT (STR_TO_DATE (FIRST_DISBURSAL_DATE, '%d-%m-%y'), '%Y-%m-%d') AS FIRST_DISBURSAL_DATE,\n"
-                + " DATE_FORMAT (STR_TO_DATE (FIRST_INSTALLMENT_DATE, '%d-%m-%y'), '%Y-%m-%d') AS FIRST_INSTALLMENT_DATE, CAST(e.INSTALLMENT_AMOUNT as DECIMAL(25,2)) AS INSTALLMENT_AMOUNT,\n"
-                + " DATE_FORMAT (STR_TO_DATE (NEXT_DUE_DATE, '%d-%m-%y'), '%Y-%m-%d') AS NEXT_DUE_DATE,e.CURRENT_STATUS,e.Mobile_No ,l.`LOAN STATUS`\n"
-                + " FROM enach_old	e\n"
-                + " left JOIN  loandetails l ON l.`LOAN NO`=e.APPLICATION_NUMBER\n"
-                + " ) a   WHERE a.`LOAN STATUS`='A' AND a.`Application Number` LIKE  '"+applicationNo+"' \n";
+            /*String quary = "SELECT a.`Application NUMBER`, a.`Branch NAME`, a.`Sanction Amount`,a.`Customer NUMBER`,\n"
+                    + " l.`CUSTOMER NAME`, a.`First Disbursal DATE`, a.`First Instalment DATE`, l.`Installment Amount`,\n"
+                    + " l.`NEXT DUE DATE`, a.`Current STATUS`, c.`Mobile No`,l.`LOAN STATUS`\n"
+                    + " FROM application a \n"
+                    + "left JOIN  loandetails l ON a.`Application Number`=l.CASAPPLNO\n"
+                    + "left  JOIN communication c ON a.`Customer Number`=c.`Customer Number`\n"
+                    + "WHERE l.`LOAN STATUS`='A' AND a.`Application Number` LIKE  '"+applicationNo+"' \n";
+*/
+               String quary = customerDetailsUtility.getCustomerDetailsQuary(applicationNo);
+              listData = jdbcTemplate.query(quary, new BeanPropertyRowMapper<>(CustomerDetails.class));
 
-        List<CustomerDetails> listData = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(CustomerDetails.class));
+        }else{
 
-        if (!listData.isEmpty() && listData.size() > 0) {
-            CustomerDetails customerDetails = listData.get(0);
+           List<CustomerDetails> CustomerDetailsList = new ArrayList<>();
+           List<?> list = enachOldRepository.findOldCustomerDetails(applicationNo);
+           if (list.size()>0) {
+              for (int i = 0; i < list.size(); i++) {
 
-          if(!StringUtils.isEmpty(customerDetails.getMobileNo())) {
-            int otpCode = otpUtility.generateCustOtp(customerDetails);
+                CustomerDetails customerDetails = new CustomerDetails();
+                Object object[] = (Object[]) list.get(i);
 
-            if (otpCode > 0) {
+                customerDetails.setApplicationNumber(object[0]+"");
+                customerDetails.setBranchName(object[1]+"");
+                customerDetails.setSanctionAmount(Double.parseDouble(object[2]+""));
+                customerDetails.setCustomerName(object[3]+"");
+                customerDetails.setFirstDisbursalDate(LocalDate.parse(object[4]+""));
+                customerDetails.setFirstInstalmentDate(LocalDate.parse(object[5]+""));
+                customerDetails.setInstallmentAmount(Double.parseDouble(object[6]+""));
+                customerDetails.setNextDueDate(LocalDate.parse(object[7]+""));
+                customerDetails.setMobileNo(object[8]+"");
+                customerDetails.setCurrentStatus(object[9]+"");
+                CustomerDetailsList.add(customerDetails);
+           }
+        }
+         listData = CustomerDetailsList;
+        }
 
-                logger.info("otp generated successfully");
-                //   if (otpUtility.sendOtp(customerDetails.getMobileNo(), otpCode)) {
-                logger.info("otp sent on mobile");
+            if (!listData.isEmpty() && listData.size() > 0) {
+                CustomerDetails customerDetails = listData.get(0);
 
-                OtpDetails otpDetails = new OtpDetails();
-                otpDetails.setOtpCode(Long.valueOf(otpCode));
+                if(!StringUtils.isEmpty(customerDetails.getMobileNo())) {
+                    int otpCode = otpUtility.generateCustOtp(customerDetails);
 
-                System.out.println(otpCode);
+                    if (otpCode > 0) {
 
-                otpDetails.setMobileNo(customerDetails.getMobileNo());
+                        logger.info("otp generated successfully");
+                     //      if (otpUtility.sendOtp(customerDetails.getApplicationNumber(),customerDetails.getMobileNo(), otpCode)) {
+                        logger.info("otp sent on mobile");
 
-                otpDetailsRepository.save(otpDetails);
-                Long otpId = otpDetails.getOtpId();
-                otpResponse.put("otpCode", String.valueOf(otpCode));
-                otpResponse.put("otpId", String.valueOf(otpId));
-                otpResponse.put("mobile", otpDetails.getMobileNo());
-                otpResponse.put("msg", "Otp send.");
-                otpResponse.put("code", "0000");
+                        OtpDetails otpDetails = new OtpDetails();
+                        otpDetails.setOtpCode(Long.valueOf(otpCode));
 
-                //     } else {
-                //         otpResponse.put("msg", "Otp did not send, please try again");
-                //         otpResponse.put("code", "1111");
-                //     }
+                        System.out.println(otpCode);
 
+                        otpDetails.setMobileNo(customerDetails.getMobileNo());
+
+                        otpDetailsRepository.save(otpDetails);
+                        Long otpId = otpDetails.getOtpId();
+                        otpResponse.put("otpCode", String.valueOf(otpCode));
+                        otpResponse.put("otpId", String.valueOf(otpId));
+                        otpResponse.put("mobile", otpDetails.getMobileNo());
+                        otpResponse.put("msg", "Otp send.");
+                        otpResponse.put("code", "0000");
+
+                        //     } else {
+                        //         otpResponse.put("msg", "Otp did not send, please try again");
+                        //         otpResponse.put("code", "1111");
+                        //     }
+
+                    } else {
+                        otpResponse.put("msg", "Otp did not generated, please try again");
+                        otpResponse.put("code", "1111");
+                    }
+
+                }else{
+                    otpResponse.put("msg", "mobile no does not exist with this application no.");
+                    otpResponse.put("code", "1111");
+                }
             } else {
-                otpResponse.put("msg", "Otp did not generated, please try again");
+                otpResponse.put("msg", "Application no does not exist / deactivate.");
                 otpResponse.put("code", "1111");
             }
-
-          }else{
-              otpResponse.put("msg", "mobile no does not exist with this application no.");
-              otpResponse.put("code", "1111");
-          }
-        } else {
-            otpResponse.put("msg", "Application no does not exist / deactivate.");
-            otpResponse.put("code", "1111");
-        }
 
     } catch (Exception e) {
             System.out.println(e);
@@ -130,22 +160,45 @@ public class CustomerServiceIMPL implements CoustomerService {
             OtpDetails otpDetails = otpDetailsRepository.IsotpExpired(mobileNo, otpCode);
             if (otpDetails != null) {
 
-                String sql= " SELECT * FROM (SELECT a.`Application NUMBER`, a.`Branch NAME`, a.`Sanction Amount`,a.`Customer NUMBER`,\n"
-                        + " l.`CUSTOMER NAME`, a.`First Disbursal DATE`, a.`First Instalment DATE`, l.`Installment Amount`,\n"
-                        + " l.`NEXT DUE DATE`, a.`Current STATUS`, c.`Mobile No`,l.`LOAN STATUS`\n"
-                        + " FROM application a\n"
-                        + " left JOIN  loandetails l ON a.`Application Number`=l.CASAPPLNO\n"
-                        + " left  JOIN communication c ON a.`Customer Number`=c.`Customer Number`\n"
-                        + " UNION\n"
-                        + " SELECT e.APPLICATION_NUMBER,e.BRANCH_NAME,e.SANCTION_AMOUNT,NULL,e.CUSTOMER_NAME,	DATE_FORMAT (STR_TO_DATE (FIRST_DISBURSAL_DATE, '%d-%m-%y'), '%Y-%m-%d') AS FIRST_DISBURSAL_DATE,\n"
-                        + " DATE_FORMAT (STR_TO_DATE (FIRST_INSTALLMENT_DATE, '%d-%m-%y'), '%Y-%m-%d') AS FIRST_INSTALLMENT_DATE, CAST(e.INSTALLMENT_AMOUNT as DECIMAL(25,2)) AS INSTALLMENT_AMOUNT,\n"
-                        + " DATE_FORMAT (STR_TO_DATE (NEXT_DUE_DATE, '%d-%m-%y'), '%Y-%m-%d') AS NEXT_DUE_DATE,e.CURRENT_STATUS,e.Mobile_No ,l.`LOAN STATUS`\n"
-                        + " FROM enach_old	e\n"
-                        + " left JOIN  loandetails l ON l.`LOAN NO`=e.APPLICATION_NUMBER\n"
-                        + " ) a   WHERE a.`LOAN STATUS`='A' AND a.`Application Number` LIKE  '"+applicationNo+"' \n";
+                List<CustomerDetails> listData = new ArrayList<>();
+                if(!applicationNo.contains("_")){
 
-                List<CustomerDetails> listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(CustomerDetails.class));
+                   /* String quary = "SELECT a.`Application NUMBER`, a.`Branch NAME`, a.`Sanction Amount`,a.`Customer NUMBER`,\n"
+                            + " l.`CUSTOMER NAME`, a.`First Disbursal DATE`, a.`First Instalment DATE`, l.`Installment Amount`,\n"
+                            + " l.`NEXT DUE DATE`, a.`Current STATUS`, c.`Mobile No`,l.`LOAN STATUS`\n"
+                            + " FROM application a \n"
+                            + "left JOIN  loandetails l ON a.`Application Number`=l.CASAPPLNO\n"
+                            + "left  JOIN communication c ON a.`Customer Number`=c.`Customer Number`\n"
+                            + "WHERE l.`LOAN STATUS`='A' AND a.`Application Number` LIKE  '"+applicationNo+"' \n";
+*/
+                    String quary = customerDetailsUtility.getCustomerDetailsQuary(applicationNo);
+                    listData = jdbcTemplate.query(quary, new BeanPropertyRowMapper<>(CustomerDetails.class));
 
+                }else{
+
+                    List<CustomerDetails> CustomerDetailsList = new ArrayList<>();
+                    List<?> list = enachOldRepository.findOldCustomerDetails(applicationNo);
+                    if (list.size()>0) {
+                        for (int i = 0; i < list.size(); i++) {
+
+                            CustomerDetails customerDetails1 = new CustomerDetails();
+                            Object object[] = (Object[]) list.get(i);
+
+                            customerDetails.setApplicationNumber(object[0]+"");
+                            customerDetails.setBranchName(object[1]+"");
+                            customerDetails.setSanctionAmount(Double.parseDouble(object[2]+""));
+                            customerDetails.setCustomerName(object[3]+"");
+                            customerDetails.setFirstDisbursalDate(LocalDate.parse(object[4]+""));
+                            customerDetails.setFirstInstalmentDate(LocalDate.parse(object[5]+""));
+                            customerDetails.setInstallmentAmount(Double.parseDouble(object[6]+""));
+                            customerDetails.setNextDueDate(LocalDate.parse(object[7]+""));
+                            customerDetails.setMobileNo(object[8]+"");
+                            customerDetails.setCurrentStatus(object[9]+"");
+                            CustomerDetailsList.add(customerDetails);
+                        }
+                    }
+                    listData = CustomerDetailsList;
+                }
                 if(!listData.isEmpty() && listData.size()>0) {
                     customerDetails = listData.get(0);
                 }else{
