@@ -63,8 +63,8 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
                         Object object[] = (Object[]) list.get(i);
 
-                        mandateTypeAmountResponse.setInstallmentAmount(new BigDecimal(object[0]+""));
-                        mandateTypeAmountResponse.setSanctionAmount(new BigDecimal(object[1]+""));
+                        mandateTypeAmountResponse.setNextInstallmentAmount(new BigDecimal(object[0]+""));
+                        mandateTypeAmountResponse.setSanctionLoanAmount(new BigDecimal(object[1]+""));
                         MandateTypeAmountDataList.add(mandateTypeAmountResponse);
                     }
                 }

@@ -27,7 +27,7 @@ public class CustomerDetails implements UserDetails {
     private String currentStatus;
     private String mobileNo;
     private String customerName;
-    private LocalDate nextDueDate;
+    private LocalDate nextInstallmentDueDate;
     private String branchName;
 
     @Override

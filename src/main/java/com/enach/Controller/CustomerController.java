@@ -84,7 +84,7 @@ public class CustomerController {
                     otpVerifyResponse.setApplicationNo(customerDetails.getApplicationNumber());
                     otpVerifyResponse.setCustName(customerDetails.getCustomerName());
                     otpVerifyResponse.setMobileNo(customerDetails.getMobileNo());
-                    LocalDate nextDueDate = customerDetails.getNextDueDate();
+                    LocalDate nextDueDate = customerDetails.getNextInstallmentDueDate();
 
                     if(StringUtils.isEmpty(nextDueDate)){
 

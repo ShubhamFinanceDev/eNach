@@ -62,7 +62,7 @@ public class OtpService implements UserDetailsService {
                         customerDetails.setFirstDisbursalDate(LocalDate.parse(object[4]+""));
                         customerDetails.setFirstInstalmentDate(LocalDate.parse(object[5]+""));
                         customerDetails.setInstallmentAmount(Double.parseDouble(object[6]+""));
-                        customerDetails.setNextDueDate(LocalDate.parse(object[7]+""));
+                        customerDetails.setNextInstallmentDueDate(LocalDate.parse(object[7]+""));
                         customerDetails.setMobileNo(object[8]+"");
                         customerDetails.setCurrentStatus(object[9]+"");
                         CustomerDetailsList.add(customerDetails);

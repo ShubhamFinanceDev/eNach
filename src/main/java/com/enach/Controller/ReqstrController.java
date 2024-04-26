@@ -40,13 +40,13 @@ public class ReqstrController {
             MandateTypeAmountData mandateTypeAmountData = reqstrService.getMandateTypeAmount(applicationNo);
 
             if("MNTH".equalsIgnoreCase(mandateType)){
-                mandateTypeAmountResponse.setAmount(mandateTypeAmountData.getInstallmentAmount().multiply(new BigDecimal(2)));
+                mandateTypeAmountResponse.setAmount(mandateTypeAmountData.getNextInstallmentAmount().multiply(new BigDecimal(2)));
                 mandateTypeAmountResponse.setCode("0000");
                 mandateTypeAmountResponse.setMsg("succuss emandate amount");
 
                 return new ResponseEntity(mandateTypeAmountResponse, HttpStatus.OK);
             } else if ("ADHO".equalsIgnoreCase(mandateType)) {
-                mandateTypeAmountResponse.setAmount(mandateTypeAmountData.getSanctionAmount());
+                mandateTypeAmountResponse.setAmount(mandateTypeAmountData.getSanctionLoanAmount());
                 mandateTypeAmountResponse.setCode("0000");
                 mandateTypeAmountResponse.setMsg("succuss emandate amount");
 
