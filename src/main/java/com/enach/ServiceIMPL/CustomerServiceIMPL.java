@@ -80,20 +80,27 @@ public class CustomerServiceIMPL implements CoustomerService {
            if (list.size()>0) {
               for (int i = 0; i < list.size(); i++) {
 
-                CustomerDetails customerDetails = new CustomerDetails();
-                Object object[] = (Object[]) list.get(i);
+                  CustomerDetails customerDetails = new CustomerDetails();
+                  Object object[] = (Object[]) list.get(i);
 
-                customerDetails.setApplicationNumber(object[0]+"");
-                customerDetails.setBranchName(object[1]+"");
-                customerDetails.setSanctionAmount(Double.parseDouble(object[2]+""));
-                customerDetails.setCustomerName(object[3]+"");
-                customerDetails.setFirstDisbursalDate(LocalDate.parse(object[4]+""));
-                customerDetails.setFirstInstalmentDate(LocalDate.parse(object[5]+""));
-                customerDetails.setInstallmentAmount(Double.parseDouble(object[6]+""));
-                customerDetails.setNextInstallmentDueDate(LocalDate.parse(object[7]+""));
-                customerDetails.setMobileNo(object[8]+"");
-                customerDetails.setCurrentStatus(object[9]+"");
-                CustomerDetailsList.add(customerDetails);
+                  customerDetails.setApplicationNumber(object[0] + "");
+                  customerDetails.setBranchName(object[1] + "");
+                  if(!StringUtils.isEmpty(object[2])) {
+                      customerDetails.setSanctionAmount(Double.parseDouble(object[2] + ""));
+                  }
+                  customerDetails.setCustomerName(object[3] + "");
+                  if (!StringUtils.isEmpty(object[4])) {
+                      customerDetails.setFirstDisbursalDate(LocalDate.parse(object[4] + ""));
+                  }if (!StringUtils.isEmpty(object[5])) {
+                      customerDetails.setFirstInstalmentDate(LocalDate.parse(object[5] + ""));
+                  }if (!StringUtils.isEmpty(object[6])){
+                      customerDetails.setInstallmentAmount(Double.parseDouble(object[6] + ""));
+                  }if(!StringUtils.isEmpty(object[7])) {
+                      customerDetails.setNextInstallmentDueDate(LocalDate.parse(object[7] + ""));
+                  }
+                  customerDetails.setMobileNo(object[8]+"");
+                  customerDetails.setCurrentStatus(object[9]+"");
+                  CustomerDetailsList.add(customerDetails);
            }
         }
          listData = CustomerDetailsList;
@@ -181,17 +188,23 @@ public class CustomerServiceIMPL implements CoustomerService {
                     if (list.size()>0) {
                         for (int i = 0; i < list.size(); i++) {
 
-                            CustomerDetails customerDetails1 = new CustomerDetails();
                             Object object[] = (Object[]) list.get(i);
 
-                            customerDetails.setApplicationNumber(object[0]+"");
-                            customerDetails.setBranchName(object[1]+"");
-                            customerDetails.setSanctionAmount(Double.parseDouble(object[2]+""));
-                            customerDetails.setCustomerName(object[3]+"");
-                            customerDetails.setFirstDisbursalDate(LocalDate.parse(object[4]+""));
-                            customerDetails.setFirstInstalmentDate(LocalDate.parse(object[5]+""));
-                            customerDetails.setInstallmentAmount(Double.parseDouble(object[6]+""));
-                            customerDetails.setNextInstallmentDueDate(LocalDate.parse(object[7]+""));
+                            customerDetails.setApplicationNumber(object[0] + "");
+                            customerDetails.setBranchName(object[1] + "");
+                            if(!StringUtils.isEmpty(object[2])) {
+                                customerDetails.setSanctionAmount(Double.parseDouble(object[2] + ""));
+                            }
+                            customerDetails.setCustomerName(object[3] + "");
+                            if (!StringUtils.isEmpty(object[4])) {
+                                customerDetails.setFirstDisbursalDate(LocalDate.parse(object[4] + ""));
+                            }if (!StringUtils.isEmpty(object[5])) {
+                                customerDetails.setFirstInstalmentDate(LocalDate.parse(object[5] + ""));
+                            }if (!StringUtils.isEmpty(object[6])){
+                                customerDetails.setInstallmentAmount(Double.parseDouble(object[6] + ""));
+                            }if(!StringUtils.isEmpty(object[7])) {
+                                customerDetails.setNextInstallmentDueDate(LocalDate.parse(object[7] + ""));
+                            }
                             customerDetails.setMobileNo(object[8]+"");
                             customerDetails.setCurrentStatus(object[9]+"");
                             CustomerDetailsList.add(customerDetails);

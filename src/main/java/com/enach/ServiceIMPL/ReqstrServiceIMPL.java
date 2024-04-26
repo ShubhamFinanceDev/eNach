@@ -13,6 +13,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -63,8 +64,11 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
                         Object object[] = (Object[]) list.get(i);
 
-                        mandateTypeAmountResponse.setNextInstallmentAmount(new BigDecimal(object[0]+""));
-                        mandateTypeAmountResponse.setSanctionLoanAmount(new BigDecimal(object[1]+""));
+                        if(!StringUtils.isEmpty(object[0])) {
+                            mandateTypeAmountResponse.setNextInstallmentAmount(new BigDecimal(object[0] + ""));
+                        }if(!StringUtils.isEmpty(object[1])) {
+                            mandateTypeAmountResponse.setSanctionLoanAmount(new BigDecimal(object[1] + ""));
+                        }
                         MandateTypeAmountDataList.add(mandateTypeAmountResponse);
                     }
                 }
