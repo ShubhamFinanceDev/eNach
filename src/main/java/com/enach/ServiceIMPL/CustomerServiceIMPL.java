@@ -229,6 +229,7 @@ public class CustomerServiceIMPL implements CoustomerService {
 
                 Timestamp transactionCompleteDate = new Timestamp(System.currentTimeMillis());
                 enachPaymentRepository.updatePaymentStatus(transactionNo, transactionStatus,errorMessage,transactionCompleteDate);
+                System.out.println("eNachPayment update successfully.");
             }
         } catch (Exception e) {
             System.out.println(e);

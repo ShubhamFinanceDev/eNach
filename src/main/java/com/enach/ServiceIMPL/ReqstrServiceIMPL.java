@@ -85,7 +85,7 @@ public class ReqstrServiceIMPL implements ReqstrService {
     }
 
     @Override
-    public EnachPayment saveEnachPayment(String transactionNo, String applicationNo, String mandateType, Timestamp transactionStartDate) throws Exception {
+    public void saveEnachPayment(String transactionNo, String applicationNo, String paymentMethod, String mandateType, Timestamp transactionStartDate) throws Exception {
 
         EnachPayment enachPayment = new EnachPayment();
         String transactionStatus ="inprocess";
@@ -94,12 +94,12 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
             enachPayment.setTransactionNo(transactionNo);
             enachPayment.setApplicationNo(applicationNo);
+            enachPayment.setPaymentMethod(paymentMethod);
             enachPayment.setMandateType(mandateType);
             enachPayment.setTransactionStartDate(transactionStartDate);
-            //enachPayment.setTransactionCompleteDate(null);
             enachPayment.setTransactionStatus(transactionStatus);
-
             enachPaymentRepository.save(enachPayment);
+
         } catch (DataIntegrityViolationException ex) {
             throw new DataIntegrityViolationException(ex.getMessage());
 
@@ -107,7 +107,6 @@ public class ReqstrServiceIMPL implements ReqstrService {
             throw new Exception(e);
         }
 
-        return enachPayment;
     }
 
 

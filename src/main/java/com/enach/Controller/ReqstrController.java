@@ -71,7 +71,7 @@ public class ReqstrController {
         CommonResponse commonResponse = new CommonResponse();
 
             try {
-                if (StringUtils.isEmpty(request.getTransactionNo()) || StringUtils.isEmpty(request.getMandateType()) || StringUtils.isEmpty(request.getApplicationNo()) || StringUtils.isEmpty(request.getTransactionStartDate())) {
+                if (StringUtils.isEmpty(request.getTransactionNo()) || StringUtils.isEmpty(request.getMandateType()) || StringUtils.isEmpty(request.getApplicationNo()) || StringUtils.isEmpty(request.getPaymentMethod()) ||StringUtils.isEmpty(request.getTransactionStartDate())) {
                     commonResponse.setMsg("Required field is empty.");
                     commonResponse.setCode("1111");
                     return new ResponseEntity(commonResponse, HttpStatus.OK);
@@ -79,10 +79,11 @@ public class ReqstrController {
 
                 String mandateType = ("MNTH".equalsIgnoreCase(request.getMandateType())) ? "e-Mandate" : "security-mandate";
 
-                EnachPayment enachPayment = reqstrService.saveEnachPayment(request.getTransactionNo(), request.getApplicationNo(), mandateType, request.getTransactionStartDate());
+                reqstrService.saveEnachPayment(request.getTransactionNo(), request.getApplicationNo(),request.getPaymentMethod(), mandateType, request.getTransactionStartDate());
 
-                commonResponse.setMsg("Response Save.");
+                commonResponse.setMsg("eNachPayment save successfully.");
                 commonResponse.setCode("0000");
+                return new ResponseEntity(commonResponse, HttpStatus.OK);
 
             } catch (DataIntegrityViolationException ex) {
 

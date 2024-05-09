@@ -25,6 +25,9 @@ public class EnachPayment {
     @Column(name = "applicationNo")
     private String applicationNo;
 
+    @Column(name = "paymentMethod")
+    private String paymentMethod;
+
     @Column(name = "transactionStartDate")
     private Timestamp transactionStartDate;
 
