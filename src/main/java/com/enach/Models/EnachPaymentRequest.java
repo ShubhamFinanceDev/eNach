@@ -12,6 +12,7 @@ public class EnachPaymentRequest {
 
     private String transactionNo;
     private String applicationNo;
+    private String paymentMethod;
     private String mandateType;
     private Timestamp transactionStartDate;
 }

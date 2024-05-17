@@ -4,6 +4,7 @@ import com.enach.Entity.EnachPayment;
 import com.enach.Models.MandateTypeAmountData;
 import com.enach.Repository.EnachPaymentRepository;
 import com.enach.Service.ReqstrService;
+import com.enach.Utill.CustomerDetailsUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -23,6 +24,8 @@ public class ReqstrServiceIMPL implements ReqstrService {
     private JdbcTemplate jdbcTemplate;
     @Autowired
     private EnachPaymentRepository enachPaymentRepository;
+    @Autowired
+    private CustomerDetailsUtility customerDetailsUtility;
 
 
     @Override
@@ -32,22 +35,7 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
         try {
 
-           // String sql = "SELECT `Installment Amount`,`Sanction Amount` FROM enach WHERE `Application Number`='"+applicationNo+"'";
-
-            String sql= " SELECT `Installment Amount`,`Sanction Amount` FROM (SELECT a.`Application NUMBER`, a.`Branch NAME`, a.`Sanction Amount`,a.`Customer NUMBER`,\n"
-                    + " l.`CUSTOMER NAME`, a.`First Disbursal DATE`, a.`First Instalment DATE`, l.`Installment Amount`,\n"
-                    + " l.`NEXT DUE DATE`, a.`Current STATUS`, c.`Mobile No`,l.`LOAN STATUS`\n"
-                    + " FROM application a\n"
-                    + " left JOIN  loandetails l ON a.`Application Number`=l.CASAPPLNO\n"
-                    + " left  JOIN communication c ON a.`Customer Number`=c.`Customer Number`\n"
-                    + " UNION\n"
-                    + " SELECT e.APPLICATION_NUMBER,e.BRANCH_NAME,e.SANCTION_AMOUNT,NULL,e.CUSTOMER_NAME,	DATE_FORMAT (STR_TO_DATE (FIRST_DISBURSAL_DATE, '%d-%m-%y'), '%Y-%m-%d') AS FIRST_DISBURSAL_DATE,\n"
-                    + " DATE_FORMAT (STR_TO_DATE (FIRST_INSTALLMENT_DATE, '%d-%m-%y'), '%Y-%m-%d') AS FIRST_INSTALLMENT_DATE, CAST(e.INSTALLMENT_AMOUNT as DECIMAL(25,2)) AS INSTALLMENT_AMOUNT,\n"
-                    + " DATE_FORMAT (STR_TO_DATE (NEXT_DUE_DATE, '%d-%m-%y'), '%Y-%m-%d') AS NEXT_DUE_DATE,e.CURRENT_STATUS,e.Mobile_No ,l.`LOAN STATUS`\n"
-                    + " FROM enach_old	e\n"
-                    + " left JOIN  loandetails l ON l.`LOAN NO`=e.APPLICATION_NUMBER\n"
-                    + " ) a   WHERE a.`LOAN STATUS`='A' AND a.`Application Number` LIKE  '"+applicationNo+"' \n";
-
+            String sql = customerDetailsUtility.getCustomerAmountQuary(applicationNo);
             List<MandateTypeAmountData> listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(MandateTypeAmountData.class));
 
             if(!listData.isEmpty() && listData.size()>0) {
@@ -62,33 +50,26 @@ public class ReqstrServiceIMPL implements ReqstrService {
     }
 
     @Override
-    public EnachPayment saveEnachPayment(String transactionNo, String applicationNo, String mandateType, Timestamp transactionStartDate) throws Exception {
+    public void saveEnachPayment(String transactionNo, String applicationNo, String paymentMethod,String mandateType, Timestamp transactionStartDate) throws Exception {
 
         EnachPayment enachPayment = new EnachPayment();
         String transactionStatus ="inprocess";
 
         try {
-
             enachPayment.setTransactionNo(transactionNo);
             enachPayment.setApplicationNo(applicationNo);
+            enachPayment.setPaymentMethod(paymentMethod);
             enachPayment.setMandateType(mandateType);
             enachPayment.setTransactionStartDate(transactionStartDate);
-            //enachPayment.setTransactionCompleteDate(null);
             enachPayment.setTransactionStatus(transactionStatus);
-
             enachPaymentRepository.save(enachPayment);
+
         } catch (DataIntegrityViolationException ex) {
             throw new DataIntegrityViolationException(ex.getMessage());
 
         } catch (Exception e) {
             throw new Exception(e);
         }
-
-        return enachPayment;
     }
-
-
-
-
 
 }

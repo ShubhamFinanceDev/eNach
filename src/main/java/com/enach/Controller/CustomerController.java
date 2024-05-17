@@ -15,11 +15,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -75,7 +73,6 @@ public class CustomerController {
             try {
                 UserDetails userDetails = userDetailsService.loadUserByUsername(request.getApplicationNo());
                 String token = this.helper.generateToken(userDetails);
-
                 CustomerDetails customerDetails = coustomerService.getCustomerDetail(request.getMobileNo(), request.getOtpCode(),request.getApplicationNo());
 
                 if (customerDetails != null) {
@@ -84,8 +81,6 @@ public class CustomerController {
                     otpVerifyResponse.setApplicationNo(customerDetails.getApplicationNumber());
                     otpVerifyResponse.setCustName(customerDetails.getCustomerName());
                     otpVerifyResponse.setMobileNo(customerDetails.getMobileNo());
-
-                  //  LocalDate firstInstallmentDate = customerDetails.getFirstInstalmentDate();
                     LocalDate nextDueDate = customerDetails.getNextDueDate();
 
                     if(StringUtils.isEmpty(nextDueDate)){
@@ -149,9 +144,7 @@ public class CustomerController {
 
             if (enachPayment != null && !StringUtils.isEmpty(enachPayment)){
 
-
                 coustomerService.sendEmailOnBank(transactionNo,request.getTransactionStatus(),request.getErrorMessage());
-
                 statusResponse.setApplicationNo(enachPayment.getApplicationNo());
                 statusResponse.setMsg("update paymentstatus.");
                 statusResponse.setCode("0000");

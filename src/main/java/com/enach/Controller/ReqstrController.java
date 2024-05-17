@@ -25,7 +25,7 @@ public class ReqstrController {
     public ResponseEntity<String> mandateType(@RequestParam("applicationNo") String applicationNo, @RequestParam("mandateType") String  mandateType) {
 
         CommonResponse commonResponse = new CommonResponse();
-
+        MandateTypeAmountResponse mandateTypeAmountResponse = new MandateTypeAmountResponse();
 
         try{
             if (StringUtils.isEmpty(applicationNo) || StringUtils.isEmpty(mandateType)) {
@@ -34,28 +34,24 @@ public class ReqstrController {
                 return new ResponseEntity(commonResponse, HttpStatus.OK);
             }
 
-
-            MandateTypeAmountResponse mandateTypeAmountResponse = new MandateTypeAmountResponse();
-
             MandateTypeAmountData mandateTypeAmountData = reqstrService.getMandateTypeAmount(applicationNo);
 
             if("MNTH".equalsIgnoreCase(mandateType)){
                 mandateTypeAmountResponse.setAmount(mandateTypeAmountData.getInstallmentAmount().multiply(new BigDecimal(2)));
                 mandateTypeAmountResponse.setCode("0000");
                 mandateTypeAmountResponse.setMsg("succuss emandate amount");
-
                 return new ResponseEntity(mandateTypeAmountResponse, HttpStatus.OK);
+
             } else if ("ADHO".equalsIgnoreCase(mandateType)) {
                 mandateTypeAmountResponse.setAmount(mandateTypeAmountData.getSanctionAmount());
                 mandateTypeAmountResponse.setCode("0000");
                 mandateTypeAmountResponse.setMsg("succuss emandate amount");
-
                 return new ResponseEntity(mandateTypeAmountResponse, HttpStatus.OK);
+
             } else {
                 commonResponse.setMsg("mandateType is not correct.");
                 commonResponse.setCode("1111");
             }
-
         }
         catch (Exception ex) {
             commonResponse.setMsg("Please try again.");
@@ -65,13 +61,14 @@ public class ReqstrController {
     }
 
 
+
     @PostMapping("/enachPayment")
     public ResponseEntity<String> enachPayment(@RequestBody EnachPaymentRequest request ) {
 
         CommonResponse commonResponse = new CommonResponse();
 
             try {
-                if (StringUtils.isEmpty(request.getTransactionNo()) || StringUtils.isEmpty(request.getMandateType()) || StringUtils.isEmpty(request.getApplicationNo()) || StringUtils.isEmpty(request.getTransactionStartDate())) {
+                if (StringUtils.isEmpty(request.getTransactionNo()) || StringUtils.isEmpty(request.getMandateType()) || StringUtils.isEmpty(request.getApplicationNo()) || StringUtils.isEmpty(request.getPaymentMethod()) || StringUtils.isEmpty(request.getTransactionStartDate())) {
                     commonResponse.setMsg("Required field is empty.");
                     commonResponse.setCode("1111");
                     return new ResponseEntity(commonResponse, HttpStatus.OK);
@@ -79,16 +76,16 @@ public class ReqstrController {
 
                 String mandateType = ("MNTH".equalsIgnoreCase(request.getMandateType())) ? "e-Mandate" : "security-mandate";
 
-                EnachPayment enachPayment = reqstrService.saveEnachPayment(request.getTransactionNo(), request.getApplicationNo(), mandateType, request.getTransactionStartDate());
+                reqstrService.saveEnachPayment(request.getTransactionNo(), request.getApplicationNo(),request.getPaymentMethod(), mandateType, request.getTransactionStartDate());
 
+                commonResponse.setMsg("eNachPayment save successfully.");
                 commonResponse.setMsg("Response Save.");
                 commonResponse.setCode("0000");
+                return new ResponseEntity(commonResponse, HttpStatus.OK);
 
             } catch (DataIntegrityViolationException ex) {
-
                 commonResponse.setMsg("Dublicate request.");
                 commonResponse.setCode("1111");
-
             } catch (Exception e) {
                 commonResponse.setMsg("something went worng.");
                 commonResponse.setCode("1111");

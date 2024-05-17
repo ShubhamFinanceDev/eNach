@@ -28,8 +28,6 @@ public class JdbcConfig {
         dataSource.setUsername(environment.getProperty("spring.datasource.jdbc.username"));
         dataSource.setPassword(environment.getProperty("spring.datasource.jdbc.password"));
 
-
-
         return dataSource;
     }
 

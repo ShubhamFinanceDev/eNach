@@ -10,7 +10,7 @@ public interface ReqstrService {
 
 
     MandateTypeAmountData getMandateTypeAmount(String applicationNo);
-    EnachPayment saveEnachPayment(String transactionNo, String applicationNo, String mandateType, Timestamp transactionStartDate) throws Exception;
+    void saveEnachPayment(String transactionNo, String applicationNo,String paymentMethod, String mandateType, Timestamp transactionStartDate) throws Exception;
 
 }
 
