@@ -18,17 +18,17 @@ import java.util.Date;
 public class CustomerDetails implements UserDetails {
 
     private String applicationNumber;
+    private String branchName;
+    private Double sanctionLoanAmount;
     private String customerNumber;
-    private String loanAccountNo;
+    private String customerName;
     private LocalDate firstDisbursalDate;
     private LocalDate firstInstalmentDate;
     private Double installmentAmount;
-    private Double sanctionAmount;
+    private LocalDate nextInstallmentDueDate;
     private String currentStatus;
-    private String mobileNo;
-    private String customerName;
-    private LocalDate nextDueDate;
-    private String branchName;
+    private String phoneNumber;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

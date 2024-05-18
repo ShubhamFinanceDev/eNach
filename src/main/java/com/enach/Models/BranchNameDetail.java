@@ -4,9 +4,9 @@ import lombok.Data;
 
 
 @Data
-public class BranchDetails {
+public class BranchNameDetail {
 
+    private String applicationNumber;
     private String branchName;
-    private String emailId;
 
 }

@@ -43,7 +43,7 @@ public class ReqstrController {
                 return new ResponseEntity(mandateTypeAmountResponse, HttpStatus.OK);
 
             } else if ("ADHO".equalsIgnoreCase(mandateType)) {
-                mandateTypeAmountResponse.setAmount(mandateTypeAmountData.getSanctionAmount());
+                mandateTypeAmountResponse.setAmount(mandateTypeAmountData.getSanctionLoanAmount());
                 mandateTypeAmountResponse.setCode("0000");
                 mandateTypeAmountResponse.setMsg("succuss emandate amount");
                 return new ResponseEntity(mandateTypeAmountResponse, HttpStatus.OK);

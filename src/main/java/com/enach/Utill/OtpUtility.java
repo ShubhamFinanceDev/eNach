@@ -36,12 +36,12 @@ public class OtpUtility {
 
     public int generateCustOtp(com.enach.Models.CustomerDetails customerDetails) {
 
-        String mobileNo = customerDetails.getMobileNo();
+        String mobileNo = customerDetails.getPhoneNumber();
         int count = otpDetailsRepository.countMobileNo(mobileNo);
 
         if (count > 0) {
 
-            String mobileNo1 = customerDetails.getMobileNo();
+            String mobileNo1 = customerDetails.getPhoneNumber();
             otpDetailsRepository.deletePrevOtp(mobileNo1);
             logger.info("previous otp deleted");
         }

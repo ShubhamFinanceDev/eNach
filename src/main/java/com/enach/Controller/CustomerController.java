@@ -4,7 +4,6 @@ package com.enach.Controller;
 import com.enach.Entity.EnachPayment;
 import com.enach.Models.*;
 import com.enach.Service.CoustomerService;
-import com.enach.Utill.NextDueDate;
 import com.enach.sercurity.JwtHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.Period;
-import java.time.format.DateTimeFormatter;
+import java.time.YearMonth;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -80,35 +79,14 @@ public class CustomerController {
                     otpVerifyResponse.setJwtToken(token);
                     otpVerifyResponse.setApplicationNo(customerDetails.getApplicationNumber());
                     otpVerifyResponse.setCustName(customerDetails.getCustomerName());
-                    otpVerifyResponse.setMobileNo(customerDetails.getMobileNo());
-                    LocalDate nextDueDate = customerDetails.getNextDueDate();
-
-                    if(StringUtils.isEmpty(nextDueDate)){
-
-                           CommonResponse commonResponse = new CommonResponse();
-                           commonResponse.setMsg("NextDueDate is empty.");
-                           commonResponse.setCode("1111");
-                           return new ResponseEntity(commonResponse, HttpStatus.OK);
-                    }
+                    otpVerifyResponse.setMobileNo(customerDetails.getPhoneNumber());
                     LocalDate currentDate = LocalDate.now();
-
-                    if(!nextDueDate.isBefore(currentDate)) {
-
-                          String startDate = NextDueDate.findNextDueDate(nextDueDate.toString());
-                          otpVerifyResponse.setStartDate(startDate);
-
-                        DateTimeFormatter formatter  = DateTimeFormatter.ofPattern("uuuu-MM-dd");;
-                        LocalDate futureDate = LocalDate.parse(startDate, formatter);
-                        otpVerifyResponse.setExpiryDate(futureDate.plus(Period.ofYears(40).minusMonths(1)).toString());
-                    }else {
-
-                          CommonResponse commonResponse = new CommonResponse();
-                          commonResponse.setMsg("Next due date before current date.");
-                          commonResponse.setCode("1111");
-                          return new ResponseEntity(commonResponse, HttpStatus.OK);
-                    }
+                    LocalDate startDate = YearMonth.from(currentDate).plusMonths(1).atDay(4);
+                    otpVerifyResponse.setStartDate(startDate.toString());
+                    otpVerifyResponse.setExpiryDate(startDate.plus(Period.ofYears(40).minusMonths(1)).toString());
 
                     return new ResponseEntity(otpVerifyResponse, HttpStatus.OK);
+
                 } else {
                     CommonResponse commonResponse = new CommonResponse();
                     commonResponse.setMsg("Otp is invalid or expired, please try again.");

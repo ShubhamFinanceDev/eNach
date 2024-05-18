@@ -8,5 +8,5 @@ import java.math.BigDecimal;
 public class MandateTypeAmountData {
 
     private BigDecimal installmentAmount;
-    private BigDecimal sanctionAmount;
+    private BigDecimal sanctionLoanAmount;
 }

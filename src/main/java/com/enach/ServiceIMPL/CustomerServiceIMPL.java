@@ -1,25 +1,22 @@
 package com.enach.ServiceIMPL;
 
 
+import com.enach.Entity.BranchDetails;
 import com.enach.Entity.EnachPayment;
 import com.enach.Entity.OtpDetails;
 import com.enach.Models.*;
+import com.enach.Repository.BranchDetailRepository;
 import com.enach.Repository.EnachPaymentRepository;
 import com.enach.Repository.OtpDetailsRepository;
 import com.enach.Service.CoustomerService;
 import com.enach.Utill.CustomerDetailsUtility;
 import com.enach.Utill.OtpUtility;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.sql.Timestamp;
 import java.time.Duration;
@@ -43,6 +40,8 @@ public class CustomerServiceIMPL implements CoustomerService {
     private EnachPaymentRepository enachPaymentRepository;
     @Autowired
     private CustomerDetailsUtility customerDetailsUtility;
+    @Autowired
+    private BranchDetailRepository branchDetailRepository;
 
 
     @Override
@@ -55,10 +54,11 @@ public class CustomerServiceIMPL implements CoustomerService {
         String sql = customerDetailsUtility.getCustomerDetailsQuary(applicationNo);
         List<CustomerDetails> listData = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(CustomerDetails.class));
 
+        System.out.println("listData"+listData);
         if (!listData.isEmpty() && listData.size() > 0) {
             CustomerDetails customerDetails = listData.get(0);
 
-          if(!StringUtils.isEmpty(customerDetails.getMobileNo())) {
+          if(!StringUtils.isEmpty(customerDetails.getPhoneNumber())) {
             int otpCode = otpUtility.generateCustOtp(customerDetails);
 
             if (otpCode > 0) {
@@ -71,7 +71,7 @@ public class CustomerServiceIMPL implements CoustomerService {
                 otpDetails.setOtpCode(Long.valueOf(otpCode));
                 System.out.println(otpCode);
 
-                otpDetails.setMobileNo(customerDetails.getMobileNo());
+                otpDetails.setMobileNo(customerDetails.getPhoneNumber());
 
                 otpDetailsRepository.save(otpDetails);
                 System.out.println("otp save successfully");
@@ -163,8 +163,8 @@ public class CustomerServiceIMPL implements CoustomerService {
      @Override
     public void sendEmailOnBank(String transactionNo, String transactionStatus,String errorMessage) {
 
-        BranchDetails branchDetails = new BranchDetails();
-        CommonResponse commonResponse = new CommonResponse();
+        BranchNameDetail branchNameDetailDetails = new BranchNameDetail();
+
         try {
 
            String mandateType = "";
@@ -178,15 +178,19 @@ public class CustomerServiceIMPL implements CoustomerService {
             applicationNo = ""+obj[1];
            }
 
-         /* String sql = "SELECT enach.Branch_Name,branch_detail.Email_Id FROM enach_customer_details.enach  INNER JOIN \n"+
-                      " enach_request_structure_details.branch_detail ON enach.Branch_Name = branch_detail.Branch_Name WHERE Application_Number='"+applicationNo+"' || Old_Application_Number='"+applicationNo+"' ";
-
-            List<BranchDetails> listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(BranchDetails.class));
+           //===========================WHEN Email Details get from DB then open this code ==============================
+            /*String sql = customerDetailsUtility.getCustomerBranchDetailsQuary(applicationNo);
+            List<BranchNameDetail> listData = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(BranchNameDetail.class));
             if(!listData.isEmpty() && listData.size()>0) {
-                branchDetails = listData.get(0);
-             }
-            String emailId = branchDetails.getEmailId();*/
-          //  String emailId = "abhialok@5499@gmail.com";
+                branchNameDetailDetails = listData.get(0);
+            }
+            String branchName = branchNameDetailDetails.getBranchName();
+
+            String branchEmailId = branchDetailRepository.findByBranchEmail(branchName);
+            System.out.println("BranchEmail"+branchEmailId);*/
+
+
+
             String emailId = "ravi.soni@shubham.co";
 
             if(!StringUtils.isEmpty(emailId)) {
