@@ -4,6 +4,7 @@ package com.enach.Controller;
 import com.enach.Entity.EnachPayment;
 import com.enach.Models.*;
 import com.enach.Service.CoustomerService;
+import com.enach.Utill.NextDueDate;
 import com.enach.sercurity.JwtHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -81,8 +83,11 @@ public class CustomerController {
                     otpVerifyResponse.setCustName(customerDetails.getCustomerName());
                     otpVerifyResponse.setMobileNo(customerDetails.getPhoneNumber());
                     LocalDate currentDate = LocalDate.now();
-                    LocalDate startDate = YearMonth.from(currentDate).plusMonths(1).atDay(4);
+                    LocalDate startDate = NextDueDate.findNextDueDate(currentDate);
                     otpVerifyResponse.setStartDate(startDate.toString());
+                    DateTimeFormatter formatter  = DateTimeFormatter.ofPattern("uuuu-MM-dd");
+                    LocalDate futureDate = LocalDate.parse(startDate.toString(), formatter);
+                    otpVerifyResponse.setExpiryDate(futureDate.plus(Period.ofYears(40).minusMonths(1)).toString());
                     otpVerifyResponse.setExpiryDate(startDate.plus(Period.ofYears(40).minusMonths(1)).toString());
 
                     return new ResponseEntity(otpVerifyResponse, HttpStatus.OK);
