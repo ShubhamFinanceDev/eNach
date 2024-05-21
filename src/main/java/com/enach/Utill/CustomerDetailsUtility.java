@@ -17,7 +17,7 @@ public class CustomerDetailsUtility {
                 + " AP.`Current STATUS`, ID.PHONE_NUMBER\n"
                 + " FROM Application AP\n"
                 + " left JOIN  Loan LD ON AP.`Application Number`=LD.CASAPPLNO\n"
-                + " left  JOIN Identification ID ON AP.`Loan Account No`=ID.LOAN_ACCOUNT_NO\n"
+                + "  left  JOIN Identification ID ON AP.`Neo CIF ID`=ID.CUSTOMER_INFO_FILE_NUMBER \n"
                 + " UNION\n"
                 + " SELECT APPLICATION_NUMBER,BRANCH_NAME,SANCTION_AMOUNT,NULL,CUSTOMER_NAME,DATE_FORMAT (STR_TO_DATE (FIRST_DISBURSAL_DATE, '%d-%m-%y'), '%Y-%m-%d') AS FIRST_DISBURSAL_DATE,\n"
                 + " DATE_FORMAT (STR_TO_DATE (FIRST_INSTALLMENT_DATE, '%d-%m-%y'), '%Y-%m-%d') AS FIRST_INSTALLMENT_DATE, cast(INSTALLMENT_AMOUNT as DECIMAL(25,2)) AS INSTALLMENT_AMOUNT,\n"
@@ -28,7 +28,7 @@ public class CustomerDetailsUtility {
 
 
             sql=quary;
-
+          System.out.println(sql);
         return sql;
     }
 
@@ -44,7 +44,7 @@ public class CustomerDetailsUtility {
                 + "  AP.`Current STATUS`, ID.PHONE_NUMBER\n"
                 + "  FROM Application AP\n"
                 + "  left JOIN  Loan LD ON AP.`Application Number`=LD.CASAPPLNO\n"
-                + "  left  JOIN Identification ID ON AP.`Loan Account No`=ID.LOAN_ACCOUNT_NO\n"
+                + "  left  JOIN Identification ID ON AP.`Neo CIF ID`=ID.CUSTOMER_INFO_FILE_NUMBER \n"
                 + " UNION\n"
                 + " SELECT APPLICATION_NUMBER,BRANCH_NAME,SANCTION_AMOUNT,NULL,CUSTOMER_NAME,DATE_FORMAT (STR_TO_DATE (FIRST_DISBURSAL_DATE, '%d-%m-%y'), '%Y-%m-%d') AS FIRST_DISBURSAL_DATE,\n"
                 + " DATE_FORMAT (STR_TO_DATE (FIRST_INSTALLMENT_DATE, '%d-%m-%y'), '%Y-%m-%d') AS FIRST_INSTALLMENT_DATE, cast(INSTALLMENT_AMOUNT as DECIMAL(25,2)) AS INSTALLMENT_AMOUNT,\n"
