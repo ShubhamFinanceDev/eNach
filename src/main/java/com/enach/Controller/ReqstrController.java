@@ -91,6 +91,7 @@ public class ReqstrController {
                 commonResponse.setMsg("something went worng.");
                 commonResponse.setCode("1111");
             }
+        System.out.println("tramsaction msg"+ commonResponse.getMsg());
         return new ResponseEntity(commonResponse, HttpStatus.OK);
     }
 
