@@ -4,6 +4,8 @@ package com.enach.Controller;
 import com.enach.Entity.EnachPayment;
 import com.enach.Models.*;
 import com.enach.Service.ReqstrService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -18,6 +20,7 @@ import java.math.BigDecimal;
 @CrossOrigin
 public class ReqstrController {
 
+    private static final Logger log = LoggerFactory.getLogger(ReqstrController.class);
     @Autowired
     private ReqstrService reqstrService;
 
@@ -68,7 +71,8 @@ public class ReqstrController {
         CommonResponse commonResponse = new CommonResponse();
 
             try {
-                System.out.println("transaction saved");
+                System.out.println("transaction saved"+ request);
+
                 if (StringUtils.isEmpty(request.getTransactionNo()) || StringUtils.isEmpty(request.getMandateType()) || StringUtils.isEmpty(request.getApplicationNo()) || StringUtils.isEmpty(request.getPaymentMethod()) || StringUtils.isEmpty(request.getTransactionStartDate())) {
                     commonResponse.setMsg("Required field is empty.");
                     commonResponse.setCode("1111");
@@ -91,7 +95,8 @@ public class ReqstrController {
                 commonResponse.setMsg("something went worng.");
                 commonResponse.setCode("1111");
             }
-        System.out.println("tramsaction msg"+ commonResponse.getMsg());
+        log.info("transaction msg"+ commonResponse.getMsg());
+
         return new ResponseEntity(commonResponse, HttpStatus.OK);
     }
 
