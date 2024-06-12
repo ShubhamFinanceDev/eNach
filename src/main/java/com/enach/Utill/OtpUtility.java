@@ -1,11 +1,14 @@
 package com.enach.Utill;
 
 
+import com.enach.Models.EmailDetails;
 import com.enach.Repository.OtpDetailsRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -33,12 +36,12 @@ public class OtpUtility {
 
     public int generateCustOtp(com.enach.Models.CustomerDetails customerDetails) {
 
-        String mobileNo = customerDetails.getMobileNo();
+        String mobileNo = customerDetails.getPhoneNumber();
         int count = otpDetailsRepository.countMobileNo(mobileNo);
 
         if (count > 0) {
 
-            String mobileNo1 = customerDetails.getMobileNo();
+            String mobileNo1 = customerDetails.getPhoneNumber();
             otpDetailsRepository.deletePrevOtp(mobileNo1);
             logger.info("previous otp deleted");
         }
@@ -66,6 +69,30 @@ public class OtpUtility {
         }
         return status;
     }
+
+
+    @Autowired
+    private JavaMailSender javaMailSender;
+    @Value("${spring.mail.username}")
+    private String sender;
+
+    public void sendSimpleMail(EmailDetails emailDetails) {
+
+        try {
+            SimpleMailMessage mailMessage = new SimpleMailMessage();
+
+            mailMessage.setFrom(sender);
+            mailMessage.setTo(emailDetails.getRecipient());
+            mailMessage.setText(emailDetails.getMsgBody());
+            mailMessage.setSubject(emailDetails.getSubject());
+
+            javaMailSender.send(mailMessage);
+
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
 
 
 }

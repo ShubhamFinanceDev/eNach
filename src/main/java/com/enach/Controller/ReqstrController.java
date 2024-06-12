@@ -1,38 +1,60 @@
 package com.enach.Controller;
 
 
-import com.enach.Entity.MandateRespDoc;
-import com.enach.Models.CommonResponse;
-import com.enach.Models.MandateRespDocResponse;
+import com.enach.Entity.EnachPayment;
+import com.enach.Models.*;
 import com.enach.Service.ReqstrService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.math.BigDecimal;
 
 @RestController
-@RequestMapping("/eNach")
+@RequestMapping("/customer")
 @CrossOrigin
 public class ReqstrController {
 
+    private static final Logger log = LoggerFactory.getLogger(ReqstrController.class);
     @Autowired
     private ReqstrService reqstrService;
 
+    @GetMapping("/mandateType")
+    public ResponseEntity<String> mandateType(@RequestParam("applicationNo") String applicationNo, @RequestParam("mandateType") String  mandateType) {
 
-    @GetMapping("/msgId")
-    public ResponseEntity<String> msgId() {
         CommonResponse commonResponse = new CommonResponse();
-        String finalMsgId = "";
-        String msg1 = "SUBH";
+        MandateTypeAmountResponse mandateTypeAmountResponse = new MandateTypeAmountResponse();
+
         try{
-            SimpleDateFormat sdf=new SimpleDateFormat("yyyyMMddHHmmssSSS");
-            String dateString=sdf.format(new Date());
-            finalMsgId = msg1+dateString;
-            commonResponse.setMsg(finalMsgId);
-            commonResponse.setCode("0000");
+            if (StringUtils.isEmpty(applicationNo) || StringUtils.isEmpty(mandateType)) {
+                commonResponse.setMsg("Required field is empty.");
+                commonResponse.setCode("1111");
+                return new ResponseEntity(commonResponse, HttpStatus.OK);
+            }
+
+            MandateTypeAmountData mandateTypeAmountData = reqstrService.getMandateTypeAmount(applicationNo);
+
+            if("MNTH".equalsIgnoreCase(mandateType)){
+                mandateTypeAmountResponse.setAmount(mandateTypeAmountData.getInstallmentAmount().multiply(new BigDecimal(2)));
+                mandateTypeAmountResponse.setCode("0000");
+                mandateTypeAmountResponse.setMsg("succuss emandate amount");
+                return new ResponseEntity(mandateTypeAmountResponse, HttpStatus.OK);
+
+            } else if ("ADHO".equalsIgnoreCase(mandateType)) {
+                mandateTypeAmountResponse.setAmount(mandateTypeAmountData.getSanctionLoanAmount());
+                mandateTypeAmountResponse.setCode("0000");
+                mandateTypeAmountResponse.setMsg("succuss emandate amount");
+                return new ResponseEntity(mandateTypeAmountResponse, HttpStatus.OK);
+
+            } else {
+                commonResponse.setMsg("mandateType is not correct.");
+                commonResponse.setCode("1111");
+            }
         }
         catch (Exception ex) {
             commonResponse.setMsg("Please try again.");
@@ -43,29 +65,40 @@ public class ReqstrController {
 
 
 
-    @PostMapping("/mandateRespDoc")
-    public ResponseEntity<String> mandateRespDoc(@RequestBody MandateRespDocResponse request) {
+    @PostMapping("/enachPayment")
+    public ResponseEntity<String> enachPayment(@RequestBody EnachPaymentRequest request ) {
 
         CommonResponse commonResponse = new CommonResponse();
 
-
             try {
 
-                MandateRespDoc mandateRespDoc = reqstrService.saveMandateRespDoc(request.getStatus(),request.getMsgId(),request.getRefId(),request.getErrors(),request.getErrorCode(),request.getErrorMessage(),request.getFiller1(),request.getFiller2(),request.getFiller3(),request.getFiller4(),request.getFiller5(),request.getFiller6(),request.getFiller7(),request.getFiller8(),request.getFiller9(),request.getFiller10());
+//                if (StringUtils.isEmpty(request.getTransactionNo()) || StringUtils.isEmpty(request.getMandateType()) || StringUtils.isEmpty(request.getApplicationNo()) || StringUtils.isEmpty(request.getPaymentMethod()) || StringUtils.isEmpty(request.getTransactionStartDate())) {
+                if (StringUtils.isEmpty(request.getTransactionNo()) || StringUtils.isEmpty(request.getMandateType()) || StringUtils.isEmpty(request.getApplicationNo()) || StringUtils.isEmpty(request.getTransactionStartDate())) {
+
+                    commonResponse.setMsg("Required field is empty.");
+                    commonResponse.setCode("1111");
+                    return new ResponseEntity(commonResponse, HttpStatus.OK);
+                }
+
+                String mandateType = ("MNTH".equalsIgnoreCase(request.getMandateType())) ? "e-Mandate" : "security-mandate";
+
+                reqstrService.saveEnachPayment(request.getTransactionNo(), request.getApplicationNo(),request.getPaymentMethod(), mandateType, request.getTransactionStartDate());
+
+                commonResponse.setMsg("eNachPayment save successfully.");
                 commonResponse.setMsg("Response Save.");
                 commonResponse.setCode("0000");
+                return new ResponseEntity(commonResponse, HttpStatus.OK);
 
+            } catch (DataIntegrityViolationException ex) {
+                commonResponse.setMsg("Dublicate request.");
+                commonResponse.setCode("1111");
             } catch (Exception e) {
                 commonResponse.setMsg("something went worng.");
                 commonResponse.setCode("1111");
             }
+        log.info("transaction msg"+ commonResponse.getMsg());
 
         return new ResponseEntity(commonResponse, HttpStatus.OK);
     }
 
-
-
-
-
-
-}
+    }

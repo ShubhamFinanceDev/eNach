@@ -1,43 +1,75 @@
 package com.enach.ServiceIMPL;
 
-import com.enach.Entity.MandateRespDoc;
-import com.enach.Repository.ReqStrDetailsRepository;
+import com.enach.Entity.EnachPayment;
+import com.enach.Models.MandateTypeAmountData;
+import com.enach.Repository.EnachPaymentRepository;
 import com.enach.Service.ReqstrService;
+import com.enach.Utill.CustomerDetailsUtility;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+
+import java.sql.Timestamp;
+import java.util.List;
+
 
 @Service
 public class ReqstrServiceIMPL implements ReqstrService {
 
     @Autowired
-    private ReqStrDetailsRepository reqStrDetailsRepository;
-
+    @Qualifier("jdbcJdbcTemplate")
+    private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private EnachPaymentRepository enachPaymentRepository;
+    @Autowired
+    private CustomerDetailsUtility customerDetailsUtility;
 
 
     @Override
-    public MandateRespDoc saveMandateRespDoc(String status, String msgId, String refId, String errors, String errorCode, String errorMessage, String filler1, String filler2, String filler3, String filler4, String filler5, String filler6, String filler7, String filler8, String filler9, String filler10) {
+    public MandateTypeAmountData getMandateTypeAmount(String applicationNo) {
 
-        MandateRespDoc mandateRespDoc = new MandateRespDoc();
+        MandateTypeAmountData mandateTypeAmountResponse = new MandateTypeAmountData();
 
-        mandateRespDoc.setStatus(status);
-        mandateRespDoc.setMsgId(msgId);
-        mandateRespDoc.setRefId(refId);
-        mandateRespDoc.setErrors(errors);
-        mandateRespDoc.setErrorCode(errorCode);
-        mandateRespDoc.setErrorMessage(errorMessage);
-        mandateRespDoc.setFiller1(filler1);
-        mandateRespDoc.setFiller2(filler2);
-        mandateRespDoc.setFiller3(filler3);
-        mandateRespDoc.setFiller4(filler4);
-        mandateRespDoc.setFiller5(filler5);
-        mandateRespDoc.setFiller6(filler6);
-        mandateRespDoc.setFiller7(filler7);
-        mandateRespDoc.setFiller8(filler8);
-        mandateRespDoc.setFiller9(filler9);
-        mandateRespDoc.setFiller10(filler10);
+        try {
 
-        reqStrDetailsRepository.save(mandateRespDoc);
+            String sql = customerDetailsUtility.getCustomerAmountQuary(applicationNo);
+            List<MandateTypeAmountData> listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(MandateTypeAmountData.class));
 
-        return mandateRespDoc;
+            if(!listData.isEmpty() && listData.size()>0) {
+                mandateTypeAmountResponse = listData.get(0);
+            }
+
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        return mandateTypeAmountResponse;
     }
+
+    @Override
+    public void saveEnachPayment(String transactionNo, String applicationNo, String paymentMethod,String mandateType, Timestamp transactionStartDate) throws Exception {
+
+        EnachPayment enachPayment = new EnachPayment();
+        String transactionStatus ="inprocess";
+
+        try {
+            enachPayment.setTransactionNo(transactionNo);
+            enachPayment.setApplicationNo(applicationNo);
+            enachPayment.setPaymentMethod(paymentMethod);
+            enachPayment.setMandateType(mandateType);
+            enachPayment.setTransactionStartDate(transactionStartDate);
+            enachPayment.setTransactionStatus(transactionStatus);
+            enachPaymentRepository.save(enachPayment);
+
+        } catch (DataIntegrityViolationException ex) {
+            throw new DataIntegrityViolationException(ex.getMessage());
+
+        } catch (Exception e) {
+            throw new Exception(e);
+        }
+    }
+
 }
