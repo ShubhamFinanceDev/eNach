@@ -16,7 +16,6 @@ import java.util.function.Function;
 public class JwtHelper {
 
     @Value("${jwt.expiration}")
-
     public long JWT_TOKEN_VALIDITY;
 
     private String secret = "afafasfafafasfasfasfafacasdasfasxASFACASDFACASDFASFASFDAFASFASDAADSCSDFADCVSGCFVADXCcadwavfsfarvf";
