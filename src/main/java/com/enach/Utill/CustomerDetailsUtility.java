@@ -28,7 +28,7 @@ public class CustomerDetailsUtility {
 
 
             sql=quary;
-          System.out.println(sql);
+//          System.out.println(sql);
         return sql;
     }
 
