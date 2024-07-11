@@ -31,12 +31,12 @@ public class CustomerDetailsUtility {
                    "           TO_DATE(FIRST_INSTALLMENT_DATE, 'DD-MM-RR') AS FIRST_INSTALLMENT_DATE,\n" +
                    "           TO_NUMBER(INSTALLMENT_AMOUNT) AS INSTALLMENT_AMOUNT,\n" +
                    "           TO_DATE(NEXT_DUE_DATE, 'DD-MM-RR') AS NEXT_DUE_DATE, CURRENT_STATUS,\n" +
-                   "           Mobile_No, LOAN_ACCOUNT_NO\n" +
+                   "           Mobile_No as PHONE_NUMBER, LOAN_ACCOUNT_NO\n" +
                    "    FROM enach_old ) CD \n" +
-                   "WHERE CD.\"Application Number\" IS NOT NULL\n" +
+                   "WHERE CD.APPLICATION_NUMBER IS NOT NULL\n" +
                    "  AND CD.PHONE_NUMBER IS NOT NULL\n" +
                    "  AND LENGTH(CD.PHONE_NUMBER) = 10\n" +
-                   "  AND CD.\"Application Number\" LIKE '"+applicationNo+"'";
+                   "  AND CD.APPLICATION_NUMBER LIKE '"+applicationNo+"'";
             sql=query;
 
 
