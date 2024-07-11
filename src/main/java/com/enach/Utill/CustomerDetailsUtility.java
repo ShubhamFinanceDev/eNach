@@ -26,7 +26,7 @@ public class CustomerDetailsUtility {
             sql=query;
 
         } else if (applicationNo.contains("_")) {
-           String query="SELECT * FROM ( SELECT APPLICATION_NUMBER, BRANCH_NAME, SANCTION_AMOUNT, NULL, CUSTOMER_NAME,\n" +
+           String query="SELECT * FROM ( SELECT APPLICATION_NUMBER, BRANCH_NAME, SANCTION_AMOUNT as SANCTION_LOAN_AMOUNT, NULL, CUSTOMER_NAME,\n" +
                    "           TO_DATE(FIRST_DISBURSAL_DATE, 'DD-MM-RR') AS FIRST_DISBURSAL_DATE,\n" +
                    "           TO_DATE(FIRST_INSTALLMENT_DATE, 'DD-MM-RR') AS FIRST_INSTALLMENT_DATE,\n" +
                    "           TO_NUMBER(INSTALLMENT_AMOUNT) AS INSTALLMENT_AMOUNT,\n" +
