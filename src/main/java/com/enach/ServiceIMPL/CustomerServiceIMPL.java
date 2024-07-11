@@ -179,7 +179,7 @@ public class CustomerServiceIMPL implements CoustomerService {
            }
 
            //===========================WHEN Email Details get from DB then open this code ==============================
-            String sql = customerDetailsUtility.getCustomerBranchDetailsQuary(applicationNo);
+            String sql = customerDetailsUtility.getCustomerDetailsQuary(applicationNo);
             List<BranchNameDetail> listData = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(BranchNameDetail.class));
             if(!listData.isEmpty() && listData.size()>0) {
                 branchNameDetailDetails = listData.get(0);
@@ -187,7 +187,7 @@ public class CustomerServiceIMPL implements CoustomerService {
             String branchName = branchNameDetailDetails.getBranchName();
 
             String emailId = branchDetailRepository.findByBranchEmail(branchName);
-            System.out.println("BranchEmail"+emailId);
+            System.out.println("BranchEmail "+emailId);
 
 
 
