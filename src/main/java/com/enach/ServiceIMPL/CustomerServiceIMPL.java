@@ -64,10 +64,10 @@ public class CustomerServiceIMPL implements CoustomerService {
                     if (otpCode > 0) {
 
                         System.out.println("otp generated successfully");
-                   if (otpUtility.sendOtp(customerDetails.getPhoneNumber(), otpCode,customerDetails.getLoanAccountNo())) {
+                        if (otpUtility.sendOtp(customerDetails.getPhoneNumber(), otpCode, customerDetails.getLoanAccountNo())) {
                             System.out.println("otp sent on mobile");
                             OtpDetails otpDetails = new OtpDetails();
-//                otpDetails.setOtpCode(Long.valueOf(otpCode));
+                            otpDetails.setOtpCode(Long.valueOf(otpCode));
                             System.out.println(otpCode);
 
                             otpDetails.setMobileNo(customerDetails.getPhoneNumber());
@@ -75,7 +75,7 @@ public class CustomerServiceIMPL implements CoustomerService {
                             otpDetailsRepository.save(otpDetails);
                             System.out.println("otp save successfully");
                             Long otpId = otpDetails.getOtpId();
-                            otpResponse.put("otpCode", String.valueOf(otpCode));
+//                            otpResponse.put("otpCode", String.valueOf(otpCode));
                             otpResponse.put("otpId", String.valueOf(otpId));
                             otpResponse.put("mobile", otpDetails.getMobileNo());
                             otpResponse.put("msg", "Otp send.");
