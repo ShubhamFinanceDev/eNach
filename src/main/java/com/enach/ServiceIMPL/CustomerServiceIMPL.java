@@ -49,65 +49,62 @@ public class CustomerServiceIMPL implements CoustomerService {
 
         HashMap<String, String> otpResponse = new HashMap<>();
 
-    try {
+        try {
 
-        String sql = customerDetailsUtility.getCustomerDetailsQuary(applicationNo);
-        List<CustomerDetails> listData = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(CustomerDetails.class));
+            String sql = customerDetailsUtility.getCustomerDetailsQuary(applicationNo);
+            List<CustomerDetails> listData = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(CustomerDetails.class));
 
-        System.out.println("listData"+listData);
-        if (!listData.isEmpty() && listData.size() > 0) {
-            CustomerDetails customerDetails = listData.get(0);
+            System.out.println("listData" + listData);
+            if (!listData.isEmpty() && listData.size() > 0) {
+                CustomerDetails customerDetails = listData.get(0);
 
-          if(!StringUtils.isEmpty(customerDetails.getPhoneNumber())) {
-            int otpCode = otpUtility.generateCustOtp(customerDetails);
+                if (!StringUtils.isEmpty(customerDetails.getPhoneNumber())) {
+                    int otpCode = otpUtility.generateCustOtp(customerDetails);
 
-            if (otpCode > 0) {
+                    if (otpCode > 0) {
 
-                System.out.println("otp generated successfully");
-//                   if (otpUtility.sendOtp(customerDetails.getPhoneNumber(), otpCode,customerDetails.getLoanAccountNo())) {
-                if (otpUtility.sendOtp("8160041657", otpCode,customerDetails.getLoanAccountNo())) {
+                        System.out.println("otp generated successfully");
+                   if (otpUtility.sendOtp(customerDetails.getPhoneNumber(), otpCode,customerDetails.getLoanAccountNo())) {
+                            System.out.println("otp sent on mobile");
+                            OtpDetails otpDetails = new OtpDetails();
+//                otpDetails.setOtpCode(Long.valueOf(otpCode));
+                            System.out.println(otpCode);
 
+                            otpDetails.setMobileNo(customerDetails.getPhoneNumber());
 
-                    System.out.println("otp sent on mobile");
-                OtpDetails otpDetails = new OtpDetails();
-                otpDetails.setOtpCode(Long.valueOf(otpCode));
-                System.out.println(otpCode);
+                            otpDetailsRepository.save(otpDetails);
+                            System.out.println("otp save successfully");
+                            Long otpId = otpDetails.getOtpId();
+                            otpResponse.put("otpCode", String.valueOf(otpCode));
+                            otpResponse.put("otpId", String.valueOf(otpId));
+                            otpResponse.put("mobile", otpDetails.getMobileNo());
+                            otpResponse.put("msg", "Otp send.");
+                            otpResponse.put("code", "0000");
 
-                otpDetails.setMobileNo(customerDetails.getPhoneNumber());
+                        } else {
+                            otpResponse.put("msg", "Otp did not send, please try again");
+                            otpResponse.put("code", "1111");
+                        }
 
-                otpDetailsRepository.save(otpDetails);
-                System.out.println("otp save successfully");
-                Long otpId = otpDetails.getOtpId();
-                otpResponse.put("otpCode", String.valueOf(otpCode));
-                otpResponse.put("otpId", String.valueOf(otpId));
-                otpResponse.put("mobile", otpDetails.getMobileNo());
-                otpResponse.put("msg", "Otp send.");
-                otpResponse.put("code", "0000");
+                    } else {
+                        otpResponse.put("msg", "Otp did not generated, please try again");
+                        otpResponse.put("code", "1111");
+                    }
 
-                     } else {
-                         otpResponse.put("msg", "Otp did not send, please try again");
-                         otpResponse.put("code", "1111");
-                     }
-
+                } else {
+                    otpResponse.put("msg", "mobile no does not exist with this application no.");
+                    otpResponse.put("code", "1111");
+                }
             } else {
-                otpResponse.put("msg", "Otp did not generated, please try again");
+                otpResponse.put("msg", "Application no does not exist / deactivate.");
                 otpResponse.put("code", "1111");
             }
 
-          }else{
-              otpResponse.put("msg", "mobile no does not exist with this application no.");
-              otpResponse.put("code", "1111");
-          }
-        } else {
-            otpResponse.put("msg", "Application no does not exist / deactivate.");
-            otpResponse.put("code", "1111");
-        }
-
-    } catch (Exception e) {
+        } catch (Exception e) {
             otpResponse.put("msg", "something went worng");
             otpResponse.put("code", "1111");
             System.out.println(e);
-    }
+        }
         return otpResponse;
     }
 
@@ -121,11 +118,11 @@ public class CustomerServiceIMPL implements CoustomerService {
             if (otpDetails != null) {
 
                 String sql = customerDetailsUtility.getCustomerDetailsQuary(applicationNo);
-                List<CustomerDetails> listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(CustomerDetails.class));
+                List<CustomerDetails> listData = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(CustomerDetails.class));
 
-                if(!listData.isEmpty() && listData.size()>0) {
+                if (!listData.isEmpty() && listData.size() > 0) {
                     customerDetails = listData.get(0);
-                }else{
+                } else {
                     customerDetails = null;
                 }
 
@@ -153,7 +150,7 @@ public class CustomerServiceIMPL implements CoustomerService {
             if (enachPayment != null && !StringUtils.isEmpty(enachPayment)) {
 
                 Timestamp transactionCompleteDate = new Timestamp(System.currentTimeMillis());
-                enachPaymentRepository.updatePaymentStatus(transactionNo, transactionStatus,errorMessage,transactionCompleteDate);
+                enachPaymentRepository.updatePaymentStatus(transactionNo, transactionStatus, errorMessage, transactionCompleteDate);
             }
         } catch (Exception e) {
             System.out.println(e);
@@ -162,40 +159,39 @@ public class CustomerServiceIMPL implements CoustomerService {
     }
 
 
-     @Override
-    public void sendEmailOnBank(String transactionNo, String transactionStatus,String errorMessage) {
+    @Override
+    public void sendEmailOnBank(String transactionNo, String transactionStatus, String errorMessage) {
 
         BranchNameDetail branchNameDetailDetails = new BranchNameDetail();
 
         try {
 
-           String mandateType = "";
-           String applicationNo = "";
+            String mandateType = "";
+            String applicationNo = "";
 
-           List<?> dataList = enachPaymentRepository.findLoanNoAndMandateType(transactionNo);
+            List<?> dataList = enachPaymentRepository.findLoanNoAndMandateType(transactionNo);
 
-           if(!dataList.isEmpty()) {
-            Object[] obj = (Object[]) dataList.get(0);
-            mandateType = ""+obj[0];
-            applicationNo = ""+obj[1];
-           }
+            if (!dataList.isEmpty()) {
+                Object[] obj = (Object[]) dataList.get(0);
+                mandateType = "" + obj[0];
+                applicationNo = "" + obj[1];
+            }
 
-           //===========================WHEN Email Details get from DB then open this code ==============================
+            //===========================WHEN Email Details get from DB then open this code ==============================
             String sql = customerDetailsUtility.getCustomerDetailsQuary(applicationNo);
             List<BranchNameDetail> listData = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(BranchNameDetail.class));
-            if(!listData.isEmpty() && listData.size()>0) {
+            if (!listData.isEmpty() && listData.size() > 0) {
                 branchNameDetailDetails = listData.get(0);
             }
             String branchName = branchNameDetailDetails.getBranchName();
 
             String emailId = branchDetailRepository.findByBranchEmail(branchName);
-            System.out.println("BranchEmail "+emailId);
-
+            System.out.println("BranchEmail " + emailId);
 
 
 //            String emailId = "ravi.soni@shubham.co";
 
-            if(!StringUtils.isEmpty(emailId)) {
+            if (!StringUtils.isEmpty(emailId)) {
                 EmailDetails emailDetails = new EmailDetails();
 
                 if ("Success".equalsIgnoreCase(transactionStatus)) {
@@ -218,11 +214,11 @@ public class CustomerServiceIMPL implements CoustomerService {
 
                     otpUtility.sendSimpleMail(emailDetails);
                 }
-            }else{
+            } else {
                 System.out.println("emailId does not exist.");
             }
-        }catch (Exception e){
-            System.out.println(transactionNo+" error is "+e);
+        } catch (Exception e) {
+            System.out.println(transactionNo + " error is " + e);
         }
     }
 
