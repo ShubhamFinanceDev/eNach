@@ -1,26 +1,30 @@
 package com.enach.ServiceIMPL;
 
 
-import com.enach.Entity.BranchDetails;
+import com.enach.Entity.CustomerDetails;
 import com.enach.Entity.EnachPayment;
 import com.enach.Entity.OtpDetails;
 import com.enach.Models.*;
 import com.enach.Repository.BranchDetailRepository;
+import com.enach.Repository.CustomerDetailsRepository;
 import com.enach.Repository.EnachPaymentRepository;
 import com.enach.Repository.OtpDetailsRepository;
 import com.enach.Service.CoustomerService;
+import com.enach.Service.OtpService;
 import com.enach.Utill.CustomerDetailsUtility;
 import com.enach.Utill.OtpUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -42,7 +46,10 @@ public class CustomerServiceIMPL implements CoustomerService {
     private CustomerDetailsUtility customerDetailsUtility;
     @Autowired
     private BranchDetailRepository branchDetailRepository;
-
+    @Autowired
+    private CustomerDetailsRepository customerDetailsRepository;
+    @Autowired
+    private OtpService otpService;
 
     @Override
     public HashMap<String, String> validateCustAndSendOtp(String applicationNo) {
@@ -50,12 +57,9 @@ public class CustomerServiceIMPL implements CoustomerService {
         HashMap<String, String> otpResponse = new HashMap<>();
 
         try {
-
-            String sql = customerDetailsUtility.getCustomerDetailsQuary(applicationNo);
-            List<CustomerDetails> listData = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(CustomerDetails.class));
-
+            List<CustomerDetails> listData = listData = otpService.getCustomerDetails(applicationNo);
             System.out.println("listData" + listData);
-            if (!listData.isEmpty() && listData.size() > 0) {
+            if (!listData.isEmpty()) {
                 CustomerDetails customerDetails = listData.get(0);
 
                 if (!StringUtils.isEmpty(customerDetails.getPhoneNumber())) {
@@ -64,12 +68,12 @@ public class CustomerServiceIMPL implements CoustomerService {
                     if (otpCode > 0) {
 
                         System.out.println("otp generated successfully");
-                        if (otpUtility.sendOtp(customerDetails.getPhoneNumber(), otpCode, customerDetails.getApplicationNumber())) {
-//                        if (otpUtility.sendOtp("8160041657", otpCode, customerDetails.getApplicationNumber())) {
+//                        if (otpUtility.sendOtp(customerDetails.getPhoneNumber(), otpCode, customerDetails.getApplicationNumber())) {
+                        if (otpUtility.sendOtp("8160041657", otpCode, customerDetails.getApplicationNumber())) {
 
                             System.out.println("otp sent on mobile");
                             OtpDetails otpDetails = new OtpDetails();
-                            otpDetails.setOtpCode(Long.valueOf(otpCode));
+                            otpDetails.setOtpCode((long) otpCode);
                             System.out.println(otpCode);
 
                             otpDetails.setMobileNo(customerDetails.getPhoneNumber());
@@ -119,10 +123,8 @@ public class CustomerServiceIMPL implements CoustomerService {
             OtpDetails otpDetails = otpDetailsRepository.IsotpExpired(mobileNo, otpCode);
             if (otpDetails != null) {
 
-                String sql = customerDetailsUtility.getCustomerDetailsQuary(applicationNo);
-                List<CustomerDetails> listData = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(CustomerDetails.class));
-
-                if (!listData.isEmpty() && listData.size() > 0) {
+                List<CustomerDetails> listData = otpService.getCustomerDetails(applicationNo);
+                if (!listData.isEmpty()) {
                     customerDetails = listData.get(0);
                 } else {
                     customerDetails = null;
@@ -164,55 +166,38 @@ public class CustomerServiceIMPL implements CoustomerService {
     @Override
     public void sendEmailOnBank(String transactionNo, String transactionStatus, String errorMessage) {
 
-        BranchNameDetail branchNameDetailDetails = new BranchNameDetail();
-
         try {
 
             String mandateType = "";
             String applicationNo = "";
 
-            List<?> dataList = enachPaymentRepository.findLoanNoAndMandateType(transactionNo);
-
-            if (!dataList.isEmpty()) {
-                Object[] obj = (Object[]) dataList.get(0);
-                mandateType = "" + obj[0];
-                applicationNo = "" + obj[1];
-            }
+            EnachPayment paymentDetail = enachPaymentRepository.findLoanNoAndMandateType(transactionNo);
+            mandateType=paymentDetail.getMandateType();
+            applicationNo=paymentDetail.getApplicationNo();
 
             //===========================WHEN Email Details get from DB then open this code ==============================
-            String sql = customerDetailsUtility.getCustomerDetailsQuary(applicationNo);
-            List<BranchNameDetail> listData = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(BranchNameDetail.class));
-            if (!listData.isEmpty() && listData.size() > 0) {
-                branchNameDetailDetails = listData.get(0);
-            }
-            String branchName = branchNameDetailDetails.getBranchName();
+           BranchNameDetail branchNameDetailDetails=otpService.branchName(applicationNo);
 
+            if (branchNameDetailDetails!=null) {
+
+            String branchName = branchNameDetailDetails.getBranchName();
             String emailId = branchDetailRepository.findByBranchEmail(branchName);
             System.out.println("BranchEmail " + emailId);
 
-
 //            String emailId = "ravi.soni@shubham.co";
-
-            if (!StringUtils.isEmpty(emailId)) {
                 EmailDetails emailDetails = new EmailDetails();
 
                 if ("Success".equalsIgnoreCase(transactionStatus)) {
                     emailDetails.setRecipient(emailId);
                     emailDetails.setSubject("E-NACH SHUBHAM");
-                    emailDetails.setMsgBody("Enach registration has been successfully completed \n" +
-                            "for " + mandateType + " to ApplicationNo " + applicationNo + " and TransactionNo " + transactionNo + ".\n" +
-                            "Regards\n" +
-                            "Shubham Housing Development Finance Company");
+                    emailDetails.setMsgBody("Enach registration has been successfully completed \n" + "for " + mandateType + " to ApplicationNo " + applicationNo + " and TransactionNo " + transactionNo + ".\n" + "Regards\n" + "Shubham Housing Development Finance Company");
 
                     otpUtility.sendSimpleMail(emailDetails);
 
                 } else if ("Failed".equalsIgnoreCase(transactionStatus)) {
                     emailDetails.setRecipient(emailId);
                     emailDetails.setSubject("E-NACH SHUBHAM");
-                    emailDetails.setMsgBody("Enach registration has been failed \n" +
-                            "due to " + errorMessage + " for " + mandateType + " to ApplicationNo " + applicationNo + " and TransactionNo " + transactionNo + ".\n" +
-                            "Regards\n" +
-                            "Shubham Housing Development Finance Company");
+                    emailDetails.setMsgBody("Enach registration has been failed \n" + "due to " + errorMessage + " for " + mandateType + " to ApplicationNo " + applicationNo + " and TransactionNo " + transactionNo + ".\n" + "Regards\n" + "Shubham Housing Development Finance Company");
 
                     otpUtility.sendSimpleMail(emailDetails);
                 }

@@ -3,6 +3,7 @@ package com.enach.ServiceIMPL;
 import com.enach.Entity.EnachPayment;
 import com.enach.Models.MandateTypeAmountData;
 import com.enach.Repository.EnachPaymentRepository;
+import com.enach.Service.OtpService;
 import com.enach.Service.ReqstrService;
 import com.enach.Utill.CustomerDetailsUtility;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,28 +27,9 @@ public class ReqstrServiceIMPL implements ReqstrService {
     private EnachPaymentRepository enachPaymentRepository;
     @Autowired
     private CustomerDetailsUtility customerDetailsUtility;
+    @Autowired
+    private OtpService otpService;
 
-
-    @Override
-    public MandateTypeAmountData getMandateTypeAmount(String applicationNo) {
-
-        MandateTypeAmountData mandateTypeAmountResponse = new MandateTypeAmountData();
-
-        try {
-
-            String sql = customerDetailsUtility.getCustomerDetailsQuary(applicationNo);
-            List<MandateTypeAmountData> listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(MandateTypeAmountData.class));
-
-            if(!listData.isEmpty() && listData.size()>0) {
-                mandateTypeAmountResponse = listData.get(0);
-            }
-
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-
-        return mandateTypeAmountResponse;
-    }
 
     @Override
     public void saveEnachPayment(String transactionNo, String applicationNo, String paymentMethod,String mandateType, Timestamp transactionStartDate) throws Exception {

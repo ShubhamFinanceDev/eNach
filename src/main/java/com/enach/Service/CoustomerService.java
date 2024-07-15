@@ -3,7 +3,7 @@ package com.enach.Service;
 
 
 import com.enach.Entity.EnachPayment;
-import com.enach.Models.CustomerDetails;
+import com.enach.Entity.CustomerDetails;
 
 import java.util.HashMap;
 
