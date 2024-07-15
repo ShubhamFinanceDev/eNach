@@ -14,10 +14,11 @@ public class CustomerDetailsUtility {
                     "    SELECT AP.\"Application Number\", AP.\"Branch Name\", AP.\"Sanction Loan Amount\",\n" +
                     "           AP.\"Customer Number\", LD.\"CUSTOMER NAME\", AP.\"First Disbursal Date\",\n" +
                     "           AP.\"First Instalment Date\", AP.\"Installment Amount\", LD.\"NEXT INSTALLMENT DUE DATE\",\n" +
-                    "           AP.\"Current Status\", ID.PHONE_NUMBER, AP.\"Loan Account No\"\n" +
+                    "           AP.\"Current Status\", AD.\"Mobile Number\" as PHONE_NUMBER, AP.\"Loan Account No\"\n" +
                     "    FROM Application AP\n" +
                     "    LEFT JOIN Loan LD ON AP.\"Application Number\" = LD.CASAPPLNO\n" +
                     "    LEFT JOIN Identification ID ON AP.\"Neo CIF ID\" = ID.CUSTOMER_INFO_FILE_NUMBER\n" +
+                    "    LEFT JOIN ADDRESS AD ON AP.\"Customer Number\"= AD.\"Customer Number\"\n"+
                     ") CD \n" +
                     "WHERE CD.\"Application Number\" IS NOT NULL\n" +
                     "  AND CD.PHONE_NUMBER IS NOT NULL\n" +
