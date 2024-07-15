@@ -12,15 +12,20 @@ public class CustomerDetailsUtility {
         if(applicationNo.startsWith("APPL")) {
             String query = "SELECT * FROM (\n" +
                     "    SELECT AP.\"Application Number\", AP.\"Branch Name\", AP.\"Sanction Loan Amount\",\n" +
-                    "           AP.\"Customer Number\", LD.\"CUSTOMER NAME\", AP.\"First Disbursal Date\",\n" +
+                    "           AP.\"Customer Number\", IC.\"Customer Name\", AP.\"First Disbursal Date\",\n" +
                     "           AP.\"First Instalment Date\", AP.\"Installment Amount\", LD.\"NEXT INSTALLMENT DUE DATE\",\n" +
                     "           AP.\"Current Status\", AD.\"Mobile Number\" as PHONE_NUMBER, AP.\"Loan Account No\"\n" +
                     "    FROM Application AP\n" +
                     "    LEFT JOIN Loan LD ON AP.\"Application Number\" = LD.CASAPPLNO\n" +
                     "    LEFT JOIN Identification ID ON AP.\"Neo CIF ID\" = ID.CUSTOMER_INFO_FILE_NUMBER\n" +
                     "    LEFT JOIN ADDRESS AD ON AP.\"Customer Number\"= AD.\"Customer Number\"\n"+
+                    "    LEFT JOIN \"Individual Customer\" IC ON AP.\"Customer Number\"= IC.\"Customer Number\"\n"+
                     ") CD \n" +
                     "WHERE CD.\"Application Number\" IS NOT NULL\n" +
+                    "  AND CD.\"Sanction Loan Amount\" IS NOT NULL\n" +
+                    "  AND CD.\"Customer Name\" IS NOT NULL\n" +
+                    "  AND CD.\"Installment Amount\" IS NOT NULL\n" +
+                    "  AND CD.\"Branch Name\" IS NOT NULL\n" +
                     "  AND CD.PHONE_NUMBER IS NOT NULL\n" +
                     "  AND LENGTH(CD.PHONE_NUMBER) = 10\n" +
                     "  AND CD.\"Application Number\" LIKE '"+applicationNo+"'";
@@ -34,7 +39,11 @@ public class CustomerDetailsUtility {
                    "           TO_DATE(NEXT_DUE_DATE, 'DD-MM-RR') AS NEXT_DUE_DATE, CURRENT_STATUS,\n" +
                    "           Mobile_No as PHONE_NUMBER, LOAN_ACCOUNT_NO\n" +
                    "    FROM enach_old ) CD \n" +
-                   "WHERE CD.APPLICATION_NUMBER IS NOT NULL\n" +
+                   "WHERE CD.\"APPLICATION_NUMBER\" IS NOT NULL\n" +
+                   "  AND CD.\"SANCTION_LOAN_AMOUNT\" IS NOT NULL\n" +
+                   "  AND CD.\"CUSTOMER_NAME\" IS NOT NULL\n" +
+                   "  AND CD.\"INSTALLMENT_AMOUNT\" IS NOT NULL\n" +
+                   "  AND CD.\"BRANCH_NAME\" IS NOT NULL\n" +
                    "  AND CD.PHONE_NUMBER IS NOT NULL\n" +
                    "  AND LENGTH(CD.PHONE_NUMBER) = 10\n" +
                    "  AND CD.APPLICATION_NUMBER LIKE '"+applicationNo+"'";
