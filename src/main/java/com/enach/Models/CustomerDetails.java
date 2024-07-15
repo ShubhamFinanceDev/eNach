@@ -28,6 +28,7 @@ public class CustomerDetails implements UserDetails {
     private LocalDate nextInstallmentDueDate;
     private String currentStatus;
     private String phoneNumber;
+    private String loanAccountNo;
 
 
     @Override

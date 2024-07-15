@@ -35,7 +35,7 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
         try {
 
-            String sql = customerDetailsUtility.getCustomerAmountQuary(applicationNo);
+            String sql = customerDetailsUtility.getCustomerDetailsQuary(applicationNo);
             List<MandateTypeAmountData> listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(MandateTypeAmountData.class));
 
             if(!listData.isEmpty() && listData.size()>0) {
