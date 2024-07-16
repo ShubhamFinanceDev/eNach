@@ -11,6 +11,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 
@@ -29,7 +30,7 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
 
     @Override
-    public void saveEnachPayment(String transactionNo, String applicationNo, String paymentMethod,String mandateType, Timestamp transactionStartDate) throws Exception {
+    public void saveEnachPayment(String transactionNo, String applicationNo, String paymentMethod, String mandateType, Timestamp transactionStartDate, BigDecimal amount) throws Exception {
 
         EnachPayment enachPayment = new EnachPayment();
         String transactionStatus ="inprocess";
@@ -42,6 +43,7 @@ public class ReqstrServiceIMPL implements ReqstrService {
             enachPayment.setMandateType(mandateType);
             enachPayment.setTransactionStartDate(transactionStartDate);
             enachPayment.setTransactionStatus(transactionStatus);
+            enachPayment.setAmount(amount);
             enachPaymentRepository.save(enachPayment);
 
         } catch (DataIntegrityViolationException ex) {

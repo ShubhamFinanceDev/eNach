@@ -43,13 +43,13 @@ public class ReqstrController {
             if ("MNTH".equalsIgnoreCase(mandateType)) {
                 mandateTypeAmountResponse.setAmount(BigDecimal.valueOf(mandateTypeAmountData.getInstallmentAmount()*2));
                 mandateTypeAmountResponse.setCode("0000");
-                mandateTypeAmountResponse.setMsg("succuss emandate amount");
+                mandateTypeAmountResponse.setMsg("success e-mandate amount");
                 return new ResponseEntity(mandateTypeAmountResponse, HttpStatus.OK);
 
             } else if ("ADHO".equalsIgnoreCase(mandateType)) {
                 mandateTypeAmountResponse.setAmount(BigDecimal.valueOf(mandateTypeAmountData.getSanctionLoanAmount()));
                 mandateTypeAmountResponse.setCode("0000");
-                mandateTypeAmountResponse.setMsg("succuss emandate amount");
+                mandateTypeAmountResponse.setMsg("success e-mandate amount");
                 return new ResponseEntity(mandateTypeAmountResponse, HttpStatus.OK);
 
             } else {
@@ -72,8 +72,7 @@ public class ReqstrController {
 
         try {
 
-//                if (StringUtils.isEmpty(request.getTransactionNo()) || StringUtils.isEmpty(request.getMandateType()) || StringUtils.isEmpty(request.getApplicationNo()) || StringUtils.isEmpty(request.getPaymentMethod()) || StringUtils.isEmpty(request.getTransactionStartDate())) {
-            if (StringUtils.isEmpty(request.getTransactionNo()) || StringUtils.isEmpty(request.getMandateType()) || StringUtils.isEmpty(request.getApplicationNo()) || StringUtils.isEmpty(request.getTransactionStartDate())) {
+                if (StringUtils.isEmpty(request.getTransactionNo()) || StringUtils.isEmpty(request.getMandateType()) || StringUtils.isEmpty(request.getApplicationNo()) || StringUtils.isEmpty(request.getPaymentMethod()) || StringUtils.isEmpty(request.getTransactionStartDate())) {
 
                 commonResponse.setMsg("Required field is empty.");
                 commonResponse.setCode("1111");
@@ -82,7 +81,7 @@ public class ReqstrController {
 
             String mandateType = ("MNTH".equalsIgnoreCase(request.getMandateType())) ? "e-Mandate" : "security-mandate";
 
-            reqstrService.saveEnachPayment(request.getTransactionNo(), request.getApplicationNo(), request.getPaymentMethod(), mandateType, request.getTransactionStartDate());
+            reqstrService.saveEnachPayment(request.getTransactionNo(), request.getApplicationNo(), request.getPaymentMethod(), mandateType, request.getTransactionStartDate(),request.getAmount());
 
             commonResponse.setMsg("eNachPayment save successfully.");
             commonResponse.setMsg("Response Save.");
@@ -90,10 +89,10 @@ public class ReqstrController {
             return new ResponseEntity(commonResponse, HttpStatus.OK);
 
         } catch (DataIntegrityViolationException ex) {
-            commonResponse.setMsg("Dublicate request.");
+            commonResponse.setMsg("Duplicate request.");
             commonResponse.setCode("1111");
         } catch (Exception e) {
-            commonResponse.setMsg("something went worng.");
+            commonResponse.setMsg("something went wrong.");
             commonResponse.setCode("1111");
         }
         log.info("transaction msg" + commonResponse.getMsg());
