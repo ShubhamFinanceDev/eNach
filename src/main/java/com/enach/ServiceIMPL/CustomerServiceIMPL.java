@@ -10,21 +10,19 @@ import com.enach.Repository.CustomerDetailsRepository;
 import com.enach.Repository.EnachPaymentRepository;
 import com.enach.Repository.OtpDetailsRepository;
 import com.enach.Service.CoustomerService;
-import com.enach.Service.OtpService;
+import com.enach.Service.DatabaseService;
 import com.enach.Utill.CustomerDetailsUtility;
 import com.enach.Utill.OtpUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.core.parameters.P;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
@@ -49,7 +47,7 @@ public class CustomerServiceIMPL implements CoustomerService {
     @Autowired
     private CustomerDetailsRepository customerDetailsRepository;
     @Autowired
-    private OtpService otpService;
+    private DatabaseService databaseService;
 
     @Override
     public HashMap<String, String> validateCustAndSendOtp(String applicationNo) {
@@ -57,7 +55,7 @@ public class CustomerServiceIMPL implements CoustomerService {
         HashMap<String, String> otpResponse = new HashMap<>();
 
         try {
-            List<CustomerDetails> listData = listData = otpService.getCustomerDetails(applicationNo);
+            List<CustomerDetails> listData =databaseService.getCustomerDetails(applicationNo);
             System.out.println("listData" + listData);
             if (!listData.isEmpty()) {
                 CustomerDetails customerDetails = listData.get(0);
@@ -123,7 +121,7 @@ public class CustomerServiceIMPL implements CoustomerService {
             OtpDetails otpDetails = otpDetailsRepository.IsotpExpired(mobileNo, otpCode);
             if (otpDetails != null) {
 
-                List<CustomerDetails> listData = otpService.getCustomerDetails(applicationNo);
+                List<CustomerDetails> listData = databaseService.getCustomerDetails(applicationNo);
                 if (!listData.isEmpty()) {
                     customerDetails = listData.get(0);
                 } else {
@@ -162,7 +160,7 @@ public class CustomerServiceIMPL implements CoustomerService {
         return enachPayment;
     }
 
-
+    @Async
     @Override
     public void sendEmailOnBank(String transactionNo, String transactionStatus, String errorMessage) {
 
@@ -176,7 +174,7 @@ public class CustomerServiceIMPL implements CoustomerService {
             applicationNo=paymentDetail.getApplicationNo();
 
             //===========================WHEN Email Details get from DB then open this code ==============================
-           BranchNameDetail branchNameDetailDetails=otpService.branchName(applicationNo);
+           BranchNameDetail branchNameDetailDetails= databaseService.branchName(applicationNo);
 
             if (branchNameDetailDetails!=null) {
 

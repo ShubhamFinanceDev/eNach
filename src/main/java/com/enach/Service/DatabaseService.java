@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class OtpService implements UserDetailsService {
+public class DatabaseService implements UserDetailsService {
 
     @Autowired
     @Qualifier("jdbcJdbcTemplate")

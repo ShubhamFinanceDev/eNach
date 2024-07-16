@@ -1,20 +1,17 @@
 package com.enach.ServiceIMPL;
 
 import com.enach.Entity.EnachPayment;
-import com.enach.Models.MandateTypeAmountData;
 import com.enach.Repository.EnachPaymentRepository;
-import com.enach.Service.OtpService;
+import com.enach.Service.DatabaseService;
 import com.enach.Service.ReqstrService;
 import com.enach.Utill.CustomerDetailsUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.util.List;
 
 
 @Service
@@ -28,7 +25,7 @@ public class ReqstrServiceIMPL implements ReqstrService {
     @Autowired
     private CustomerDetailsUtility customerDetailsUtility;
     @Autowired
-    private OtpService otpService;
+    private DatabaseService databaseService;
 
 
     @Override
@@ -38,6 +35,7 @@ public class ReqstrServiceIMPL implements ReqstrService {
         String transactionStatus ="inprocess";
 
         try {
+            enachPaymentRepository.unprocessTransaction(applicationNo,mandateType);
             enachPayment.setTransactionNo(transactionNo);
             enachPayment.setApplicationNo(applicationNo);
             enachPayment.setPaymentMethod(paymentMethod);

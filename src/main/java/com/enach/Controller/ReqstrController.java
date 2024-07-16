@@ -1,9 +1,8 @@
 package com.enach.Controller;
 
 
-import com.enach.Entity.EnachPayment;
 import com.enach.Models.*;
-import com.enach.Service.OtpService;
+import com.enach.Service.DatabaseService;
 import com.enach.Service.ReqstrService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +24,7 @@ public class ReqstrController {
     @Autowired
     private ReqstrService reqstrService;
     @Autowired
-    private OtpService otpService;
+    private DatabaseService databaseService;
 
     @GetMapping("/mandateType")
     public ResponseEntity<String> mandateType(@RequestParam("applicationNo") String applicationNo, @RequestParam("mandateType") String mandateType) {
@@ -40,7 +39,7 @@ public class ReqstrController {
                 return new ResponseEntity(commonResponse, HttpStatus.OK);
             }
 
-            MandateTypeAmountData mandateTypeAmountData = otpService.mandateTypeAmount(applicationNo);
+            MandateTypeAmountData mandateTypeAmountData = databaseService.mandateTypeAmount(applicationNo);
             if ("MNTH".equalsIgnoreCase(mandateType)) {
                 mandateTypeAmountResponse.setAmount(BigDecimal.valueOf(mandateTypeAmountData.getInstallmentAmount()*2));
                 mandateTypeAmountResponse.setCode("0000");
