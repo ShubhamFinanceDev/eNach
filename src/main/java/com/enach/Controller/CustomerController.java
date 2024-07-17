@@ -131,12 +131,12 @@ public class CustomerController {
                 statusResponse.setApplicationNo(enachPayment.getApplicationNo());
                 statusResponse.setMandateType(enachPayment.getMandateType());
                 statusResponse.setAmount(enachPayment.getAmount());
-                statusResponse.setMsg("update paymentstatus.");
+                statusResponse.setMsg("update payment-status.");
                 statusResponse.setCode("0000");
                 return new ResponseEntity(statusResponse, HttpStatus.OK);
 
             }else{
-                commonResponse.setMsg("transactionno does not exist.");
+                commonResponse.setMsg("transaction-no does not exist.");
                 commonResponse.setCode("1111");
             }
 
