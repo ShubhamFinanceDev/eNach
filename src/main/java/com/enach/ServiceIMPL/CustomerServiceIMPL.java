@@ -142,7 +142,7 @@ public class CustomerServiceIMPL implements CoustomerService {
 
 
     @Override
-    public EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus, String errorMessage) {
+    public EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus, String errorMessage,String refrenceId) {
 
         EnachPayment enachPayment = null;
 
@@ -152,7 +152,7 @@ public class CustomerServiceIMPL implements CoustomerService {
             if (enachPayment != null && !StringUtils.isEmpty(enachPayment)) {
 
                 Timestamp transactionCompleteDate = new Timestamp(System.currentTimeMillis());
-                enachPaymentRepository.updatePaymentStatus(transactionNo, transactionStatus, errorMessage, transactionCompleteDate);
+                enachPaymentRepository.updatePaymentStatus(transactionNo, transactionStatus, errorMessage, transactionCompleteDate,refrenceId);
             }
         } catch (Exception e) {
             System.out.println(e);

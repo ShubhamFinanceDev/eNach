@@ -123,7 +123,7 @@ public class CustomerController {
                 return new ResponseEntity(commonResponse, HttpStatus.OK);
             }
 
-            EnachPayment enachPayment = coustomerService.updateEnachPaymentStatus(transactionNo,request.getTransactionStatus(),request.getErrorMessage());
+            EnachPayment enachPayment = coustomerService.updateEnachPaymentStatus(transactionNo,request.getTransactionStatus(),request.getErrorMessage(),request.getRefrenceId());
 
             if (enachPayment != null && !StringUtils.isEmpty(enachPayment)){
 

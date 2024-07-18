@@ -37,6 +37,8 @@ public class EnachPayment {
     private String errorMessage;
     @Column(name="amount")
     private BigDecimal amount;
+    @Column(name="refrenceId")
+    private String refrenceId;
 
 
 }
