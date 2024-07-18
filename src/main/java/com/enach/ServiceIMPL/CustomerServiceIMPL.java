@@ -5,21 +5,26 @@ import com.enach.Entity.CustomerDetails;
 import com.enach.Entity.EnachPayment;
 import com.enach.Entity.OtpDetails;
 import com.enach.Models.*;
-import com.enach.Repository.BranchDetailRepository;
-import com.enach.Repository.CustomerDetailsRepository;
-import com.enach.Repository.EnachPaymentRepository;
-import com.enach.Repository.OtpDetailsRepository;
+import com.enach.Repository.*;
 import com.enach.Service.CoustomerService;
 import com.enach.Service.DatabaseService;
 import com.enach.Utill.CustomerDetailsUtility;
 import com.enach.Utill.OtpUtility;
+import com.enach.Utill.SendEmailUtility;
+import io.micrometer.core.instrument.MultiGauge;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -48,6 +53,11 @@ public class CustomerServiceIMPL implements CoustomerService {
     private CustomerDetailsRepository customerDetailsRepository;
     @Autowired
     private DatabaseService databaseService;
+    @Autowired
+    private SendEmailUtility sendEmailUtility;
+    @Autowired
+    private EmailDetailsRepo emailDetailsRepo;
+
 
     @Override
     public HashMap<String, String> validateCustAndSendOtp(String applicationNo) {
@@ -207,4 +217,50 @@ public class CustomerServiceIMPL implements CoustomerService {
         }
     }
 
+//    @Scheduled(cron = "1 * * * * *") // 30 minutes
+    public CommonResponse generateReportOnMail(){
+
+        try{
+            List<EnachPayment> enachPayment = enachPaymentRepository.findByTransactionStatus();
+            XSSFWorkbook workbook = new XSSFWorkbook();
+            XSSFSheet sheet = workbook.createSheet("Enach-payment-report");
+            int rowCount = 0;
+
+            String[] header = {"Transaction No", "Application No", "Payment Method", "Transaction Start Date", "Transaction Complete Date", "Transaction Status", "Mandate Type", "Error Message", "Amount"};
+            Row headerRow = sheet.createRow(rowCount++);
+            int cellCount = 0;
+
+            for (String headerValue : header) {
+                headerRow.createCell(cellCount++).setCellValue(headerValue);
+            }
+            for (EnachPayment details : enachPayment) {
+                Row row = sheet.createRow(rowCount++);
+                row.createCell(0).setCellValue(details.getTransactionNo() != null ? details.getTransactionNo() : "");
+                row.createCell(1).setCellValue(details.getApplicationNo() != null ? details.getApplicationNo() : "");
+                row.createCell(2).setCellValue(details.getPaymentMethod() != null ? details.getPaymentMethod() : "");
+                row.createCell(3).setCellValue(details.getTransactionStartDate() != null ? details.getTransactionStartDate().toString() : "");
+                row.createCell(4).setCellValue(details.getTransactionCompleteDate() != null ? details.getTransactionCompleteDate().toString() : "");
+                row.createCell(5).setCellValue(details.getTransactionStatus() != null ? details.getTransactionStatus() : "");
+                row.createCell(6).setCellValue(details.getMandateType() != null ? details.getMandateType() : "");
+                row.createCell(7).setCellValue(details.getErrorMessage() != null ? details.getErrorMessage() : "");
+                row.createCell(8).setCellValue(details.getAmount() != null ? details.getAmount().toString() : "");
+//                row.createCell(9).setCellValue(details.getRefrenceId() != null ? details.getRefrenceId() : "");
+            }
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                workbook.write(outputStream);
+                workbook.close();
+                byte[] excelData = outputStream.toByteArray();
+                    System.out.println("File created successfully");
+                List<com.enach.Entity.EmailDetails> emailDetails = emailDetailsRepo.findAll();
+                for (com.enach.Entity.EmailDetails emails :emailDetails) {
+                    String email = emails.getEmail();
+                    sendEmailUtility.sendEmailWithAttachment(email, excelData);
+                    emailDetailsRepo.updateSendingTime(email,Timestamp.valueOf(LocalDateTime.now()));
+                }
+            System.out.println("Email send successfully.");
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
 }

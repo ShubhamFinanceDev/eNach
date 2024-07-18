@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 
 @Repository
@@ -30,4 +31,6 @@ public interface EnachPaymentRepository  extends JpaRepository<EnachPayment, Lon
     @Modifying
     @Query("update EnachPayment cd set cd.transactionStatus='Failed', cd.errorMessage='Due to new request initiated' where cd.transactionStatus='inprocess' and cd.applicationNo=:applicationNo and cd.mandateType=:mandateType")
     void unprocessTransaction(String applicationNo, String mandateType);
+    @Query("select cd from EnachPayment cd where cd.transactionStatus='Failed' or cd.transactionStatus ='Success'")
+    List<EnachPayment> findByTransactionStatus(/*String transactionStatus*/);
 }

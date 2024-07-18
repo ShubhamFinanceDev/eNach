@@ -147,4 +147,10 @@ public class CustomerController {
         return new ResponseEntity(commonResponse, HttpStatus.OK);
     }
 
+    @GetMapping("/send-report")
+    public ResponseEntity<?> generateReport() {
+        coustomerService.generateReportOnMail();
+        return ResponseEntity.ok("Success");
+    }
+
 }

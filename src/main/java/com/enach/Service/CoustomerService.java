@@ -4,6 +4,7 @@ package com.enach.Service;
 
 import com.enach.Entity.EnachPayment;
 import com.enach.Entity.CustomerDetails;
+import com.enach.Models.CommonResponse;
 
 import java.util.HashMap;
 
@@ -17,5 +18,5 @@ public interface CoustomerService {
 
     void sendEmailOnBank(String transactionNo, String transactionStatus, String errorMessage);
 
-
+    CommonResponse generateReportOnMail();
 }
