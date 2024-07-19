@@ -1,19 +1,18 @@
 package com.enach.ServiceIMPL;
 
 import com.enach.Entity.EnachPayment;
-import com.enach.Models.MandateTypeAmountData;
 import com.enach.Repository.EnachPaymentRepository;
+import com.enach.Service.DatabaseService;
 import com.enach.Service.ReqstrService;
 import com.enach.Utill.CustomerDetailsUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.List;
 
 
 @Service
@@ -26,42 +25,25 @@ public class ReqstrServiceIMPL implements ReqstrService {
     private EnachPaymentRepository enachPaymentRepository;
     @Autowired
     private CustomerDetailsUtility customerDetailsUtility;
+    @Autowired
+    private DatabaseService databaseService;
 
 
     @Override
-    public MandateTypeAmountData getMandateTypeAmount(String applicationNo) {
-
-        MandateTypeAmountData mandateTypeAmountResponse = new MandateTypeAmountData();
-
-        try {
-
-            String sql = customerDetailsUtility.getCustomerDetailsQuary(applicationNo);
-            List<MandateTypeAmountData> listData = jdbcTemplate.query(sql,new BeanPropertyRowMapper<>(MandateTypeAmountData.class));
-
-            if(!listData.isEmpty() && listData.size()>0) {
-                mandateTypeAmountResponse = listData.get(0);
-            }
-
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-
-        return mandateTypeAmountResponse;
-    }
-
-    @Override
-    public void saveEnachPayment(String transactionNo, String applicationNo, String paymentMethod,String mandateType, Timestamp transactionStartDate) throws Exception {
+    public void saveEnachPayment(String transactionNo, String applicationNo, String paymentMethod, String mandateType, Timestamp transactionStartDate, BigDecimal amount) throws Exception {
 
         EnachPayment enachPayment = new EnachPayment();
         String transactionStatus ="inprocess";
 
         try {
+            enachPaymentRepository.unprocessTransaction(applicationNo,mandateType);
             enachPayment.setTransactionNo(transactionNo);
             enachPayment.setApplicationNo(applicationNo);
             enachPayment.setPaymentMethod(paymentMethod);
             enachPayment.setMandateType(mandateType);
             enachPayment.setTransactionStartDate(transactionStartDate);
             enachPayment.setTransactionStatus(transactionStatus);
+            enachPayment.setAmount(amount);
             enachPaymentRepository.save(enachPayment);
 
         } catch (DataIntegrityViolationException ex) {

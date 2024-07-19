@@ -21,11 +21,16 @@ public interface EnachPaymentRepository  extends JpaRepository<EnachPayment, Lon
 
     @Transactional
     @Modifying
-    @Query("update EnachPayment cd set cd.transactionStatus=:transactionStatus, cd.transactionCompleteDate=:transactionCompleteDate, cd.errorMessage=:errorMessage where cd.transactionNo=:transactionNo")
-    void updatePaymentStatus(@Param("transactionNo") String transactionNo, @Param("transactionStatus") String transactionStatus, @Param("errorMessage") String errorMessage, @Param("transactionCompleteDate")Timestamp transactionCompleteDate);
+    @Query("update EnachPayment cd set cd.transactionStatus=:transactionStatus, cd.transactionCompleteDate=:transactionCompleteDate, cd.errorMessage=:errorMessage ,cd.refrenceId=:refrenceId where cd.transactionNo=:transactionNo")
+    void updatePaymentStatus(@Param("transactionNo") String transactionNo, @Param("transactionStatus") String transactionStatus, @Param("errorMessage") String errorMessage, @Param("transactionCompleteDate")Timestamp transactionCompleteDate,@Param("refrenceId")String refrenceId);
 
-    @Query("select cd.mandateType,cd.applicationNo from EnachPayment cd where cd.transactionNo=:transactionNo")
-    List<?> findLoanNoAndMandateType(@Param("transactionNo") String transactionNo);
+    @Query("select cd from EnachPayment cd where cd.transactionNo=:transactionNo")
+    EnachPayment findLoanNoAndMandateType(@Param("transactionNo") String transactionNo);
 
-
+    @Transactional
+    @Modifying
+    @Query("update EnachPayment cd set cd.transactionStatus='Failed', cd.errorMessage='Due to new request initiated' where cd.transactionStatus='inprocess' and cd.applicationNo=:applicationNo and cd.mandateType=:mandateType")
+    void unprocessTransaction(String applicationNo, String mandateType);
+    @Query("select cd from EnachPayment cd where cd.transactionStatus='Failed' or cd.transactionStatus ='Success'")
+    List<EnachPayment> findByTransactionStatus(/*String transactionStatus*/);
 }

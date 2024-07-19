@@ -1,4 +1,4 @@
-package com.enach.Models;
+package com.enach.Entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -7,27 +7,35 @@ import jakarta.persistence.Table;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.w3c.dom.Text;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Date;
-
+@Entity
+@Table(name = "enach_old")
 @Data
 public class CustomerDetails implements UserDetails {
-
+    @Id
+    @Column(name = "APPLICATION_NUMBER")
     private String applicationNumber;
+    @Column(name = "BRANCH_NAME")
     private String branchName;
+    @Column(name = "SANCTION_AMOUNT")
     private Double sanctionLoanAmount;
-    private String customerNumber;
+    @Column(name = "CUSTOMER_NAME")
     private String customerName;
-    private LocalDate firstDisbursalDate;
-    private LocalDate firstInstalmentDate;
+//    @Column(name = "FIRST_DISBURSAL_DATE")
+//    private LocalDate firstDisbursalDate;
+//    @Column(name = "FIRST_INSTALLMENT_DATE")
+//    private LocalDate firstInstalmentDate;
+    @Column(name = "INSTALLMENT_AMOUNT")
     private Double installmentAmount;
-    private LocalDate nextInstallmentDueDate;
+//    @Column(name = "NEXT_DUE_DATE")
+//    private LocalDate nextInstallmentDueDate;
+    @Column(name = "CURRENT_STATUS")
     private String currentStatus;
+    @Column(name = "Mobile_No")
     private String phoneNumber;
+    @Column(name = "LOAN_ACCOUNT_NO")
     private String loanAccountNo;
 
 

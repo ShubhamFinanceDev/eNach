@@ -1,6 +1,7 @@
 package com.enach.Utill;
 
 
+import com.enach.Entity.CustomerDetails;
 import com.enach.Models.EmailDetails;
 import com.enach.Repository.OtpDetailsRepository;
 import org.slf4j.Logger;
@@ -34,7 +35,7 @@ public class OtpUtility {
     private OtpDetailsRepository otpDetailsRepository;
     private Logger logger = LoggerFactory.getLogger(OncePerRequestFilter.class);
 
-    public int generateCustOtp(com.enach.Models.CustomerDetails customerDetails) {
+    public int generateCustOtp(CustomerDetails customerDetails) {
 
         String mobileNo = customerDetails.getPhoneNumber();
         int count = otpDetailsRepository.countMobileNo(mobileNo);

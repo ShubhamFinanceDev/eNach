@@ -1,23 +1,30 @@
 package com.enach.ServiceIMPL;
 
 
-import com.enach.Entity.BranchDetails;
+import com.enach.Entity.CustomerDetails;
 import com.enach.Entity.EnachPayment;
 import com.enach.Entity.OtpDetails;
 import com.enach.Models.*;
-import com.enach.Repository.BranchDetailRepository;
-import com.enach.Repository.EnachPaymentRepository;
-import com.enach.Repository.OtpDetailsRepository;
+import com.enach.Repository.*;
 import com.enach.Service.CoustomerService;
+import com.enach.Service.DatabaseService;
 import com.enach.Utill.CustomerDetailsUtility;
 import com.enach.Utill.OtpUtility;
+import com.enach.Utill.SendEmailUtility;
+import io.micrometer.core.instrument.MultiGauge;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import java.io.ByteArrayOutputStream;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -42,6 +49,14 @@ public class CustomerServiceIMPL implements CoustomerService {
     private CustomerDetailsUtility customerDetailsUtility;
     @Autowired
     private BranchDetailRepository branchDetailRepository;
+    @Autowired
+    private CustomerDetailsRepository customerDetailsRepository;
+    @Autowired
+    private DatabaseService databaseService;
+    @Autowired
+    private SendEmailUtility sendEmailUtility;
+    @Autowired
+    private EmailDetailsRepo emailDetailsRepo;
 
 
     @Override
@@ -50,12 +65,9 @@ public class CustomerServiceIMPL implements CoustomerService {
         HashMap<String, String> otpResponse = new HashMap<>();
 
         try {
-
-            String sql = customerDetailsUtility.getCustomerDetailsQuary(applicationNo);
-            List<CustomerDetails> listData = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(CustomerDetails.class));
-
+            List<CustomerDetails> listData =databaseService.getCustomerDetails(applicationNo);
             System.out.println("listData" + listData);
-            if (!listData.isEmpty() && listData.size() > 0) {
+            if (!listData.isEmpty()) {
                 CustomerDetails customerDetails = listData.get(0);
 
                 if (!StringUtils.isEmpty(customerDetails.getPhoneNumber())) {
@@ -64,12 +76,12 @@ public class CustomerServiceIMPL implements CoustomerService {
                     if (otpCode > 0) {
 
                         System.out.println("otp generated successfully");
-                        if (otpUtility.sendOtp(customerDetails.getPhoneNumber(), otpCode, customerDetails.getApplicationNumber())) {
+//                        if (otpUtility.sendOtp(customerDetails.getPhoneNumber(), otpCode, customerDetails.getApplicationNumber())) {
 //                        if (otpUtility.sendOtp("8160041657", otpCode, customerDetails.getApplicationNumber())) {
 
                             System.out.println("otp sent on mobile");
                             OtpDetails otpDetails = new OtpDetails();
-                            otpDetails.setOtpCode(Long.valueOf(otpCode));
+                            otpDetails.setOtpCode((long) otpCode);
                             System.out.println(otpCode);
 
                             otpDetails.setMobileNo(customerDetails.getPhoneNumber());
@@ -77,16 +89,16 @@ public class CustomerServiceIMPL implements CoustomerService {
                             otpDetailsRepository.save(otpDetails);
                             System.out.println("otp save successfully");
                             Long otpId = otpDetails.getOtpId();
-//                            otpResponse.put("otpCode", String.valueOf(otpCode));
+                            otpResponse.put("otpCode", String.valueOf(otpCode));
 //                            otpResponse.put("otpId", String.valueOf(otpId));
                             otpResponse.put("mobile", otpDetails.getMobileNo());
                             otpResponse.put("msg", "Otp send.");
                             otpResponse.put("code", "0000");
 
-                        } else {
-                            otpResponse.put("msg", "Otp did not send, please try again");
-                            otpResponse.put("code", "1111");
-                        }
+//                        } else {
+//                            otpResponse.put("msg", "Otp did not send, please try again");
+//                            otpResponse.put("code", "1111");
+//                        }
 
                     } else {
                         otpResponse.put("msg", "Otp did not generated, please try again");
@@ -119,10 +131,8 @@ public class CustomerServiceIMPL implements CoustomerService {
             OtpDetails otpDetails = otpDetailsRepository.IsotpExpired(mobileNo, otpCode);
             if (otpDetails != null) {
 
-                String sql = customerDetailsUtility.getCustomerDetailsQuary(applicationNo);
-                List<CustomerDetails> listData = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(CustomerDetails.class));
-
-                if (!listData.isEmpty() && listData.size() > 0) {
+                List<CustomerDetails> listData = databaseService.getCustomerDetails(applicationNo);
+                if (!listData.isEmpty()) {
                     customerDetails = listData.get(0);
                 } else {
                     customerDetails = null;
@@ -142,7 +152,7 @@ public class CustomerServiceIMPL implements CoustomerService {
 
 
     @Override
-    public EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus, String errorMessage) {
+    public EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus, String errorMessage,String refrenceId) {
 
         EnachPayment enachPayment = null;
 
@@ -152,7 +162,7 @@ public class CustomerServiceIMPL implements CoustomerService {
             if (enachPayment != null && !StringUtils.isEmpty(enachPayment)) {
 
                 Timestamp transactionCompleteDate = new Timestamp(System.currentTimeMillis());
-                enachPaymentRepository.updatePaymentStatus(transactionNo, transactionStatus, errorMessage, transactionCompleteDate);
+                enachPaymentRepository.updatePaymentStatus(transactionNo, transactionStatus, errorMessage, transactionCompleteDate,refrenceId);
             }
         } catch (Exception e) {
             System.out.println(e);
@@ -160,59 +170,42 @@ public class CustomerServiceIMPL implements CoustomerService {
         return enachPayment;
     }
 
-
+    @Async
     @Override
     public void sendEmailOnBank(String transactionNo, String transactionStatus, String errorMessage) {
-
-        BranchNameDetail branchNameDetailDetails = new BranchNameDetail();
 
         try {
 
             String mandateType = "";
             String applicationNo = "";
 
-            List<?> dataList = enachPaymentRepository.findLoanNoAndMandateType(transactionNo);
-
-            if (!dataList.isEmpty()) {
-                Object[] obj = (Object[]) dataList.get(0);
-                mandateType = "" + obj[0];
-                applicationNo = "" + obj[1];
-            }
+            EnachPayment paymentDetail = enachPaymentRepository.findLoanNoAndMandateType(transactionNo);
+            mandateType=paymentDetail.getMandateType();
+            applicationNo=paymentDetail.getApplicationNo();
 
             //===========================WHEN Email Details get from DB then open this code ==============================
-            String sql = customerDetailsUtility.getCustomerDetailsQuary(applicationNo);
-            List<BranchNameDetail> listData = jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(BranchNameDetail.class));
-            if (!listData.isEmpty() && listData.size() > 0) {
-                branchNameDetailDetails = listData.get(0);
-            }
-            String branchName = branchNameDetailDetails.getBranchName();
+           BranchNameDetail branchNameDetailDetails= databaseService.branchName(applicationNo);
 
+            if (branchNameDetailDetails!=null) {
+
+            String branchName = branchNameDetailDetails.getBranchName();
             String emailId = branchDetailRepository.findByBranchEmail(branchName);
             System.out.println("BranchEmail " + emailId);
 
-
 //            String emailId = "ravi.soni@shubham.co";
-
-            if (!StringUtils.isEmpty(emailId)) {
                 EmailDetails emailDetails = new EmailDetails();
 
                 if ("Success".equalsIgnoreCase(transactionStatus)) {
                     emailDetails.setRecipient(emailId);
                     emailDetails.setSubject("E-NACH SHUBHAM");
-                    emailDetails.setMsgBody("Enach registration has been successfully completed \n" +
-                            "for " + mandateType + " to ApplicationNo " + applicationNo + " and TransactionNo " + transactionNo + ".\n" +
-                            "Regards\n" +
-                            "Shubham Housing Development Finance Company");
+                    emailDetails.setMsgBody("Enach registration has been successfully completed \n" + "for " + mandateType + " to ApplicationNo " + applicationNo + " and TransactionNo " + transactionNo + ".\n" + "Regards\n" + "Shubham Housing Development Finance Company");
 
                     otpUtility.sendSimpleMail(emailDetails);
 
                 } else if ("Failed".equalsIgnoreCase(transactionStatus)) {
                     emailDetails.setRecipient(emailId);
                     emailDetails.setSubject("E-NACH SHUBHAM");
-                    emailDetails.setMsgBody("Enach registration has been failed \n" +
-                            "due to " + errorMessage + " for " + mandateType + " to ApplicationNo " + applicationNo + " and TransactionNo " + transactionNo + ".\n" +
-                            "Regards\n" +
-                            "Shubham Housing Development Finance Company");
+                    emailDetails.setMsgBody("Enach registration has been failed \n" + "due to " + errorMessage + " for " + mandateType + " to ApplicationNo " + applicationNo + " and TransactionNo " + transactionNo + ".\n" + "Regards\n" + "Shubham Housing Development Finance Company");
 
                     otpUtility.sendSimpleMail(emailDetails);
                 }
@@ -224,4 +217,50 @@ public class CustomerServiceIMPL implements CoustomerService {
         }
     }
 
+//    @Scheduled(cron = "1 * * * * *") // 30 minutes
+    public CommonResponse generateReportOnMail(){
+
+        try{
+            List<EnachPayment> enachPayment = enachPaymentRepository.findByTransactionStatus();
+            XSSFWorkbook workbook = new XSSFWorkbook();
+            XSSFSheet sheet = workbook.createSheet("Enach-payment-report");
+            int rowCount = 0;
+
+            String[] header = {"Transaction No", "Application No", "Payment Method", "Transaction Start Date", "Transaction Complete Date", "Transaction Status", "Mandate Type", "Error Message", "Amount"};
+            Row headerRow = sheet.createRow(rowCount++);
+            int cellCount = 0;
+
+            for (String headerValue : header) {
+                headerRow.createCell(cellCount++).setCellValue(headerValue);
+            }
+            for (EnachPayment details : enachPayment) {
+                Row row = sheet.createRow(rowCount++);
+                row.createCell(0).setCellValue(details.getTransactionNo() != null ? details.getTransactionNo() : "");
+                row.createCell(1).setCellValue(details.getApplicationNo() != null ? details.getApplicationNo() : "");
+                row.createCell(2).setCellValue(details.getPaymentMethod() != null ? details.getPaymentMethod() : "");
+                row.createCell(3).setCellValue(details.getTransactionStartDate() != null ? details.getTransactionStartDate().toString() : "");
+                row.createCell(4).setCellValue(details.getTransactionCompleteDate() != null ? details.getTransactionCompleteDate().toString() : "");
+                row.createCell(5).setCellValue(details.getTransactionStatus() != null ? details.getTransactionStatus() : "");
+                row.createCell(6).setCellValue(details.getMandateType() != null ? details.getMandateType() : "");
+                row.createCell(7).setCellValue(details.getErrorMessage() != null ? details.getErrorMessage() : "");
+                row.createCell(8).setCellValue(details.getAmount() != null ? details.getAmount().toString() : "");
+//                row.createCell(9).setCellValue(details.getRefrenceId() != null ? details.getRefrenceId() : "");
+            }
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                workbook.write(outputStream);
+                workbook.close();
+                byte[] excelData = outputStream.toByteArray();
+                    System.out.println("File created successfully");
+                List<com.enach.Entity.EmailDetails> emailDetails = emailDetailsRepo.findAll();
+                for (com.enach.Entity.EmailDetails emails :emailDetails) {
+                    String email = emails.getEmail();
+                    sendEmailUtility.sendEmailWithAttachment(email, excelData);
+                    emailDetailsRepo.updateSendingTime(email,Timestamp.valueOf(LocalDateTime.now()));
+                }
+            System.out.println("Email send successfully.");
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
 }

@@ -1,6 +1,7 @@
 package com.enach.Controller;
 
 
+import com.enach.Entity.CustomerDetails;
 import com.enach.Entity.EnachPayment;
 import com.enach.Models.*;
 import com.enach.Service.CoustomerService;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.Period;
-import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
@@ -123,18 +123,20 @@ public class CustomerController {
                 return new ResponseEntity(commonResponse, HttpStatus.OK);
             }
 
-            EnachPayment enachPayment = coustomerService.updateEnachPaymentStatus(transactionNo,request.getTransactionStatus(),request.getErrorMessage());
+            EnachPayment enachPayment = coustomerService.updateEnachPaymentStatus(transactionNo,request.getTransactionStatus(),request.getErrorMessage(),request.getRefrenceId());
 
             if (enachPayment != null && !StringUtils.isEmpty(enachPayment)){
 
                 coustomerService.sendEmailOnBank(transactionNo,request.getTransactionStatus(),request.getErrorMessage());
                 statusResponse.setApplicationNo(enachPayment.getApplicationNo());
-                statusResponse.setMsg("update paymentstatus.");
+                statusResponse.setMandateType(enachPayment.getMandateType());
+                statusResponse.setAmount(enachPayment.getAmount());
+                statusResponse.setMsg("update payment-status.");
                 statusResponse.setCode("0000");
                 return new ResponseEntity(statusResponse, HttpStatus.OK);
 
             }else{
-                commonResponse.setMsg("transactionno does not exist.");
+                commonResponse.setMsg("transaction-no does not exist.");
                 commonResponse.setCode("1111");
             }
 
@@ -143,6 +145,12 @@ public class CustomerController {
             commonResponse.setCode("1111");
         }
         return new ResponseEntity(commonResponse, HttpStatus.OK);
+    }
+
+    @GetMapping("/send-report")
+    public ResponseEntity<?> generateReport() {
+        coustomerService.generateReportOnMail();
+        return ResponseEntity.ok("Success");
     }
 
 }
