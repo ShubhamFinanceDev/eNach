@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -31,7 +32,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 
-
+@EnableScheduling
 @Service
 public class CustomerServiceIMPL implements CoustomerService {
 
@@ -217,7 +218,7 @@ public class CustomerServiceIMPL implements CoustomerService {
         }
     }
 
-//    @Scheduled(cron = "1 * * * * *") // 30 minutes
+    @Scheduled(cron = "30 * * * * *") // 30 minutes
     public CommonResponse generateReportOnMail(){
 
         try{
