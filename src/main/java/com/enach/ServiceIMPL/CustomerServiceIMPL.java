@@ -77,8 +77,8 @@ public class CustomerServiceIMPL implements CoustomerService {
                     if (otpCode > 0) {
 
                         System.out.println("otp generated successfully");
-//                        if (otpUtility.sendOtp(customerDetails.getPhoneNumber(), otpCode, customerDetails.getApplicationNumber())) {
-                        if (otpUtility.sendOtp("8160041657", otpCode, customerDetails.getApplicationNumber())) {
+                        if (otpUtility.sendOtp(customerDetails.getPhoneNumber(), otpCode, customerDetails.getApplicationNumber())) {
+//                        if (otpUtility.sendOtp("8160041657", otpCode, customerDetails.getApplicationNumber())) {
 
                             System.out.println("otp sent on mobile");
                             OtpDetails otpDetails = new OtpDetails();
