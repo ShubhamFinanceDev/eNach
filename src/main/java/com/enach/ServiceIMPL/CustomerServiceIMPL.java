@@ -218,7 +218,7 @@ public class CustomerServiceIMPL implements CoustomerService {
         }
     }
 
-    @Scheduled(cron = "30 * * * * *") // 30 minutes
+    @Scheduled(cron = "* 30 * * * *") // 30 minutes
     public CommonResponse generateReportOnMail(){
 
         try{
