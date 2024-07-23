@@ -9,5 +9,6 @@ public class EnachPaymentStatusRequest {
     private String transactionStatus;
     private String errorMessage;
     private String refrenceId;
+    private String umrn;
 
 }

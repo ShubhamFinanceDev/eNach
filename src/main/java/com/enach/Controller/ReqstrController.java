@@ -81,7 +81,7 @@ public class ReqstrController {
 
             String mandateType = ("MNTH".equalsIgnoreCase(request.getMandateType())) ? "e-Mandate" : "security-mandate";
 
-            reqstrService.saveEnachPayment(request.getTransactionNo(), request.getApplicationNo(), request.getPaymentMethod(), mandateType, request.getTransactionStartDate(),request.getAmount());
+            reqstrService.saveEnachPayment(request);
 
             commonResponse.setMsg("eNachPayment save successfully.");
             commonResponse.setMsg("Response Save.");

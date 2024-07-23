@@ -39,6 +39,20 @@ public class EnachPayment {
     private BigDecimal amount;
     @Column(name="refrenceId")
     private String refrenceId;
+    @Column(name="bankName")
+    private String bankName;
+    @Column(name="bankAccountNo")
+    private String bankAccountNo;
+    @Column(name="ifscCode")
+    private String ifscCode;
+    @Column(name="startDate")
+    private Date startDate;
+    @Column(name="endDate")
+    private Date endDate;
+    @Column(name="umrn")
+    private String umrn;
+
+
 
 
 }

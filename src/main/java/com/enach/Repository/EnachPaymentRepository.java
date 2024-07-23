@@ -21,8 +21,8 @@ public interface EnachPaymentRepository  extends JpaRepository<EnachPayment, Lon
 
     @Transactional
     @Modifying
-    @Query("update EnachPayment cd set cd.transactionStatus=:transactionStatus, cd.transactionCompleteDate=:transactionCompleteDate, cd.errorMessage=:errorMessage ,cd.refrenceId=:refrenceId where cd.transactionNo=:transactionNo")
-    void updatePaymentStatus(@Param("transactionNo") String transactionNo, @Param("transactionStatus") String transactionStatus, @Param("errorMessage") String errorMessage, @Param("transactionCompleteDate")Timestamp transactionCompleteDate,@Param("refrenceId")String refrenceId);
+    @Query("update EnachPayment cd set cd.transactionStatus=:transactionStatus, cd.transactionCompleteDate=:transactionCompleteDate, cd.errorMessage=:errorMessage ,cd.refrenceId=:refrenceId,cd.umrn=:umrn where cd.transactionNo=:transactionNo")
+    void updatePaymentStatus(@Param("transactionNo") String transactionNo, @Param("transactionStatus") String transactionStatus, @Param("errorMessage") String errorMessage, @Param("transactionCompleteDate")Timestamp transactionCompleteDate, @Param("refrenceId")String refrenceId, String umrn);
 
     @Query("select cd from EnachPayment cd where cd.transactionNo=:transactionNo")
     EnachPayment findLoanNoAndMandateType(@Param("transactionNo") String transactionNo);
