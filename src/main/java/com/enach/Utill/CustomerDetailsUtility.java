@@ -33,7 +33,7 @@ private CustomerDetailsRepository customerDetailsRepository;
                 "  AND CD.\"Application Number\" LIKE '" + applicationNo + "'";
         sql = query;
 
-//        System.out.println(sql);
+        System.out.println(sql);
         return sql;
     }
     public String getBranchNameQuery(String applicationNo){
