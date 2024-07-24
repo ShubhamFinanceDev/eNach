@@ -17,4 +17,9 @@ public class EnachPaymentRequest {
     private String mandateType;
     private Timestamp transactionStartDate;
     private BigDecimal amount;
+    private String bankName;
+    private String bankAccountNo;
+    private String ifscCode;
+    private Date startDate;
+    private Date endDate;
 }

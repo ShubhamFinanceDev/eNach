@@ -14,7 +14,7 @@ public interface CoustomerService {
 
     CustomerDetails getCustomerDetail(String mobileNo, String otpCode, String applicationNo);
 
-    EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus, String errorMessage,String refrenceId);
+    EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus, String errorMessage, String refrenceId, String umrn);
 
     void sendEmailOnBank(String transactionNo, String transactionStatus, String errorMessage);
 

@@ -11,9 +11,7 @@ import com.enach.Service.DatabaseService;
 import com.enach.Utill.CustomerDetailsUtility;
 import com.enach.Utill.OtpUtility;
 import com.enach.Utill.SendEmailUtility;
-import io.micrometer.core.instrument.MultiGauge;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -153,7 +151,7 @@ public class CustomerServiceIMPL implements CoustomerService {
 
 
     @Override
-    public EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus, String errorMessage,String refrenceId) {
+    public EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus, String errorMessage, String refrenceId, String umrn) {
 
         EnachPayment enachPayment = null;
 
@@ -163,7 +161,7 @@ public class CustomerServiceIMPL implements CoustomerService {
             if (enachPayment != null && !StringUtils.isEmpty(enachPayment)) {
 
                 Timestamp transactionCompleteDate = new Timestamp(System.currentTimeMillis());
-                enachPaymentRepository.updatePaymentStatus(transactionNo, transactionStatus, errorMessage, transactionCompleteDate,refrenceId);
+                enachPaymentRepository.updatePaymentStatus(transactionNo, transactionStatus, errorMessage, transactionCompleteDate,refrenceId,umrn);
             }
         } catch (Exception e) {
             System.out.println(e);

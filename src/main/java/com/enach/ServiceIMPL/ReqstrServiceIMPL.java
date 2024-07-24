@@ -1,6 +1,7 @@
 package com.enach.ServiceIMPL;
 
 import com.enach.Entity.EnachPayment;
+import com.enach.Models.EnachPaymentRequest;
 import com.enach.Repository.EnachPaymentRepository;
 import com.enach.Service.DatabaseService;
 import com.enach.Service.ReqstrService;
@@ -10,9 +11,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.sql.Timestamp;
 
 
 @Service
@@ -30,20 +28,26 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
 
     @Override
-    public void saveEnachPayment(String transactionNo, String applicationNo, String paymentMethod, String mandateType, Timestamp transactionStartDate, BigDecimal amount) throws Exception {
+    public void saveEnachPayment(EnachPaymentRequest request) throws Exception {
 
         EnachPayment enachPayment = new EnachPayment();
         String transactionStatus ="inprocess";
+        String mandateType = ("MNTH".equalsIgnoreCase(request.getMandateType())) ? "e-Mandate" : "security-mandate";
 
         try {
-            enachPaymentRepository.unprocessTransaction(applicationNo,mandateType);
-            enachPayment.setTransactionNo(transactionNo);
-            enachPayment.setApplicationNo(applicationNo);
-            enachPayment.setPaymentMethod(paymentMethod);
+            enachPaymentRepository.unprocessTransaction(request.getApplicationNo(),request.getMandateType());
+            enachPayment.setTransactionNo(request.getTransactionNo());
+            enachPayment.setApplicationNo(request.getApplicationNo());
+            enachPayment.setPaymentMethod(request.getPaymentMethod());
             enachPayment.setMandateType(mandateType);
-            enachPayment.setTransactionStartDate(transactionStartDate);
+            enachPayment.setTransactionStartDate(request.getTransactionStartDate());
             enachPayment.setTransactionStatus(transactionStatus);
-            enachPayment.setAmount(amount);
+            enachPayment.setAmount(request.getAmount());
+            enachPayment.setBankName(request.getBankName());
+            enachPayment.setBankAccountNo(request.getBankAccountNo());
+            enachPayment.setIfscCode(request.getIfscCode());
+            enachPayment.setStartDate(request.getStartDate());
+            enachPayment.setEndDate(request.getEndDate());
             enachPaymentRepository.save(enachPayment);
 
         } catch (DataIntegrityViolationException ex) {
