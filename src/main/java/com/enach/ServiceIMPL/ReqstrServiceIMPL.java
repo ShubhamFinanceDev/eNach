@@ -32,13 +32,14 @@ public class ReqstrServiceIMPL implements ReqstrService {
 
         EnachPayment enachPayment = new EnachPayment();
         String transactionStatus ="inprocess";
+        String mandateType = ("MNTH".equalsIgnoreCase(request.getMandateType())) ? "e-Mandate" : "security-mandate";
 
         try {
             enachPaymentRepository.unprocessTransaction(request.getApplicationNo(),request.getMandateType());
             enachPayment.setTransactionNo(request.getTransactionNo());
             enachPayment.setApplicationNo(request.getApplicationNo());
             enachPayment.setPaymentMethod(request.getPaymentMethod());
-            enachPayment.setMandateType(request.getMandateType());
+            enachPayment.setMandateType(mandateType);
             enachPayment.setTransactionStartDate(request.getTransactionStartDate());
             enachPayment.setTransactionStatus(transactionStatus);
             enachPayment.setAmount(request.getAmount());

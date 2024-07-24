@@ -79,7 +79,6 @@ public class ReqstrController {
                 return new ResponseEntity(commonResponse, HttpStatus.OK);
             }
 
-            String mandateType = ("MNTH".equalsIgnoreCase(request.getMandateType())) ? "e-Mandate" : "security-mandate";
 
             reqstrService.saveEnachPayment(request);
 
