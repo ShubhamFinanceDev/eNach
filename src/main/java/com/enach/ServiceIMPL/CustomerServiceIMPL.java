@@ -225,7 +225,7 @@ public class CustomerServiceIMPL implements CoustomerService {
             XSSFSheet sheet = workbook.createSheet("Enach-payment-report");
             int rowCount = 0;
 
-            String[] header = {"Transaction No", "Application No", "Payment Method", "Transaction Start Date", "Transaction Complete Date", "Transaction Status", "Mandate Type", "Error Message", "Amount"};
+            String[] header = {"Transaction No ", "Application No ", "Payment Method ", "Transaction Start Date", "Transaction Complete Date", "Transaction Status", "Mandate Type", "Error Message", "CustomerName", "PhoneNumber", "Amount "};
             Row headerRow = sheet.createRow(rowCount++);
             int cellCount = 0;
 
@@ -242,8 +242,14 @@ public class CustomerServiceIMPL implements CoustomerService {
                 row.createCell(5).setCellValue(details.getTransactionStatus() != null ? details.getTransactionStatus() : "");
                 row.createCell(6).setCellValue(details.getMandateType() != null ? details.getMandateType() : "");
                 row.createCell(7).setCellValue(details.getErrorMessage() != null ? details.getErrorMessage() : "");
-                row.createCell(8).setCellValue(details.getAmount() != null ? details.getAmount().toString() : "");
 //                row.createCell(9).setCellValue(details.getRefrenceId() != null ? details.getRefrenceId() : "");
+                List<CustomerDetails> detailsList = databaseService.getCustomerDetails(details.getApplicationNo());
+                CustomerDetails details1 = detailsList.get(0);
+                row.createCell(8).setCellValue(details1.getCustomerName()!= null ? details1.getCustomerName() : "");
+                row.createCell(9).setCellValue(details1.getPhoneNumber()!= null ? details1.getPhoneNumber() : "");
+                String amount = (details.getMandateType().equals("security-Mandate") ? String.valueOf(details1.getSanctionLoanAmount()) : (details.getMandateType().equals("e-Mandate") ? String.valueOf(details1.getInstallmentAmount() * 2) : ""));
+                row.createCell(10).setCellValue(amount);
+
             }
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                 workbook.write(outputStream);
