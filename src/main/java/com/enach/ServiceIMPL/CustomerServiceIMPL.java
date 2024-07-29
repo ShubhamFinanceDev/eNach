@@ -14,6 +14,8 @@ import com.enach.Utill.SendEmailUtility;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -57,6 +59,7 @@ public class CustomerServiceIMPL implements CoustomerService {
     @Autowired
     private EmailDetailsRepo emailDetailsRepo;
 
+    private final Logger logger = LoggerFactory.getLogger(CustomerServiceIMPL.class);
 
     @Override
     public HashMap<String, String> validateCustAndSendOtp(String applicationNo) {
@@ -64,7 +67,7 @@ public class CustomerServiceIMPL implements CoustomerService {
         HashMap<String, String> otpResponse = new HashMap<>();
 
         try {
-            List<CustomerDetails> listData =databaseService.getCustomerDetails(applicationNo);
+            List<CustomerDetails> listData = databaseService.getCustomerDetails(applicationNo);
             System.out.println("listData" + listData);
             if (!listData.isEmpty()) {
                 CustomerDetails customerDetails = listData.get(0);
@@ -161,7 +164,7 @@ public class CustomerServiceIMPL implements CoustomerService {
             if (enachPayment != null && !StringUtils.isEmpty(enachPayment)) {
 
                 Timestamp transactionCompleteDate = new Timestamp(System.currentTimeMillis());
-                enachPaymentRepository.updatePaymentStatus(transactionNo, transactionStatus, errorMessage, transactionCompleteDate,refrenceId,umrn);
+                enachPaymentRepository.updatePaymentStatus(transactionNo, transactionStatus, errorMessage, transactionCompleteDate, refrenceId, umrn);
             }
         } catch (Exception e) {
             System.out.println(e);
@@ -179,35 +182,34 @@ public class CustomerServiceIMPL implements CoustomerService {
             String applicationNo = "";
 
             EnachPayment paymentDetail = enachPaymentRepository.findLoanNoAndMandateType(transactionNo);
-            mandateType=paymentDetail.getMandateType();
-            applicationNo=paymentDetail.getApplicationNo();
+            mandateType = paymentDetail.getMandateType();
+            applicationNo = paymentDetail.getApplicationNo();
 
             //===========================WHEN Email Details get from DB then open this code ==============================
-           BranchNameDetail branchNameDetailDetails= databaseService.branchName(applicationNo);
+            BranchNameDetail branchNameDetailDetails = databaseService.branchName(applicationNo);
+            String emailId = branchDetailRepository.findByBranchEmail(branchNameDetailDetails.getBranchName());
 
-            if (branchNameDetailDetails!=null) {
+            if (emailId != null) {
 
-            String branchName = branchNameDetailDetails.getBranchName();
-            String emailId = branchDetailRepository.findByBranchEmail(branchName);
-            System.out.println("BranchEmail " + emailId);
-
-//            String emailId = "ravi.soni@shubham.co";
+//                String emailId = "apps.development@shubham.co";
+                logger.info("BranchEmail of {} {}", branchNameDetailDetails.getBranchName(), emailId);
                 EmailDetails emailDetails = new EmailDetails();
 
                 if ("Success".equalsIgnoreCase(transactionStatus)) {
                     emailDetails.setRecipient(emailId);
-                    emailDetails.setSubject("E-NACH SHUBHAM");
-                    emailDetails.setMsgBody("Enach registration has been successfully completed \n" + "for " + mandateType + " to ApplicationNo " + applicationNo + " and TransactionNo " + transactionNo + ".\n" + "Regards\n" + "Shubham Housing Development Finance Company");
+                    emailDetails.setSubject("E-NACH transaction acknowledgement");
+                    emailDetails.setMsgBody("Dear Sir/Mam \n\n\n Enach registration has been successfully completed for " + mandateType + " to ApplicationNo " + applicationNo + ".\n\n\n\n\n Regards\n" + "Shubham Housing Finance.");
 
                     otpUtility.sendSimpleMail(emailDetails);
-
                 } else if ("Failed".equalsIgnoreCase(transactionStatus)) {
                     emailDetails.setRecipient(emailId);
-                    emailDetails.setSubject("E-NACH SHUBHAM");
-                    emailDetails.setMsgBody("Enach registration has been failed \n" + "due to " + errorMessage + " for " + mandateType + " to ApplicationNo " + applicationNo + " and TransactionNo " + transactionNo + ".\n" + "Regards\n" + "Shubham Housing Development Finance Company");
+                    emailDetails.setSubject("E-NACH Portal");
+                    emailDetails.setMsgBody("Dear Sir/Mam \n\n\n Enach registration has been failed due to " + errorMessage + " for " + mandateType + " to ApplicationNo " + applicationNo + ".\n\n\n\n\n Regards\n" + "Shubham Housing Finance.");
 
                     otpUtility.sendSimpleMail(emailDetails);
                 }
+                logger.info("Acknowledgement mail has been sent successfully.");
+
             } else {
                 System.out.println("emailId does not exist.");
             }
@@ -216,16 +218,18 @@ public class CustomerServiceIMPL implements CoustomerService {
         }
     }
 
-    @Scheduled(cron = "* 30 * * * *") // 30 minutes
-    public CommonResponse generateReportOnMail(){
-
-        try{
+    @Override
+    @Scheduled(cron = "30 * * * * *") // 30 minutes
+    public void generateReportOnMail() {
+        logger.info("Generating report on mail process invoke at {}", LocalDateTime.now());
+        try {
             List<EnachPayment> enachPayment = enachPaymentRepository.findByTransactionStatus();
+            logger.info("Row fetched in payment-records {}", enachPayment.size());
             XSSFWorkbook workbook = new XSSFWorkbook();
             XSSFSheet sheet = workbook.createSheet("Enach-payment-report");
             int rowCount = 0;
 
-            String[] header = {"Transaction No", "Application No", "Payment Method", "Transaction Start Date", "Transaction Complete Date", "Transaction Status", "Mandate Type", "Error Message", "Amount"};
+            String[] header = {"Transaction-No", "Application-No", "Payment-Method", "Transaction-Start-Date", "Transaction-Complete-Date", "Transaction-Status", "Mandate-Type", "Error-Message", "Amount", "Refrence-Id", "Bank-Name", "Account-No", "Start-Date", "End-Date", "Ifsc-Code", "Umrn-No"};
             Row headerRow = sheet.createRow(rowCount++);
             int cellCount = 0;
 
@@ -243,23 +247,29 @@ public class CustomerServiceIMPL implements CoustomerService {
                 row.createCell(6).setCellValue(details.getMandateType() != null ? details.getMandateType() : "");
                 row.createCell(7).setCellValue(details.getErrorMessage() != null ? details.getErrorMessage() : "");
                 row.createCell(8).setCellValue(details.getAmount() != null ? details.getAmount().toString() : "");
-//                row.createCell(9).setCellValue(details.getRefrenceId() != null ? details.getRefrenceId() : "");
+                row.createCell(9).setCellValue(details.getRefrenceId() != null ? details.getRefrenceId() : "");
+                row.createCell(10).setCellValue(details.getBankName() != null ? details.getBankName() : "");
+                row.createCell(11).setCellValue(details.getBankAccountNo() != null ? details.getBankAccountNo() : "");
+                row.createCell(12).setCellValue(details.getStartDate() != null ? details.getStartDate().toString() : "");
+                row.createCell(13).setCellValue(details.getEndDate() != null ? details.getEndDate().toString() : "");
+                row.createCell(14).setCellValue(details.getIfscCode() != null ? details.getIfscCode() : "");
+                row.createCell(15).setCellValue(details.getUmrn() != null ? details.getUmrn() : "");
             }
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                workbook.write(outputStream);
-                workbook.close();
-                byte[] excelData = outputStream.toByteArray();
-                    System.out.println("File created successfully");
-                List<com.enach.Entity.EmailDetails> emailDetails = emailDetailsRepo.findAll();
-                for (com.enach.Entity.EmailDetails emails :emailDetails) {
-                    String email = emails.getEmail();
-                    sendEmailUtility.sendEmailWithAttachment(email, excelData);
-                    emailDetailsRepo.updateSendingTime(email,Timestamp.valueOf(LocalDateTime.now()));
-                }
-            System.out.println("Email send successfully.");
-        }catch (Exception e){
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+            workbook.close();
+            byte[] excelData = outputStream.toByteArray();
+            logger.info("Report created.");
+            List<com.enach.Entity.EmailDetails> emailDetails = emailDetailsRepo.findAll();
+            for (com.enach.Entity.EmailDetails emails : emailDetails) {
+                String email = emails.getEmail();
+                sendEmailUtility.sendEmailWithAttachment(email, excelData);
+                emailDetailsRepo.updateSendingTime(email, Timestamp.valueOf(LocalDateTime.now()));
+            }
+            logger.info("Report has been shared. No of email {}", emailDetails.size());
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-        return null;
     }
+
 }

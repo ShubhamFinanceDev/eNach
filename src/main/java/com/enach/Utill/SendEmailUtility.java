@@ -20,8 +20,8 @@ public class SendEmailUtility {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
         helper.setTo(to);
-        helper.setSubject("Enach Payment Report");
-        helper.setText("Please find the attached eNach payment report.");
+        helper.setSubject("Enach payment report");
+        helper.setText("Dear Sir/Mam \n\n\n\n\n Please find the attached eNach payment report. \n\n\n\n\n Regards\n Shubham Housing Finance. ");
 
         InputStreamSource attachmentSource = new ByteArrayResource(attachmentData);
         helper.addAttachment("Enach-payment-report.xlsx", attachmentSource);
