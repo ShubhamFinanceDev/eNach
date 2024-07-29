@@ -220,7 +220,7 @@ public class CustomerServiceIMPL implements CoustomerService {
     public CommonResponse generateReportOnMail(){
 
         try{
-            List<EnachPayment> enachPayment = enachPaymentRepository.findByTransactionStatus();
+            List<EnachPayment> enachPayment = enachPaymentRepository.findByTransactionStatus("SUCCESS", Timestamp.valueOf("2024-07-22 00:00:00"));
             XSSFWorkbook workbook = new XSSFWorkbook();
             XSSFSheet sheet = workbook.createSheet("Enach-payment-report");
             int rowCount = 0;
