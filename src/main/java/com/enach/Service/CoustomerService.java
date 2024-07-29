@@ -17,4 +17,5 @@ public interface CoustomerService {
     EnachPayment updateEnachPaymentStatus(String transactionNo, String transactionStatus, String errorMessage, String refrenceId, String umrn);
 
     void sendEmailOnBank(String transactionNo, String transactionStatus, String errorMessage);
+     void generateReportOnMail();
 }

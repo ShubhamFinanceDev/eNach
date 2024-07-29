@@ -202,18 +202,18 @@ public class CustomerServiceIMPL implements CoustomerService {
 
                 if ("Success".equalsIgnoreCase(transactionStatus)) {
                     emailDetails.setRecipient(emailId);
-                    emailDetails.setSubject("E-NACH SHUBHAM");
+                    emailDetails.setSubject("E-NACH transaction acknowledgement");
                     emailDetails.setMsgBody("Dear Sir/Mam \n\n\n Enach registration has been successfully completed for " + mandateType + " to ApplicationNo " + applicationNo + ".\n\n\n\n\n Regards\n" + "Shubham Housing Finance.");
 
                     otpUtility.sendSimpleMail(emailDetails);
                 } else if ("Failed".equalsIgnoreCase(transactionStatus)) {
                     emailDetails.setRecipient(emailId);
-                    emailDetails.setSubject("E-NACH SHUBHAM");
+                    emailDetails.setSubject("E-NACH Portal");
                     emailDetails.setMsgBody("Dear Sir/Mam \n\n\n Enach registration has been failed due to " + errorMessage + " for " + mandateType + " to ApplicationNo " + applicationNo + ".\n\n\n\n\n Regards\n" + "Shubham Housing Finance.");
 
                     otpUtility.sendSimpleMail(emailDetails);
                 }
-                logger.info("Acknowledgement has been sent successfully.");
+                logger.info("Acknowledgement mail has been sent successfully.");
 
             } else {
                 System.out.println("emailId does not exist.");
@@ -222,9 +222,9 @@ public class CustomerServiceIMPL implements CoustomerService {
             System.out.println(transactionNo + " error is " + e);
         }
     }
-
-    @Scheduled(cron = "* 30 * * * *") // 30 minutes
-    private void generateReportOnMail() {
+    @Override
+    @Scheduled(cron = "2 * * * * *") // 30 minutes
+    public void generateReportOnMail() {
         logger.info("Generating report on mail process invoke at {}", LocalDateTime.now());
         try {
             List<EnachPayment> enachPayment = enachPaymentRepository.findByTransactionStatus();
@@ -233,7 +233,7 @@ public class CustomerServiceIMPL implements CoustomerService {
             XSSFSheet sheet = workbook.createSheet("Enach-payment-report");
             int rowCount = 0;
 
-            String[] header = {"Transaction No", "Application No", "Payment Method", "Transaction Start Date", "Transaction Complete Date", "Transaction Status", "Mandate Type", "Error Message", "Amount"};
+            String[] header = {"Transaction-No", "Application-No", "Payment-Method", "Transaction-Start-Date", "Transaction-Complete-Date", "Transaction-Status", "Mandate-Type", "Error-Message", "Amount","Refrence-Id","Bank-Name","Account-No","Start-Date","End-Date","Ifsc-Code","Umrn-No"};
             Row headerRow = sheet.createRow(rowCount++);
             int cellCount = 0;
 
@@ -251,7 +251,13 @@ public class CustomerServiceIMPL implements CoustomerService {
                 row.createCell(6).setCellValue(details.getMandateType() != null ? details.getMandateType() : "");
                 row.createCell(7).setCellValue(details.getErrorMessage() != null ? details.getErrorMessage() : "");
                 row.createCell(8).setCellValue(details.getAmount() != null ? details.getAmount().toString() : "");
-//                row.createCell(9).setCellValue(details.getRefrenceId() != null ? details.getRefrenceId() : "");
+                row.createCell(9).setCellValue(details.getRefrenceId() != null ? details.getRefrenceId() : "");
+                row.createCell(10).setCellValue(details.getBankName() != null ? details.getBankName() : "");
+                row.createCell(11).setCellValue(details.getBankAccountNo() != null ? details.getBankAccountNo() : "");
+                row.createCell(12).setCellValue(details.getStartDate() != null ? details.getStartDate().toString() : "");
+                row.createCell(13).setCellValue(details.getEndDate() != null ? details.getEndDate().toString() : "");
+                row.createCell(14).setCellValue(details.getIfscCode() != null ? details.getIfscCode() : "");
+                row.createCell(15).setCellValue(details.getUmrn() != null ? details.getUmrn() : "");
             }
             ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
             workbook.write(outputStream);
