@@ -11,9 +11,7 @@ import com.enach.Service.DatabaseService;
 import com.enach.Utill.CustomerDetailsUtility;
 import com.enach.Utill.OtpUtility;
 import com.enach.Utill.SendEmailUtility;
-import io.micrometer.core.instrument.MultiGauge;
 import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
@@ -26,13 +24,11 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
-import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.ByteArrayOutputStream;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -95,7 +91,7 @@ public class CustomerServiceIMPL implements CoustomerService {
                             otpDetailsRepository.save(otpDetails);
                             System.out.println("otp save successfully");
                             Long otpId = otpDetails.getOtpId();
-//                            otpResponse.put("otpCode", String.valueOf(otpCode));
+                            otpResponse.put("otpCode", String.valueOf(otpCode));
 //                            otpResponse.put("otpId", String.valueOf(otpId));
                             otpResponse.put("mobile", otpDetails.getMobileNo());
                             otpResponse.put("msg", "Otp send.");
@@ -191,13 +187,11 @@ public class CustomerServiceIMPL implements CoustomerService {
 
             //===========================WHEN Email Details get from DB then open this code ==============================
             BranchNameDetail branchNameDetailDetails = databaseService.branchName(applicationNo);
+//            String emailId = branchDetailRepository.findByBranchEmail(branchNameDetailDetails.getBranchName());
+            String emailId = "apps.development@shubham.co";
+            if (emailId != null) {
 
-            if (branchNameDetailDetails != null) {
-
-//                String emailId = branchNameDetailDetails.getBranchName();
-
-                String emailId = "apps.development@shubham.co";
-                logger.info("BranchEmail {}", emailId);
+                logger.info("BranchEmail of {} {}", branchNameDetailDetails.getBranchName(), emailId);
                 EmailDetails emailDetails = new EmailDetails();
 
                 if ("Success".equalsIgnoreCase(transactionStatus)) {
@@ -222,8 +216,9 @@ public class CustomerServiceIMPL implements CoustomerService {
             System.out.println(transactionNo + " error is " + e);
         }
     }
+
     @Override
-    @Scheduled(cron = "2 * * * * *") // 30 minutes
+    @Scheduled(cron = "30 * * * * *") // 30 minutes
     public void generateReportOnMail() {
         logger.info("Generating report on mail process invoke at {}", LocalDateTime.now());
         try {
@@ -233,7 +228,7 @@ public class CustomerServiceIMPL implements CoustomerService {
             XSSFSheet sheet = workbook.createSheet("Enach-payment-report");
             int rowCount = 0;
 
-            String[] header = {"Transaction-No", "Application-No", "Payment-Method", "Transaction-Start-Date", "Transaction-Complete-Date", "Transaction-Status", "Mandate-Type", "Error-Message", "Amount","Refrence-Id","Bank-Name","Account-No","Start-Date","End-Date","Ifsc-Code","Umrn-No"};
+            String[] header = {"Transaction-No", "Application-No", "Payment-Method", "Transaction-Start-Date", "Transaction-Complete-Date", "Transaction-Status", "Mandate-Type", "Error-Message", "Amount", "Refrence-Id", "Bank-Name", "Account-No", "Start-Date", "End-Date", "Ifsc-Code", "Umrn-No"};
             Row headerRow = sheet.createRow(rowCount++);
             int cellCount = 0;
 
