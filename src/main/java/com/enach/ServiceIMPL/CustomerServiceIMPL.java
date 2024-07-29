@@ -216,7 +216,7 @@ public class CustomerServiceIMPL implements CoustomerService {
         }
     }
 
-    @Scheduled(cron = "* 30 * * * *") // 30 minutes
+    @Scheduled(cron = "* 5 * * * *") // 30 minutes
     public CommonResponse generateReportOnMail(){
 
         try{
@@ -242,14 +242,19 @@ public class CustomerServiceIMPL implements CoustomerService {
                 row.createCell(5).setCellValue(details.getTransactionStatus() != null ? details.getTransactionStatus() : "");
                 row.createCell(6).setCellValue(details.getMandateType() != null ? details.getMandateType() : "");
                 row.createCell(7).setCellValue(details.getErrorMessage() != null ? details.getErrorMessage() : "");
-//                row.createCell(9).setCellValue(details.getRefrenceId() != null ? details.getRefrenceId() : "");
+                row.createCell(8).setCellValue(details.getRefrenceId() != null ? details.getRefrenceId() : "");
+                row.createCell(9).setCellValue(details.getBankName() != null ? details.getBankName() : "");
+                row.createCell(10).setCellValue(details.getBankAccountNo() != null ? details.getBankAccountNo() : "");
+                row.createCell(11).setCellValue(details.getStartDate() != null ? details.getStartDate().toString() : "");
+                row.createCell(12).setCellValue(details.getEndDate() != null ? details.getEndDate().toString() : "");
+                row.createCell(13).setCellValue(details.getIfscCode() != null ? details.getIfscCode() : "");
+                row.createCell(14).setCellValue(details.getUmrn() != null ? details.getUmrn() : "");
                 List<CustomerDetails> detailsList = databaseService.getCustomerDetails(details.getApplicationNo());
                 CustomerDetails details1 = detailsList.get(0);
-                row.createCell(8).setCellValue(details1.getCustomerName()!= null ? details1.getCustomerName() : "");
-                row.createCell(9).setCellValue(details1.getPhoneNumber()!= null ? details1.getPhoneNumber() : "");
+                row.createCell(15).setCellValue(details1.getCustomerName()!= null ? details1.getCustomerName() : "");
+                row.createCell(16).setCellValue(details1.getPhoneNumber()!= null ? details1.getPhoneNumber() : "");
                 String amount = (details.getMandateType().equals("security-Mandate") ? String.valueOf(details1.getSanctionLoanAmount()) : (details.getMandateType().equals("e-Mandate") ? String.valueOf(details1.getInstallmentAmount() * 2) : ""));
-                row.createCell(10).setCellValue(amount);
-
+                row.createCell(17).setCellValue(amount);
             }
                 ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                 workbook.write(outputStream);
