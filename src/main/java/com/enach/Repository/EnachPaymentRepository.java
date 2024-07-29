@@ -29,7 +29,7 @@ public interface EnachPaymentRepository  extends JpaRepository<EnachPayment, Lon
 
     @Transactional
     @Modifying
-    @Query("update EnachPayment cd set cd.transactionStatus='Failed', cd.errorMessage='Due to new request initiated' where cd.transactionStatus='inprocess' and cd.applicationNo=:applicationNo and cd.mandateType=:mandateType")
+    @Query("update EnachPayment cd set cd.transactionStatus='Failed', cd.errorMessage='Request did not completed' where cd.transactionStatus='inprocess' and cd.applicationNo=:applicationNo and cd.mandateType=:mandateType")
     void unprocessTransaction(String applicationNo, String mandateType);
     @Query("select cd from EnachPayment cd where cd.transactionStatus='Failed' or cd.transactionStatus ='Success'")
     List<EnachPayment> findByTransactionStatus(/*String transactionStatus*/);
