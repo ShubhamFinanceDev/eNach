@@ -218,7 +218,7 @@ public class CustomerServiceIMPL implements CoustomerService {
     }
 
     @Override
-    @Scheduled(cron = "* 0/30 * * * *") // 30 minutes
+    @Scheduled(cron = "0 0/30 * * * *") // 30 minutes
     public void generateReportOnMail() {
         logger.info("Generating report on mail process invoke at {}", LocalDateTime.now());
         try {
