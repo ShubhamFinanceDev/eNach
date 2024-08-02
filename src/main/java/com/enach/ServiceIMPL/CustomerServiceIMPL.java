@@ -26,9 +26,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.io.ByteArrayOutputStream;
+import java.io.StringReader;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 
@@ -180,10 +182,12 @@ public class CustomerServiceIMPL implements CoustomerService {
 
             String mandateType = "";
             String applicationNo = "";
+            String registeredAmount = "";
 
             EnachPayment paymentDetail = enachPaymentRepository.findLoanNoAndMandateType(transactionNo);
             mandateType = paymentDetail.getMandateType();
             applicationNo = paymentDetail.getApplicationNo();
+            registeredAmount = paymentDetail.getRegisteredAmount();
 
             //===========================WHEN Email Details get from DB then open this code ==============================
             BranchNameDetail branchNameDetailDetails = databaseService.branchName(applicationNo);
@@ -196,14 +200,25 @@ public class CustomerServiceIMPL implements CoustomerService {
 
                 if ("Success".equalsIgnoreCase(transactionStatus)) {
                     emailDetails.setRecipient(emailId);
-                    emailDetails.setSubject("E-NACH transaction acknowledgement");
-                    emailDetails.setMsgBody("Dear Sir/Mam \n\n\n Enach registration has been successfully completed for " + mandateType + " to ApplicationNo " + applicationNo + ".\n\n\n\n\n Regards\n" + "Shubham Housing Finance.");
+                    emailDetails.setSubject("application number");
+                    emailDetails.setMsgBody("Dear Sir/Mam,\n\n\n" +
+                            "E-NACH registration has been successfully completed for " + mandateType +
+                            " with Application No: " + applicationNo +
+                            " and a registered amount of " + registeredAmount + ".\n\n\n\n\n" +
+                            "Regards,\n" +
+                            "Shubham Housing Finance.");
 
                     otpUtility.sendSimpleMail(emailDetails);
                 } else if ("Failed".equalsIgnoreCase(transactionStatus)) {
                     emailDetails.setRecipient(emailId);
-                    emailDetails.setSubject("E-NACH Portal");
-                    emailDetails.setMsgBody("Dear Sir/Mam \n\n\n Enach registration has been failed due to " + errorMessage + " for " + mandateType + " to ApplicationNo " + applicationNo + ".\n\n\n\n\n Regards\n" + "Shubham Housing Finance.");
+                    emailDetails.setSubject("application number");
+                    emailDetails.setMsgBody("Dear Sir/Mam,\n\n\n" +
+                            "E-NACH registration has failed due to " + errorMessage +
+                            " for " + mandateType +
+                            " with Application No: " + applicationNo +
+                            " and a registered amount of " + registeredAmount + ".\n\n\n\n\n" +
+                            "Regards,\n" +
+                            "Shubham Housing Finance.");
 
                     otpUtility.sendSimpleMail(emailDetails);
                 }
@@ -218,7 +233,7 @@ public class CustomerServiceIMPL implements CoustomerService {
     }
 
     @Override
-    @Scheduled(cron = "0 0/30 * * * *") // 30 minutes
+    @Scheduled(cron = "0 0 9-23/2 * * *") // every 2 hours
     public void generateReportOnMail() {
         logger.info("Generating report on mail process invoke at {}", LocalDateTime.now());
         try {

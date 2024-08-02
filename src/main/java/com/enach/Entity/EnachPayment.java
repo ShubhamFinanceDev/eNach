@@ -51,6 +51,10 @@ public class EnachPayment {
     private Date endDate;
     @Column(name="umrn")
     private String umrn;
+    @Column(name = "registeredamount")
+    private  String registeredAmount;
+
+
 
 
 
