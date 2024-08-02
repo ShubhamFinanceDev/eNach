@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.io.ByteArrayOutputStream;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -177,13 +178,14 @@ public class CustomerServiceIMPL implements CoustomerService {
     public void sendEmailOnBank(String transactionNo, String transactionStatus, String errorMessage) {
 
         try {
-
+            BigDecimal registeredAmount;
             String mandateType = "";
             String applicationNo = "";
 
             EnachPayment paymentDetail = enachPaymentRepository.findLoanNoAndMandateType(transactionNo);
             mandateType = paymentDetail.getMandateType();
             applicationNo = paymentDetail.getApplicationNo();
+            registeredAmount=paymentDetail.getAmount();
 
             //===========================WHEN Email Details get from DB then open this code ==============================
             BranchNameDetail branchNameDetailDetails = databaseService.branchName(applicationNo);
@@ -196,8 +198,8 @@ public class CustomerServiceIMPL implements CoustomerService {
 
                 if ("Success".equalsIgnoreCase(transactionStatus)) {
                     emailDetails.setRecipient(emailId);
-                    emailDetails.setSubject("E-NACH transaction acknowledgement");
-                    emailDetails.setMsgBody("Dear Sir/Mam \n\n\n Enach registration has been successfully completed for " + mandateType + " to ApplicationNo " + applicationNo + ".\n\n\n\n\n Regards\n" + "Shubham Housing Finance.");
+                    emailDetails.setSubject("E-NACH transaction acknowledgement "+applicationNo);
+                    emailDetails.setMsgBody("Dear Sir/Mam \n\n\n Enach registration has been successfully completed for " + mandateType + " to ApplicationNo " + applicationNo + "with registered amount "+ registeredAmount + ".\n\n\n\n\n Regards\n" + "Shubham Housing Finance.");
 
                     otpUtility.sendSimpleMail(emailDetails);
                 } else if ("Failed".equalsIgnoreCase(transactionStatus)) {
@@ -218,7 +220,7 @@ public class CustomerServiceIMPL implements CoustomerService {
     }
 
     @Override
-    @Scheduled(cron = "0 0 9-23/2 * * *") // 30 minutes
+    @Scheduled(cron = "0 0 9-23/2 * * *") // After every 2 hours
     public void generateReportOnMail() {
         logger.info("Generating report on mail process invoke at {}", LocalDateTime.now());
         try {
