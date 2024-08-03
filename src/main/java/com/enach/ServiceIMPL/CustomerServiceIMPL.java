@@ -204,13 +204,13 @@ public class CustomerServiceIMPL implements CoustomerService {
                 if ("Success".equalsIgnoreCase(transactionStatus)) {
                     emailDetails.setRecipient(emailId);
                     emailDetails.setSubject("E-NACH transaction acknowledgement "+applicationNo);
-                    emailDetails.setMsgBody("Dear Sir/Mam \n\n\n Enach registration has been successfully completed for " + mandateType + " to ApplicationNo " + applicationNo + " with registered amount "+ registeredAmount + ".\n\n\n\n\n Regards\n" + "Shubham Housing Finance.");
+                    emailDetails.setMsgBody("Dear Sir/Mam \n\n\n Enach registration has been successfully completed for " + mandateType + " to ApplicationNo " + applicationNo + " with registered amount "+ registeredAmount + ".\n\n\n\n\n Regards\n" + "IT Support.");
 
                     sendEmailUtility.sendSimpleMail(emailDetails);
                 } else if ("Failed".equalsIgnoreCase(transactionStatus)) {
                     emailDetails.setRecipient(emailId);
-                    emailDetails.setSubject("E-NACH Portal "+applicationNo);
-                    emailDetails.setMsgBody("Dear Sir/Mam \n\n\n Enach registration has been failed due to " + errorMessage + " for " + mandateType + " to ApplicationNo " + applicationNo +" with registered amount "+ registeredAmount +  ".\n\n\n\n\n Regards\n" + "Shubham Housing Finance.");
+                    emailDetails.setSubject("E-NACH transaction acknowledgement "+applicationNo);
+                    emailDetails.setMsgBody("Dear Sir/Mam \n\n\n Enach registration has been failed due to " + errorMessage + " for " + mandateType + " to ApplicationNo " + applicationNo +" with registered amount "+ registeredAmount +  ".\n\n\n\n\n Regards\n" + "IT Support.");
 
                     sendEmailUtility.sendSimpleMail(emailDetails);
                 }
