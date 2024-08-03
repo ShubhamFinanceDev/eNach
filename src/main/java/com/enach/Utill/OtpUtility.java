@@ -73,28 +73,5 @@ public class OtpUtility {
     }
 
 
-    @Autowired
-    private JavaMailSender javaMailSender;
-    @Value("${spring.mail.username}")
-    private String sender;
-
-    public void sendSimpleMail(EmailDetails emailDetails) {
-
-        try {
-            SimpleMailMessage mailMessage = new SimpleMailMessage();
-
-            mailMessage.setFrom(sender);
-            mailMessage.setTo(emailDetails.getRecipient());
-            mailMessage.setText(emailDetails.getMsgBody());
-            mailMessage.setSubject(emailDetails.getSubject());
-
-            javaMailSender.send(mailMessage);
-
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-    }
-
-
 
 }

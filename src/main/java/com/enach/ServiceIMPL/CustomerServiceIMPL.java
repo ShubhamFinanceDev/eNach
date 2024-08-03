@@ -144,10 +144,12 @@ public class CustomerServiceIMPL implements CoustomerService {
                 Duration duration = Duration.between(otpDetails.getOtpExprTime(), LocalDateTime.now());
                 customerDetails = (duration.toMinutes() > 5) ? null : customerDetails;
             } else {
+                logger.info("Otp-code does not exist for {} {}",mobileNo, otpCode);
                 customerDetails = null;
             }
         } catch (Exception e) {
             System.out.println(e);
+            logger.error("Error while validating otp-code for {}",applicationNo);
         }
 
         return customerDetails;
@@ -166,9 +168,12 @@ public class CustomerServiceIMPL implements CoustomerService {
 
                 Timestamp transactionCompleteDate = new Timestamp(System.currentTimeMillis());
                 enachPaymentRepository.updatePaymentStatus(transactionNo, transactionStatus, errorMessage, transactionCompleteDate, refrenceId, umrn);
+                logger.info("Payment status updated for transaction-no {} {}",transactionNo, transactionCompleteDate);
+
             }
         } catch (Exception e) {
             System.out.println(e);
+            logger.error("Error while updating transaction status {}",transactionNo);
         }
         return enachPayment;
     }
@@ -201,13 +206,13 @@ public class CustomerServiceIMPL implements CoustomerService {
                     emailDetails.setSubject("E-NACH transaction acknowledgement "+applicationNo);
                     emailDetails.setMsgBody("Dear Sir/Mam \n\n\n Enach registration has been successfully completed for " + mandateType + " to ApplicationNo " + applicationNo + " with registered amount "+ registeredAmount + ".\n\n\n\n\n Regards\n" + "Shubham Housing Finance.");
 
-                    otpUtility.sendSimpleMail(emailDetails);
+                    sendEmailUtility.sendSimpleMail(emailDetails);
                 } else if ("Failed".equalsIgnoreCase(transactionStatus)) {
                     emailDetails.setRecipient(emailId);
                     emailDetails.setSubject("E-NACH Portal "+applicationNo);
                     emailDetails.setMsgBody("Dear Sir/Mam \n\n\n Enach registration has been failed due to " + errorMessage + " for " + mandateType + " to ApplicationNo " + applicationNo +" with registered amount "+ registeredAmount +  ".\n\n\n\n\n Regards\n" + "Shubham Housing Finance.");
 
-                    otpUtility.sendSimpleMail(emailDetails);
+                    sendEmailUtility.sendSimpleMail(emailDetails);
                 }
                 logger.info("Acknowledgement mail has been sent successfully.");
 

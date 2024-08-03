@@ -1,11 +1,14 @@
 package com.enach.ServiceIMPL;
 
+import com.enach.Controller.CustomerController;
 import com.enach.Entity.EnachPayment;
 import com.enach.Models.EnachPaymentRequest;
 import com.enach.Repository.EnachPaymentRepository;
 import com.enach.Service.DatabaseService;
 import com.enach.Service.ReqstrService;
 import com.enach.Utill.CustomerDetailsUtility;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -26,6 +29,7 @@ public class ReqstrServiceIMPL implements ReqstrService {
     @Autowired
     private DatabaseService databaseService;
 
+    private final Logger logger = LoggerFactory.getLogger(ReqstrServiceIMPL.class);
 
     @Override
     public void saveEnachPayment(EnachPaymentRequest request) throws Exception {
@@ -49,11 +53,14 @@ public class ReqstrServiceIMPL implements ReqstrService {
             enachPayment.setStartDate(request.getStartDate());
             enachPayment.setEndDate(request.getEndDate());
             enachPaymentRepository.save(enachPayment);
+            logger.info("Transaction details saved {}",request.getTransactionNo());
 
         } catch (DataIntegrityViolationException ex) {
+            logger.error("Error while saving transaction details {} {}",request.getTransactionNo(),ex.getMessage());
             throw new DataIntegrityViolationException(ex.getMessage());
 
         } catch (Exception e) {
+            logger.error("Error while saving transaction details {} {}",request.getTransactionNo(),e.getMessage());
             throw new Exception(e);
         }
     }
