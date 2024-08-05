@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.io.ByteArrayOutputStream;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -143,10 +144,12 @@ public class CustomerServiceIMPL implements CoustomerService {
                 Duration duration = Duration.between(otpDetails.getOtpExprTime(), LocalDateTime.now());
                 customerDetails = (duration.toMinutes() > 5) ? null : customerDetails;
             } else {
+                logger.info("Otp-code does not exist for {} {}",mobileNo, otpCode);
                 customerDetails = null;
             }
         } catch (Exception e) {
             System.out.println(e);
+            logger.error("Error while validating otp-code for {}",applicationNo);
         }
 
         return customerDetails;
@@ -165,9 +168,12 @@ public class CustomerServiceIMPL implements CoustomerService {
 
                 Timestamp transactionCompleteDate = new Timestamp(System.currentTimeMillis());
                 enachPaymentRepository.updatePaymentStatus(transactionNo, transactionStatus, errorMessage, transactionCompleteDate, refrenceId, umrn);
+                logger.info("Payment status updated for transaction-no {} {}",transactionNo, transactionCompleteDate);
+
             }
         } catch (Exception e) {
             System.out.println(e);
+            logger.error("Error while updating transaction status {}",transactionNo);
         }
         return enachPayment;
     }
@@ -177,36 +183,36 @@ public class CustomerServiceIMPL implements CoustomerService {
     public void sendEmailOnBank(String transactionNo, String transactionStatus, String errorMessage) {
 
         try {
-
+            BigDecimal registeredAmount;
             String mandateType = "";
             String applicationNo = "";
 
             EnachPayment paymentDetail = enachPaymentRepository.findLoanNoAndMandateType(transactionNo);
             mandateType = paymentDetail.getMandateType();
             applicationNo = paymentDetail.getApplicationNo();
+            registeredAmount=paymentDetail.getAmount();
 
             //===========================WHEN Email Details get from DB then open this code ==============================
             BranchNameDetail branchNameDetailDetails = databaseService.branchName(applicationNo);
             String emailId = branchDetailRepository.findByBranchEmail(branchNameDetailDetails.getBranchName());
-
+//            String emailId = "apps.development@shubham.co";
             if (emailId != null) {
 
-//                String emailId = "apps.development@shubham.co";
                 logger.info("BranchEmail of {} {}", branchNameDetailDetails.getBranchName(), emailId);
                 EmailDetails emailDetails = new EmailDetails();
 
                 if ("Success".equalsIgnoreCase(transactionStatus)) {
                     emailDetails.setRecipient(emailId);
-                    emailDetails.setSubject("E-NACH transaction acknowledgement");
-                    emailDetails.setMsgBody("Dear Sir/Mam \n\n\n Enach registration has been successfully completed for " + mandateType + " to ApplicationNo " + applicationNo + ".\n\n\n\n\n Regards\n" + "Shubham Housing Finance.");
+                    emailDetails.setSubject("E-NACH transaction acknowledgement "+applicationNo);
+                    emailDetails.setMsgBody("Dear Sir/Mam \n\n\n Enach registration has been successfully completed for " + mandateType + " to ApplicationNo " + applicationNo + " with registered amount "+ registeredAmount + ".\n\n\n\n\n Regards\n" + "IT Support.");
 
-                    otpUtility.sendSimpleMail(emailDetails);
+                    sendEmailUtility.sendSimpleMail(emailDetails);
                 } else if ("Failed".equalsIgnoreCase(transactionStatus)) {
                     emailDetails.setRecipient(emailId);
-                    emailDetails.setSubject("E-NACH Portal");
-                    emailDetails.setMsgBody("Dear Sir/Mam \n\n\n Enach registration has been failed due to " + errorMessage + " for " + mandateType + " to ApplicationNo " + applicationNo + ".\n\n\n\n\n Regards\n" + "Shubham Housing Finance.");
+                    emailDetails.setSubject("E-NACH transaction acknowledgement "+applicationNo);
+                    emailDetails.setMsgBody("Dear Sir/Mam \n\n\n Enach registration has been failed due to " + errorMessage + " for " + mandateType + " to ApplicationNo " + applicationNo +" with registered amount "+ registeredAmount +  ".\n\n\n\n\n Regards\n" + "IT Support.");
 
-                    otpUtility.sendSimpleMail(emailDetails);
+                    sendEmailUtility.sendSimpleMail(emailDetails);
                 }
                 logger.info("Acknowledgement mail has been sent successfully.");
 
@@ -219,7 +225,7 @@ public class CustomerServiceIMPL implements CoustomerService {
     }
 
     @Override
-    @Scheduled(cron = "0 0/30 * * * *") // 30 minutes
+    @Scheduled(cron = "0 0 9-23/2 * * *") // After every 2 hours
     public void generateReportOnMail() {
         logger.info("Generating report on mail process invoke at {}", LocalDateTime.now());
         try {
