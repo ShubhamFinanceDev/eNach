@@ -33,7 +33,7 @@ public class OtpUtility {
 
     @Autowired
     private OtpDetailsRepository otpDetailsRepository;
-    private Logger logger = LoggerFactory.getLogger(OncePerRequestFilter.class);
+    private Logger logger = LoggerFactory.getLogger(OtpUtility.class);
 
     public int generateCustOtp(CustomerDetails customerDetails) {
 

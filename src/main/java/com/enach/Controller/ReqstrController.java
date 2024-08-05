@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 @CrossOrigin
 public class ReqstrController {
 
-    private final Logger logger = LoggerFactory.getLogger(CustomerController.class);
+    private final Logger logger = LoggerFactory.getLogger(ReqstrController.class);
     @Autowired
     private ReqstrService reqstrService;
     @Autowired
