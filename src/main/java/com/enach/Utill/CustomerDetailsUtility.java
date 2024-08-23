@@ -19,7 +19,7 @@ private CustomerDetailsRepository customerDetailsRepository;
                 "           AP.\"Customer Number\", IC.\"Customer Name\",\n" +
                 "            AP.\"Installment Amount\",\n" +
                 "           AP.\"Current Status\",(select distinct \"Mobile Number\" from NEO_CAS_LMS_SIT1_SH.\"Address Details\" AD\n" +
-                "where \"Customer Number\"=ap.\"Customer Number\") as PHONE_NUMBER, AP.\"Loan Account No\"\n" +
+                "where \"Customer Number\"=ap.\"Customer Number\" AND \"Mobile Number\" IS NOT NULL AND ROWNUM = 1) as PHONE_NUMBER, AP.\"Loan Account No\"\n" +
                 "    FROM neo_cas_lms_sit1_sh.application_newprod AP\n" +
                 "    LEFT JOIN NEO_CAS_LMS_SIT1_SH.\"Individual Customer\" IC ON AP.\"Customer Number\"= IC.\"Customer Number\"\n" +
                 ") CD \n" +
