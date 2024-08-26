@@ -50,7 +50,7 @@ public class CustomerController {
             otpResponse.put("msg", "Application number field is empty");
             otpResponse.put("code", "1111");
         } else {
-            otpResponse = coustomerService.validateCustAndSendOtp(applicationNo);
+            otpResponse = coustomerService.validateCustAndSendOtp(applicationNo.trim());
         }
 
         return otpResponse;
