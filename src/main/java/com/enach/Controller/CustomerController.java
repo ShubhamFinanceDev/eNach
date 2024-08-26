@@ -7,6 +7,8 @@ import com.enach.Models.*;
 import com.enach.Service.CoustomerService;
 import com.enach.Utill.NextDueDate;
 import com.enach.sercurity.JwtHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +17,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -34,17 +37,12 @@ public class CustomerController {
     private JwtHelper helper;
     @Autowired
     private CoustomerService coustomerService;
-
-    @RequestMapping(value = "/", method = RequestMethod.GET)
-    public String demo(){
-
-        return "Hello programmer";
-    }
+    private final Logger logger = LoggerFactory.getLogger(CustomerController.class);
 
 
     @PostMapping("/sendOtp")
     public HashMap sendOtpOnCustomerRegisteredMobile(@RequestBody Map<String, String> inputParam) {
-
+        System.out.println("cont"+inputParam.get("applicationNo"));
         String applicationNo = inputParam.get("applicationNo");
         HashMap<String, String> otpResponse = new HashMap<>();
 
@@ -52,7 +50,7 @@ public class CustomerController {
             otpResponse.put("msg", "Application number field is empty");
             otpResponse.put("code", "1111");
         } else {
-            otpResponse = coustomerService.validateCustAndSendOtp(applicationNo);
+            otpResponse = coustomerService.validateCustAndSendOtp(applicationNo.trim());
         }
 
         return otpResponse;
@@ -90,18 +88,23 @@ public class CustomerController {
                     otpVerifyResponse.setExpiryDate(futureDate.plus(Period.ofYears(40).minusMonths(1)).toString());
                     otpVerifyResponse.setExpiryDate(startDate.plus(Period.ofYears(40).minusMonths(1)).toString());
 
+                    logger.info("Authentication successfully completed for.{}",request.getApplicationNo());
                     return new ResponseEntity(otpVerifyResponse, HttpStatus.OK);
 
                 } else {
                     CommonResponse commonResponse = new CommonResponse();
                     commonResponse.setMsg("Otp is invalid or expired, please try again.");
                     commonResponse.setCode("1111");
+
+                    logger.info("Authentication failed for.{}",request.getApplicationNo());
                     return new ResponseEntity(commonResponse, HttpStatus.OK);
                 }
             } catch (Exception e) {
                 CommonResponse commonResponse = new CommonResponse();
                 commonResponse.setMsg("phone number does not exist.");
                 commonResponse.setCode("1111");
+
+                logger.error("Application number does not exist {}",request.getApplicationNo());
                 System.out.println(e);
                 return new ResponseEntity(commonResponse, HttpStatus.OK);
             }
@@ -115,6 +118,7 @@ public class CustomerController {
 
         StatusResponse statusResponse = new StatusResponse();
         CommonResponse commonResponse = new CommonResponse();
+        logger.info("Update payment status for transaction-no {} {}", request.getTransactionStatus(), transactionNo);
 
         try {
             if (StringUtils.isEmpty(transactionNo) || StringUtils.isEmpty(request.getTransactionStatus())) {
@@ -138,11 +142,16 @@ public class CustomerController {
             }else{
                 commonResponse.setMsg("transaction-no does not exist.");
                 commonResponse.setCode("1111");
+                logger.info("Transaction-no does not exist {}",transactionNo);
+
+
             }
 
         } catch (Exception e) {
-            commonResponse.setMsg("something went worng.");
+            commonResponse.setMsg("something went wrong.");
             commonResponse.setCode("1111");
+            logger.error("Something went wrong while updating payment status for {}",transactionNo );
+
         }
         return new ResponseEntity(commonResponse, HttpStatus.OK);
     }

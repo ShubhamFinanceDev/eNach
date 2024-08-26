@@ -33,7 +33,7 @@ public class OtpUtility {
 
     @Autowired
     private OtpDetailsRepository otpDetailsRepository;
-    private Logger logger = LoggerFactory.getLogger(OncePerRequestFilter.class);
+    private Logger logger = LoggerFactory.getLogger(OtpUtility.class);
 
     public int generateCustOtp(CustomerDetails customerDetails) {
 
@@ -70,29 +70,6 @@ public class OtpUtility {
             status=true;
         }
         return status;
-    }
-
-
-    @Autowired
-    private JavaMailSender javaMailSender;
-    @Value("${spring.mail.username}")
-    private String sender;
-
-    public void sendSimpleMail(EmailDetails emailDetails) {
-
-        try {
-            SimpleMailMessage mailMessage = new SimpleMailMessage();
-
-            mailMessage.setFrom(sender);
-            mailMessage.setTo(emailDetails.getRecipient());
-            mailMessage.setText(emailDetails.getMsgBody());
-            mailMessage.setSubject(emailDetails.getSubject());
-
-            javaMailSender.send(mailMessage);
-
-        } catch (Exception e) {
-            System.out.println(e);
-        }
     }
 
 
