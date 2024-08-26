@@ -42,7 +42,7 @@ public class CustomerController {
 
     @PostMapping("/sendOtp")
     public HashMap sendOtpOnCustomerRegisteredMobile(@RequestBody Map<String, String> inputParam) {
-        System.out.println("cont"+inputParam.get("applicationNo"));
+
         String applicationNo = inputParam.get("applicationNo");
         HashMap<String, String> otpResponse = new HashMap<>();
 

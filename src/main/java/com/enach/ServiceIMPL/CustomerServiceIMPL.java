@@ -64,7 +64,7 @@ public class CustomerServiceIMPL implements CoustomerService {
 
     @Override
     public HashMap<String, String> validateCustAndSendOtp(String applicationNo) {
-        System.out.println(applicationNo);
+
         HashMap<String, String> otpResponse = new HashMap<>();
 
         try {
