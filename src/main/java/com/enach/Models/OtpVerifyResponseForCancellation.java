@@ -7,11 +7,11 @@ import java.util.List;
 @Data
 public class OtpVerifyResponseForCancellation
 {
-    public Data1 data1 ;
+    public Data data ;
     public List<LoanDetails> loanDetails;
 
     @Data
-    public static class Data1
+    public static class Data
     {
         public String customerName;
         public String applicationNo;
