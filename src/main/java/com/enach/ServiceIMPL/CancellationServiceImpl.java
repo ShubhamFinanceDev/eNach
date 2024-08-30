@@ -26,16 +26,7 @@ public class CancellationServiceImpl implements CancellationService {
         try {
             // Fetch list of customer details based on application number
             List<CustomerDetails> listData = databaseService.getCustomerDetailsFromLoans(applicationNo);
-            System.out.println("this is list data: " + listData);
-
-            if (!listData.isEmpty()) {
-
-                System.out.println("print this: " + listData);
-                return listData;
-            } else {
-                System.out.println("No customer details found for application number: " + applicationNo);
-                return null;
-            }
+            return listData;
         } catch (Exception e) {
             System.out.println("Error fetching customer details: " + e.getMessage());
             e.printStackTrace();  // Log the full stack trace

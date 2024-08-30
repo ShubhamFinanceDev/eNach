@@ -1,10 +1,7 @@
 package com.enach.Controller;
 
 import com.enach.Entity.CustomerDetails;
-import com.enach.Models.CommonResponse;
-import com.enach.Models.OtpRequest;
-import com.enach.Models.OtpVerifyResponse;
-import com.enach.Models.OtpVerifyResponseForCancellation;
+import com.enach.Models.*;
 import com.enach.Service.CancellationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,10 +12,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 @RestController
-@RequestMapping("/enach-cancel")
+@RequestMapping("/cancellation")
 public class CancellationController {
 
 
@@ -41,24 +40,23 @@ public class CancellationController {
                         request.getMobileNo(), request.getOtpCode(), request.getApplicationNo()
                 );
 
-                // Check and log the customerDetailsList
-                System.out.println("This is list data: " + customerDetailsList);
                 if (customerDetailsList != null && !customerDetailsList.isEmpty()) {
                     CustomerDetails customerDetails = customerDetailsList.get(0);
 
-                    otpVerifyResponse.setData1(new OtpVerifyResponseForCancellation.Data1());
-                    otpVerifyResponse.getData1().setApplicationNo(customerDetails.getApplicationNumber());
-                    otpVerifyResponse.getData1().setCustomerName(customerDetails.getCustomerName());
-                    otpVerifyResponse.getData1().setMobileNo(request.getMobileNo());
+                    otpVerifyResponse.setData(new OtpVerifyResponseForCancellation.Data());
+                    otpVerifyResponse.getData().setApplicationNo(customerDetails.getApplicationNumber());
+                    otpVerifyResponse.getData().setCustomerName(customerDetails.getCustomerName());
+                    otpVerifyResponse.getData().setMobileNo(request.getMobileNo());
 
-                    List<OtpVerifyResponseForCancellation.LoanDetails> loanDetailsList = new ArrayList<>();
+                    List<NestedLoansDetails> nestedLoansDetailsList =new ArrayList<>();
+
                     for (CustomerDetails details : customerDetailsList) {
-                        OtpVerifyResponseForCancellation.LoanDetails loanDetail = new OtpVerifyResponseForCancellation.LoanDetails();
-                        loanDetail.setLoanNo(details.getLoanAccountNo());
-                        loanDetail.setStatus(details.getCurrentStatus());
-                        loanDetailsList.add(loanDetail);
+                        NestedLoansDetails nestedLoansDetails=new NestedLoansDetails();
+                        nestedLoansDetails.setLoanNo(details.getLoanAccountNo());
+                        nestedLoansDetails.setStatus(details.getCurrentStatus());
+                        nestedLoansDetailsList.add(nestedLoansDetails);
                     }
-                    otpVerifyResponse.setLoanDetails(loanDetailsList);
+                    otpVerifyResponse.setLoansDetails(nestedLoansDetailsList);
 
                     return new ResponseEntity(otpVerifyResponse, HttpStatus.OK);
                 } else {
