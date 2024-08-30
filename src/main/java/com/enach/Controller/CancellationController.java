@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@RequestMapping("/cancel")
+@RequestMapping("/enach-cancel")
 public class CancellationController {
 
 

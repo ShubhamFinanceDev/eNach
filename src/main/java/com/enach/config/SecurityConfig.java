@@ -25,7 +25,7 @@ public class SecurityConfig {
                 csrf(csrf->csrf.disable())
 
 //                .cors(cors->cors.disable())
-                .authorizeHttpRequests(auth ->auth.requestMatchers("/customer/**").authenticated().requestMatchers("/cancel/otpVerification").permitAll().requestMatchers("/eNach/**","/actuator/health").permitAll().anyRequest().authenticated())
+                .authorizeHttpRequests(auth ->auth.requestMatchers("/customer/**").authenticated().requestMatchers("/eNach/**","/actuator/health","/enach-cancel/**").permitAll().anyRequest().authenticated())
 
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(point))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
