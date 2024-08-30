@@ -44,5 +44,15 @@ private CustomerDetailsRepository customerDetailsRepository;
         return "Select \"Sanction Loan Amount\",\"Installment Amount\" from neo_cas_lms_sit1_sh.application_newprod where \"Application Number\"='" + applicationNo+ "'";
 
     }
+
+    public String getLoanDetailsQuery(String applicationNo) {
+        String query = "SELECT \"LOAN NO\" AS loanAccountNo, \n" +
+                "CASAPPLNO AS applicationNumber, \n" +
+                "\"LOAN STATUS\" AS currentStatus, \n" +
+                "\"CUSTOMER NAME\" AS customerName \n" +
+                "FROM neo_cas_lms_sit1_sh.loandetails_newprod \n" +
+                "WHERE CASAPPLNO = '" + applicationNo + "' \n";
+        return query;
+    }
 }
 

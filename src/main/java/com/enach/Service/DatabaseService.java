@@ -68,4 +68,15 @@ public class DatabaseService implements UserDetailsService {
         return (applicationNo.startsWith("APPL") ? jdbcTemplate.queryForObject(customerDetailsUtility.getMandateAmountQuery(applicationNo), new BeanPropertyRowMapper<>(MandateTypeAmountData.class)): customerDetailsRepository.getMandateTypeAmount(applicationNo));
 
     }
+
+    public List<CustomerDetails> getCustomerDetailsFromLoans(String applicationNo) {
+        try {
+            String applicationNoBasedLoanNoSql = customerDetailsUtility.getLoanDetailsQuery(applicationNo);
+            return jdbcTemplate.query(applicationNoBasedLoanNoSql, new BeanPropertyRowMapper<>(CustomerDetails.class));
+        } catch (Exception e) {
+            System.out.println("Error executing query: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
 }
