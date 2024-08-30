@@ -74,4 +74,21 @@ public class CancellationController {
             }
         }
     }
+
+    @PostMapping("/save-status")
+    public ResponseEntity<?> saveStatus(@RequestBody SaveStatusRequest statusRequest){
+        CommonResponse commonResponse=new CommonResponse();
+        try {
+            statusRequest.validate();
+            commonResponse.setMsg(cancellationService.statusRequest(statusRequest));
+            return ResponseEntity.ok(commonResponse);
+        } catch (IllegalArgumentException e) {
+            commonResponse.setMsg(e.getMessage());
+            return ResponseEntity.badRequest().body(commonResponse);
+        }
+        catch (Exception e) {
+            commonResponse.setMsg(e.getMessage());
+            return ResponseEntity.internalServerError().body(commonResponse);
+        }
+    }
 }
