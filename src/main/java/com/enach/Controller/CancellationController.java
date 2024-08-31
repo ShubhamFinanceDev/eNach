@@ -75,7 +75,7 @@ public class CancellationController {
         }
     }
 
-    @PostMapping("/save-status")
+    @PostMapping("/cancellation-status")
     public ResponseEntity<?> saveStatus(@RequestBody SaveStatusRequest statusRequest){
         CommonResponse commonResponse=new CommonResponse();
         try {

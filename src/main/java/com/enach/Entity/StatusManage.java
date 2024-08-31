@@ -11,7 +11,7 @@ import java.sql.Timestamp;
 public class StatusManage {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "status_id")
     private Long statusId;
     @Column(name = "loan_no")
