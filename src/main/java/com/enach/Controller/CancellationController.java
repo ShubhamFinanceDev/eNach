@@ -31,7 +31,7 @@ public class CancellationController {
         if (request.getMobileNo().isBlank() || request.getOtpCode().isBlank() || request.getApplicationNo().isBlank()) {
             CommonResponse commonResponse = new CommonResponse();
             commonResponse.setMsg("Field is empty");
-            commonResponse.setCode("0000");
+            commonResponse.setCode("1111");
             return new ResponseEntity(commonResponse, HttpStatus.OK);
         } else {
             try {
@@ -57,6 +57,8 @@ public class CancellationController {
                         nestedLoansDetailsList.add(nestedLoansDetails);
                     }
                     otpVerifyResponse.setLoansDetails(nestedLoansDetailsList);
+                    otpVerifyResponse.setCode("0000");
+                    otpVerifyResponse.setMsg("Otp verified successfully");
 
                     return new ResponseEntity(otpVerifyResponse, HttpStatus.OK);
                 } else {

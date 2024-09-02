@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 
 @Data
-public class OtpVerifyResponseForCancellation
+public class OtpVerifyResponseForCancellation extends CommonResponse
 {
     public Data data ;
     public List<NestedLoansDetails> loansDetails;
