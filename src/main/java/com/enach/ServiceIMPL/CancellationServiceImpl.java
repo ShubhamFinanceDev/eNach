@@ -30,6 +30,7 @@ import java.io.ByteArrayOutputStream;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -53,15 +54,37 @@ public class CancellationServiceImpl implements CancellationService {
     private final Logger logger = LoggerFactory.getLogger(CancellationServiceImpl.class);
 
     public List<CustomerDetails> getCustomerDetail(String mobileNo, String otpCode, String applicationNo) {
+        List<CustomerDetails> customerDetails = new ArrayList<>();
         try {
             // Fetch list of customer details based on application number
             List<CustomerDetails> listData = databaseService.getCustomerDetailsFromLoans(applicationNo);
-            return listData;
+
+            OtpDetails otpDetails = otpDetailsRepository.IsotpExpired(mobileNo, otpCode);
+
+            if (otpDetails != null) {
+                System.out.println("this is list data: " + listData);
+
+                if (!listData.isEmpty()) {
+
+                    System.out.println("print this: " + listData);
+                    customerDetails= listData;
+
+                } else {
+                    System.out.println("No customer details found for application number: " + applicationNo);
+                    customerDetails=null;
+                }
+                Duration duration = Duration.between(otpDetails.getOtpExprTime(), LocalDateTime.now());
+                customerDetails = (duration.toMinutes() > 5) ? null : listData;
+            } else {
+
+                customerDetails = null;
+            }
         } catch (Exception e) {
             System.out.println("Error fetching customer details: " + e.getMessage());
             e.printStackTrace();  // Log the full stack trace
-            return null;
+
         }
+        return customerDetails;
     }
 
     @Override
