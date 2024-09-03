@@ -2,6 +2,7 @@ package com.enach.Controller;
 
 import com.enach.Entity.CustomerDetails;
 import com.enach.Models.*;
+import com.enach.Repository.StatusRepository;
 import com.enach.Service.CancellationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,6 +24,9 @@ public class CancellationController {
 
     @Autowired
     private CancellationService cancellationService;
+
+    @Autowired
+    private StatusRepository statusRepository;
 
     @PostMapping("/otpVerification")
     public ResponseEntity<OtpVerifyResponseForCancellation> login(@RequestBody OtpRequest request) {
@@ -50,10 +54,12 @@ public class CancellationController {
 
                     List<NestedLoansDetails> nestedLoansDetailsList =new ArrayList<>();
 
+                    boolean flag = statusRepository.existsByApplicationNoAndCancelCause(request.getApplicationNo(), "cancel");
                     for (CustomerDetails details : customerDetailsList) {
                         NestedLoansDetails nestedLoansDetails=new NestedLoansDetails();
                         nestedLoansDetails.setLoanNo(details.getLoanAccountNo());
                         nestedLoansDetails.setStatus(details.getCurrentStatus());
+                        nestedLoansDetails.setCurrentStatus(flag);
                         nestedLoansDetailsList.add(nestedLoansDetails);
                     }
                     otpVerifyResponse.setLoansDetails(nestedLoansDetailsList);

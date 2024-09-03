@@ -6,4 +6,5 @@ import lombok.Data;
 public class NestedLoansDetails {
     String loanNo;
     String status;
+    boolean currentStatus;
 }
