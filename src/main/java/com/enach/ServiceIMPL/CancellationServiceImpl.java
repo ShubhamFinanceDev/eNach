@@ -59,7 +59,7 @@ public class CancellationServiceImpl implements CancellationService {
             OtpDetails otpDetails = otpDetailsRepository.IsotpExpired(mobileNo, otpCode);
             if (otpDetails != null) {
 
-                List<CustomerDetails> listData = databaseService.getCustomerDetails(applicationNo);
+                List<CustomerDetails> listData = databaseService.getCustomerDetailsFromLoans(applicationNo);
                 if (!listData.isEmpty()) {
                     System.out.println("print this: " + listData);
                     return listData;
