@@ -53,13 +53,11 @@ public class CancellationController {
                     otpVerifyResponse.getData().setMobileNo(request.getMobileNo());
 
                     List<NestedLoansDetails> nestedLoansDetailsList =new ArrayList<>();
-
-                    boolean flag = statusRepository.existsByApplicationNoAndCancelCause(request.getApplicationNo(), "cancel");
                     for (CustomerDetails details : customerDetailsList) {
                         NestedLoansDetails nestedLoansDetails=new NestedLoansDetails();
                         nestedLoansDetails.setLoanNo(details.getLoanAccountNo());
                         nestedLoansDetails.setStatus(details.getCurrentStatus());
-                        nestedLoansDetails.setCurrentStatus(flag);
+                        nestedLoansDetails.setCurrentStatus(statusRepository.currentStatusCheck(request.getApplicationNo(), details.getLoanAccountNo()) > 0);
                         nestedLoansDetailsList.add(nestedLoansDetails);
                     }
                     otpVerifyResponse.setLoansDetails(nestedLoansDetailsList);

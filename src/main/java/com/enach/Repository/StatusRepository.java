@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface StatusRepository extends JpaRepository<StatusManage,Long> {
 
-    @Query("SELECT COUNT(s) > 0 FROM StatusManage s WHERE s.applicationNo = :applicationNo AND s.cancelCause LIKE %:cancelWord%")
-    boolean existsByApplicationNoAndCancelCause(@Param("applicationNo") String applicationNo, @Param("cancelWord") String cancelWord);
+    @Query("SELECT COUNT(*) FROM StatusManage s WHERE s.applicationNo = :applicationNo AND s.loanNo=:loanAccountNo")
+    Integer currentStatusCheck(String applicationNo, String loanAccountNo);
 }
