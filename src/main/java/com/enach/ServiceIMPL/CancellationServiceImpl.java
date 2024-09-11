@@ -1,13 +1,16 @@
 package com.enach.ServiceIMPL;
 
 import com.enach.Entity.CustomerDetails;
+import com.enach.Entity.EmailDetails;
 import com.enach.Entity.OtpDetails;
 import com.enach.Entity.StatusManage;
 import com.enach.Models.SaveStatusRequest;
+import com.enach.Repository.EmailDetailsRepo;
 import com.enach.Repository.OtpDetailsRepository;
 import com.enach.Repository.StatusRepository;
 import com.enach.Service.CancellationService;
 import com.enach.Service.DatabaseService;
+import com.enach.Utill.SendEmailUtility;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.apache.poi.ss.usermodel.Row;
@@ -50,6 +53,10 @@ public class CancellationServiceImpl implements CancellationService {
     private DatabaseService databaseService;
     @Autowired
     private StatusRepository statusRepository;
+    @Autowired
+    private SendEmailUtility sendEmailUtility;
+    @Autowired
+    private EmailDetailsRepo emailDetailsRepo;
 
     private final Logger logger = LoggerFactory.getLogger(CancellationServiceImpl.class);
 
@@ -69,11 +76,11 @@ public class CancellationServiceImpl implements CancellationService {
                     return null;
                 }
             } else {
-                logger.info("Otp-code does not exist for {} {}",mobileNo, otpCode);
+                logger.info("Otp-code does not exist for {} {}", mobileNo, otpCode);
                 return null;
             }
         } catch (Exception e) {
-            logger.error("Error while validating otp-code for {}",applicationNo);
+            logger.error("Error while validating otp-code for {}", applicationNo);
             return null;
         }
     }
@@ -93,28 +100,27 @@ public class CancellationServiceImpl implements CancellationService {
         return "Cancel status save successfully";
     }
 
-    @Scheduled(cron = "0 52 16 * * ?")
-    public ResponseEntity<?> generateReportForOfStatus() throws Exception {
+    @Scheduled(cron = "0 0 9-23/2 * * *")
+    public void generateReportForCancellation() {
         try {
             List<StatusManage> statusManage = statusRepository.findAll();
-            if (statusManage.isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            logger.info("Cancellation record for mis report {}",statusManage.size());
+            if (!statusManage.isEmpty()) {
+                generateCancellationExcel(statusManage);
             }
-            generateExcel(statusManage);
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
     }
 
-    private void generateExcel(List<StatusManage> statusManageList) {
+    private void generateCancellationExcel(List<StatusManage> statusManageList) {
 
         try {
             XSSFWorkbook workbook = new XSSFWorkbook();
             XSSFSheet sheet = workbook.createSheet("status-Details");
             int rowCount = 0;
 
-            String[] header = {"Application Number", "Loan Number", "Cancellation Cause", "Cancellation Time"};
+            String[] header = {"Application Number", "Loan Number", "Status", "Cancellation Time"};
             Row headerRow = sheet.createRow(rowCount++);
             int cellCount = 0;
 
@@ -132,25 +138,19 @@ public class CancellationServiceImpl implements CancellationService {
             workbook.write(outputStream);
             workbook.close();
             byte[] excelData = outputStream.toByteArray();
-            sendEmailWithAttachment(excelData);
+            List<EmailDetails> emailDetails = emailDetailsRepo.findAll();
+            for (EmailDetails reciver : emailDetails) {
+                if(reciver.getReportType().contains("cancellation")) {
+                    sendEmailUtility.sendCancellationAttachment(excelData, reciver.getEmail());
+                    emailDetailsRepo.updateSendingTime(reciver.getEmail(), Timestamp.valueOf(LocalDateTime.now()));
+
+                }
+            }
 
         } catch (Exception e) {
             System.out.println("Error while executing report query :" + e.getMessage());
         }
     }
 
-    private void sendEmailWithAttachment(byte[] excelData) throws MessagingException {
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-        helper.setFrom(sender);
-        helper.setTo(reciver);
-        helper.setText("Dear Sir, \n\n\n Please find the below attached sheet. \n\n\n\n Regards\n It Support.");
-        helper.setSubject("Cancellation mail");
-
-        InputStreamSource attachmentSource = new ByteArrayResource(excelData);
-        helper.addAttachment("Cancellation-status-report.xlsx", attachmentSource);
-        mailSender.send(message);
-        logger.info("Generate excel and send to mail {}", reciver);
-    }
 }

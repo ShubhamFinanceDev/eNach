@@ -18,5 +18,7 @@ public class EmailDetails {
     private String email;
     @Column(name = "last_updated")
     private Timestamp lastSending;
+    @Column(name = "report_type")
+    private String reportType;
 
 }

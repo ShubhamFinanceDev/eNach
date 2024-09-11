@@ -1,8 +1,11 @@
 package com.enach.Utill;
 
 import com.enach.Models.EmailDetails;
+import com.enach.ServiceIMPL.CancellationServiceImpl;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
@@ -20,6 +23,8 @@ public class SendEmailUtility {
     private JavaMailSender mailSender;
     @Value("${spring.mail.username}")
     private String sender;
+    private final Logger logger = LoggerFactory.getLogger(SendEmailUtility.class);
+
     @Async
     public void sendEmailWithAttachment(String to, byte[] attachmentData) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
@@ -43,5 +48,22 @@ public class SendEmailUtility {
             mailMessage.setSubject(emailDetails.getSubject());
             mailSender.send(mailMessage);
 
+    }
+
+
+
+    public void sendCancellationAttachment(byte[] excelData,String reciver) throws MessagingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+        helper.setFrom(sender);
+        helper.setTo(reciver);
+        helper.setText("Dear Sir, \n\n\n Please find the below attached sheet. \n\n\n\n Regards\n It Support.");
+        helper.setSubject("Cancellation-Report");
+
+        InputStreamSource attachmentSource = new ByteArrayResource(excelData);
+        helper.addAttachment("Cancellation-report.xlsx", attachmentSource);
+        mailSender.send(message);
+        logger.info("Generate excel and send to mail {}", reciver);
     }
 }
