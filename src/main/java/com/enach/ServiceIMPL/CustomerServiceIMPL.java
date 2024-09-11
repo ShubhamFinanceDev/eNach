@@ -92,7 +92,7 @@ public class CustomerServiceIMPL implements CoustomerService {
                             otpDetailsRepository.save(otpDetails);
                             System.out.println("otp save successfully");
                             Long otpId = otpDetails.getOtpId();
-                            otpResponse.put("otpCode", String.valueOf(otpCode));
+//                            otpResponse.put("otpCode", String.valueOf(otpCode));
 //                            otpResponse.put("otpId", String.valueOf(otpId));
                             otpResponse.put("mobile", otpDetails.getMobileNo());
                             otpResponse.put("msg", "Otp send.");
