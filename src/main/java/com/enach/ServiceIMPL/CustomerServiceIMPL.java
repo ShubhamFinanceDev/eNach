@@ -194,8 +194,8 @@ public class CustomerServiceIMPL implements CoustomerService {
 
             //===========================WHEN Email Details get from DB then open this code ==============================
             BranchNameDetail branchNameDetailDetails = databaseService.branchName(applicationNo);
-//            String emailId = branchDetailRepository.findByBranchEmail(branchNameDetailDetails.getBranchName());
-            String emailId = "apps.development@shubham.co";
+            String emailId = branchDetailRepository.findByBranchEmail(branchNameDetailDetails.getBranchName());
+//            String emailId = "apps.development@shubham.co";
             if (emailId != null) {
 
                 logger.info("BranchEmail of {} {}", branchNameDetailDetails.getBranchName(), emailId);
@@ -277,7 +277,5 @@ public class CustomerServiceIMPL implements CoustomerService {
             System.out.println(e.getMessage());
         }
     }
-
-
 
 }
