@@ -44,8 +44,6 @@ public class CancellationServiceImpl implements CancellationService {
 
     @Value("${spring.mail.username}")
     private String sender;
-    @Value("${spring.mail.reciver}")
-    private String reciver;
     @Autowired
     private OtpDetailsRepository otpDetailsRepository;
 
