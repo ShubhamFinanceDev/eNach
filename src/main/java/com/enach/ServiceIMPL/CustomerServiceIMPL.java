@@ -133,16 +133,8 @@ public class CustomerServiceIMPL implements CoustomerService {
         try {
             OtpDetails otpDetails = otpDetailsRepository.IsotpExpired(mobileNo, otpCode);
             if (otpDetails != null) {
-
-                List<CustomerDetails> listData = databaseService.getCustomerDetails(applicationNo);
-                if (!listData.isEmpty()) {
-                    customerDetails = listData.get(0);
-                } else {
-                    customerDetails = null;
-                }
-
                 Duration duration = Duration.between(otpDetails.getOtpExprTime(), LocalDateTime.now());
-                customerDetails = (duration.toMinutes() > 5) ? null : customerDetails;
+                customerDetails = (duration.toMinutes() > 10) ? null : databaseService.getCustomerDetails(applicationNo).get(0);
             } else {
                 logger.info("Otp-code does not exist for {} {}",mobileNo, otpCode);
                 customerDetails = null;
@@ -150,6 +142,8 @@ public class CustomerServiceIMPL implements CoustomerService {
         } catch (Exception e) {
             System.out.println(e);
             logger.error("Error while validating otp-code for {}",applicationNo);
+            customerDetails = null;
+
         }
 
         return customerDetails;

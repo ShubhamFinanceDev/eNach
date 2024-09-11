@@ -66,15 +66,9 @@ public class CancellationServiceImpl implements CancellationService {
             OtpDetails otpDetails = otpDetailsRepository.IsotpExpired(mobileNo, otpCode);
             if (otpDetails != null) {
 
-                List<CustomerDetails> listData = databaseService.getCustomerDetailsFromLoans(applicationNo);
-                if (!listData.isEmpty()) {
-                    System.out.println("print this: " + listData);
-                    return listData;
-
-                } else {
-                    System.out.println("No customer details found for application number: " + applicationNo);
-                    return null;
-                }
+                Duration duration = Duration.between(otpDetails.getOtpExprTime(), LocalDateTime.now());
+               List<CustomerDetails> listData = (duration.toMinutes() > 10) ? null : databaseService.getCustomerDetailsFromLoans(applicationNo);
+                return listData;
             } else {
                 logger.info("Otp-code does not exist for {} {}", mobileNo, otpCode);
                 return null;
@@ -83,6 +77,7 @@ public class CancellationServiceImpl implements CancellationService {
             logger.error("Error while validating otp-code for {}", applicationNo);
             return null;
         }
+
     }
 
     @Override
