@@ -262,9 +262,11 @@ public class CustomerServiceIMPL implements CoustomerService {
             logger.info("Report created.");
             List<com.enach.Entity.EmailDetails> emailDetails = emailDetailsRepo.findAll();
             for (com.enach.Entity.EmailDetails emails : emailDetails) {
-                String email = emails.getEmail();
-                sendEmailUtility.sendEmailWithAttachment(email, excelData);
-                emailDetailsRepo.updateSendingTime(email, Timestamp.valueOf(LocalDateTime.now()));
+                if(emails.getReportType().contains("registration")) {
+                    String email = emails.getEmail();
+                    sendEmailUtility.sendEmailWithAttachment(email, excelData);
+                    emailDetailsRepo.updateSendingTime(email, Timestamp.valueOf(LocalDateTime.now()));
+                }
             }
             logger.info("Report has been shared. No of email {}", emailDetails.size());
         } catch (Exception e) {
