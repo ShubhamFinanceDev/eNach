@@ -1,6 +1,7 @@
 package com.enach.Controller;
 
 import com.enach.Entity.CustomerDetails;
+import com.enach.Entity.StatusManage;
 import com.enach.Models.*;
 import com.enach.Repository.StatusRepository;
 import com.enach.Service.CancellationService;
@@ -86,8 +87,9 @@ public class CancellationController {
         CommonResponse commonResponse=new CommonResponse();
         try {
             statusRequest.validate();
-            commonResponse.setMsg(cancellationService.statusRequest(statusRequest));
-            return ResponseEntity.ok(commonResponse);
+            List<StatusManage> statusManageList=(cancellationService.statusRequest(statusRequest));
+            return ResponseEntity.ok(statusManageList);
+
         } catch (IllegalArgumentException e) {
             commonResponse.setMsg(e.getMessage());
             return ResponseEntity.badRequest().body(commonResponse);

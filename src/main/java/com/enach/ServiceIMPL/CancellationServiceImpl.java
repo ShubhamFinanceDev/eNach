@@ -79,7 +79,7 @@ public class CancellationServiceImpl implements CancellationService {
     }
 
     @Override
-    public String statusRequest(SaveStatusRequest statusRequest) throws Exception {
+    public List<StatusManage> statusRequest(SaveStatusRequest statusRequest) throws Exception {
 
         StatusManage statusManage = new StatusManage();
 
@@ -88,9 +88,9 @@ public class CancellationServiceImpl implements CancellationService {
         statusManage.setLoanNo(statusRequest.getLoanNo());
         statusManage.setCancellationTime(Timestamp.valueOf(LocalDateTime.now()));
 
-        statusRepository.save(statusManage);
+       List<StatusManage> status= statusRepository.findAll();
 
-        return "Cancel status save successfully";
+        return status;
     }
 
     @Scheduled(cron = "0 0 9-23/2 * * *")
