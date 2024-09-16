@@ -93,7 +93,7 @@ public class CancellationServiceImpl implements CancellationService {
         return "Cancel status save successfully";
     }
 
-    @Scheduled(cron = "0 0 9-23/2 * * *")
+    @Scheduled(cron = "0 0 20 * * *")
     public void generateReportForCancellation() {
         try {
             List<StatusManage> statusManage = statusRepository.findAll();
